@@ -1,0 +1,4 @@
+﻿  main.cpp
+c:\users\joão pires barreira\documents\github\cg-1617\generator\generator\main.cpp(34): warning C4018: '<': signed/unsigned mismatch
+  Generator.vcxproj -> C:\Users\João Pires Barreira\Documents\GitHub\cg-1617\Generator\Debug\Generator.exe
+  Generator.vcxproj -> C:\Users\João Pires Barreira\Documents\GitHub\cg-1617\Generator\Debug\Generator.pdb (Full PDB)
