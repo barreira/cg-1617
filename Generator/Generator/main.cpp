@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -24,15 +23,15 @@ using namespace std;
 
 
 
-bool isPlane(vector<string> commands, vector<float> &dim, string fileName)
+bool isPlane(vector<string> params, vector<float> &dim, string fileName)
 {
 	bool ret = true;
 
-	if (commands.size() == PLANE_PARAMS) {
-		fileName = commands.back();
+	if (params.size() == PLANE_PARAMS) {
+		fileName = params.back();
 
-		for (int i = 0; i < commands.size() - 1 && ret; i++) {
-			istringstream iss(commands.at(i));
+		for (size_t i = 0; i < params.size() - 1 && ret; i++) {
+			istringstream iss(params.at(i));
 			float flt = 0;
 
 			if (!(iss >> flt)) {
@@ -51,7 +50,8 @@ bool isPlane(vector<string> commands, vector<float> &dim, string fileName)
 }
 
 
-vector<string> generateVertex(float x, float y, float z, float multX, float multY, float multZ)
+vector<string> generateVertex(float x, float y, float z, 
+	                          float multX, float multY, float multZ)
 {
 	vector<string> ret;
 	stringstream aux;
@@ -69,27 +69,23 @@ vector<string> generateVertex(float x, float y, float z, float multX, float mult
 	aux << (x * multX) << " " << (y * multY) << " " << (z * multZ);
 	ret.push_back(aux.str());
 
-
-
 	return ret;
 }
 
 
-bool generatePlane(vector<string> commands)
+bool generatePlane(vector<string> params)
 {
 	vector<float> dim;
 	string fileName;
 	vector<string> v1;
 	vector<string> v2;
 
-	if (isPlane(commands, dim, fileName)) {
+	if (isPlane(params, dim, fileName)) {
 		float x = dim.front() / 2;
 		float z = dim.back() / 2;
 
 		v1 = generateVertex(x, 0, z, -1, 1, 1);
 		v2 = generateVertex(x, 0, z, 1, 1, -1);
-
-
 	}
 
 	return true;
@@ -97,7 +93,9 @@ bool generatePlane(vector<string> commands)
 
 
 
-bool isValidCommands(string primitive, vector<string> commands)
+
+
+bool isValidParams(string primitive, vector<string> params)
 {
 	bool ret = false;
 	/*
@@ -108,7 +106,9 @@ bool isValidCommands(string primitive, vector<string> commands)
 	ret = isCone(commands);
 	}*/
 	//else if (primitive.compare(PLANE) == 0) {
-	ret = generatePlane(commands);
+	
+	ret = generatePlane(params);
+	
 	/*}
 	else if (primitive.compare(SPHERE) == 0) {
 	ret = isSphere(commands);
@@ -122,13 +122,13 @@ int main(int argc, char** argv)
 {
 	if (argc >= MIN_PARAMS) {
 		string primitive(argv[1]);
-		vector<string> commands;
+		vector<string> params;
 
 		for (int i = 2; i < argc; i++) {
-			commands.push_back(argv[i]);
+			params.push_back(argv[i]);
 		}
 
-		if (isValidCommands(primitive, commands)) {
+		if (isValidParams(primitive, params)) {
 
 		}
 	}
