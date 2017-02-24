@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 #include "plane.h"
 #include "box.h"
 
@@ -137,26 +138,30 @@ int main(int argc, char** argv)
 		}
 	}
 
-	
+	ofstream file;
+	file.open("vertices.txt");
+
 	vector<Vertex*> vertices;
 
-	Primitive* p = new Box(4, 5, 3, 0);
+	Primitive* p = new Box(10, 10, 10, 10);
 
 	p->generateVertices();
 	vertices = p->getVertices();
 
 	//reverse(vertices.begin(), vertices.end());
 
-	for (size_t i = 1; i < vertices.size(); i++) {
-		cout << vertices.at(i - 1)->toString() << endl;
+	file << "glBegin(GL_TRIANGLES);" << endl;
+
+	for (size_t i = 1; i <= vertices.size(); i++) {
+		file << "glVertex3f(" << vertices.at(i - 1)->toString() << ");" << endl;
 
 		if (i % 3 == 0) {
-			cout << endl;
+			file << endl;
 		}
 	}
 
-	cout << endl;
-	
+	file << "glEnd();";
+	file.close();
 
 	getchar();
 	return 0;

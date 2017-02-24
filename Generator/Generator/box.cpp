@@ -103,18 +103,17 @@ public:
 				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
 
 				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
-
-
-				vertices.push_back(new Vertex(i - centerX, y - centerY, j - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
 				vertices.push_back(new Vertex(i - centerX, y - centerY, j + divZ - centerZ));
-				
-
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
 				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j + divZ - centerZ));
+
+
+				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
+				
+				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j + divZ - centerZ));
+				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
 			}
 		}
 
@@ -137,13 +136,13 @@ public:
 				vertices.push_back(new Vertex(x - centerX, i - centerY, j + divZ - centerZ));
 
 
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j - centerZ));
 
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j + divZ - centerZ));
+				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
 			}
 		}
 
