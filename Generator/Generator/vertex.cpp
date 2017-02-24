@@ -3,20 +3,19 @@
 #include "vertex.h"
 
 
-/*
-class VertexImp : public Vertex {
+class Vertex::VertexImpl {
 	float x;
 	float y;
 	float z;
 
 public :
-	VertexImp(void) 
+	VertexImpl(void) 
 	{
 		x = y = z = 0;
 	}
 
 
-	VertexImp(float x, float y, float z) 
+	VertexImpl(float x, float y, float z) 
 	{
 		this->x = x;
 		this->y = y;
@@ -24,75 +23,127 @@ public :
 	}
 
 
-	float getX() 
+	float getX(void) 
 	{
 		return x;
 	}
 
 
-	float getY()
+	float getY(void)
 	{
 		return y;
 	}
 
 
-	float getZ()
+	float getZ(void)
 	{
 		return z;
 	}
 
 
-	std::string toString()
+	void setX(float x)
+	{
+		this->x = x;
+	}
+
+
+	void setY(float y)
+	{
+		this->y = y;
+	}
+
+
+	void setZ(float z)
+	{
+		this->z = z;
+	}
+
+
+	void add(float x, float y, float z)
+	{
+		this->x += x;
+		this->y += y;
+		this->z += z;
+	}
+
+
+	std::string toString(void)
 	{
 		std::stringstream aux;
 
 		aux << x << "," << y << "," << z;
-		
+
 		return aux.str();
 	}
+
+
+	~VertexImpl(void) = default;
 };
-*/
 
 
 
-Vertex::Vertex(void)
+Vertex::Vertex(void) : pimpl{ new VertexImpl() } {}
+
+
+Vertex::Vertex(float x, float y, float z) 
+	: pimpl{ new VertexImpl(x, y, z) } {}
+
+
+/*
+Vertex::Vertex(const Vertex& v) : pimpl{ new VertexImpl() } 
 {
-	x = y = z = 0;
+	pimpl->setX(v.pimpl->getX());
+	pimpl->setX(v.pimpl->getY());
+	pimpl->setX(v.pimpl->getZ());
+}*/
+
+
+float Vertex::getX(void)
+{
+	return pimpl->getX();
 }
 
 
-Vertex::Vertex(float x, float y, float z)
+float Vertex::getY(void)
 {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+	return pimpl->getY();
 }
 
 
-float Vertex::getX()
+float Vertex::getZ(void)
 {
-	return x;
+	return pimpl->getZ();
 }
 
 
-float Vertex::getY()
+void Vertex::setX(float x)
 {
-	return y;
+	pimpl->setX(x);
 }
 
 
-float Vertex::getZ()
+void Vertex::setY(float y)
 {
-	return z;
+	pimpl->setY(y);
 }
 
 
-std::string Vertex::toString()
+void Vertex::setZ(float z)
 {
-	std::stringstream aux;
-
-	aux << x << "," << y << "," << z;
-
-	return aux.str();
+	pimpl->setZ(z);
 }
 
+
+void Vertex::add(float x, float y, float z)
+{
+	pimpl->add(x, y, z);
+}
+
+
+std::string Vertex::toString(void)
+{
+	return pimpl->toString();
+}
+
+
+Vertex::~Vertex(void) = default;

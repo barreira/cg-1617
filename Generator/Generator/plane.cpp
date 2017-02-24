@@ -1,70 +1,75 @@
 #include "plane.h"
 
 
-Plane::Plane(void)
-{
-	Vertex center;
-	
-	dimX = dimY = dimZ = 0;
-	this->center = center;
-	this->generatePlane();
-}
+class Plane::PlaneImpl {
+	float dimX;
+	float dimZ;
+
+public:
+	PlaneImpl(void)
+	{
+		dimX = dimZ = 0;
+	}
 
 
-Plane::Plane(Vertex center, float dimX, float dimY, float dimZ)
-{
-	this->dimX = dimX;
-	this->dimY = dimY;
-	this->dimZ = dimZ;
-	this->center = center;
-	this->generatePlane();
-}
+	PlaneImpl(float dimX, float dimZ)
+	{
+		this->dimX = dimX;
+		this->dimZ = dimZ;
+	}
+
+
+	float getDimX(void)
+	{
+		return dimX;
+	}
+
+
+	float getDimZ(void)
+	{
+		return dimZ;
+	}
+
+
+	~PlaneImpl(void) = default;
+};
+
+
+Plane::Plane(void) : pimpl{ new PlaneImpl() } {}
+
+
+Plane::Plane(float dimX, float dimZ)
+	: pimpl{ new PlaneImpl(dimX, dimZ) } {}
 
 
 float Plane::getDimX(void)
 {
-	return dimX;
+	return pimpl->getDimX();
 }
-
-
-float Plane::getDimY(void)
-{
-	return dimY;
-}
-
 
 
 float Plane::getDimZ(void)
 {
-	return dimZ;
+	return pimpl->getDimZ();
 }
 
 
-std::string Plane::toString(void)
+void Plane::generateVertices(void)
 {
-	std::string str("");
+	float x = pimpl->getDimX() / 2;
+	float z = pimpl->getDimZ() / 2;
 
-	for (size_t i = 0; i < vertices.size(); i++) {
-		str + vertices.at(i).toString() + "\n";
-	}
+	addVertex(new Vertex(x, 0, -z));
+	addVertex(new Vertex(-x, 0, -z));
+	addVertex(new Vertex(-x, 0, z));
 
-	return str;
+	addVertex(new Vertex(x, 0, -z));
+	addVertex(new Vertex(-x, 0, z));
+	addVertex(new Vertex(x, 0, z));
 }
 
 
-void Plane::generatePlane(void)
-{
-	float x = dimX / 2;
-	float y = dimY / 2;
-	float z = dimZ / 2;
-
-	vertices.push_back(new Vertex(-x + center.getX(), center.getY, z + center.getZ()));
-	
-	v1 = generateVertex(x, 0, z, -1, 1, 1);
-	v2 = generateVertex(x, 0, z, 1, 1, -1);
-}
-
-
+Plane::~Plane(void) = default;
 
 
 

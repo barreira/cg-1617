@@ -1,6 +1,10 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <algorithm>
+#include "plane.h"
+#include "box.h"
 
 
 using namespace std;
@@ -133,5 +137,27 @@ int main(int argc, char** argv)
 		}
 	}
 
+	
+	vector<Vertex*> vertices;
+
+	Primitive* p = new Box(4, 5, 3, 0);
+
+	p->generateVertices();
+	vertices = p->getVertices();
+
+	//reverse(vertices.begin(), vertices.end());
+
+	for (size_t i = 1; i < vertices.size(); i++) {
+		cout << vertices.at(i - 1)->toString() << endl;
+
+		if (i % 3 == 0) {
+			cout << endl;
+		}
+	}
+
+	cout << endl;
+	
+
+	getchar();
 	return 0;
 }

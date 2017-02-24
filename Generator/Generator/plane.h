@@ -1,29 +1,22 @@
 #ifndef plane_h
 #define plane_h
 
+#include "primitive.h"
 
-#include <vector>
-#include "vertex.h"
-
-
-class Plane {
-	Vertex center;
-	float dimX;
-	float dimY;
-	float dimZ;
-	std::vector<Vertex> vertices;
-
-	void generatePlane(void);
+class Plane : public Primitive {
+	class PlaneImpl;
+	std::unique_ptr<PlaneImpl> pimpl;
 
 public:
-	Plane();
-	Plane(Vertex origin, float dimX, float dimY, float dimZ);
+	Plane(void);
+	Plane(float dimX, float dimZ);
+	
 	float getDimX(void);
-	float getDimY(void);
 	float getDimZ(void);
-	//std::vector<Vertex> getVertices(void);
-	std::string toString(void);
+	
+	void generateVertices(void);
 
+	~Plane(void);
 };
 
 #endif
