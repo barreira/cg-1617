@@ -32,7 +32,7 @@
 std::vector<Vertex> vertices;
 std::string fileName;
 std::vector<float> arguments;
-Primitive *p;
+Primitive *p = NULL;
 
 
 bool generateArgs(std::vector<std::string> params, const size_t numParams,
@@ -180,6 +180,13 @@ int main(int argc, char** argv)
 
 		for (size_t i = 0; i < vertices.size(); i++) {
 			file << vertices.at(i).toString() << std::endl;
+		}
+
+		file.close();
+
+		if (p != NULL) {
+			delete p;
+			p = NULL;
 		}
 	}
 	else {
