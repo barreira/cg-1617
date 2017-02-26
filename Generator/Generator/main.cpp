@@ -7,6 +7,8 @@
 #include "plane.h"
 #include "box.h"
 #include "cone.h"
+#include "sphere.h"
+
 
 
 using namespace std;
@@ -145,13 +147,17 @@ int main(int argc, char** argv)
 	vector<Vertex> vertices;
 
 	//Primitive* p = new Box(10, 10, 10, 10);
-	Primitive* c = new Cone(2, 4, 15, 20);
+//	Primitive* c = new Cone(2, 4, 15, 20);
+	Primitive* s = new Sphere(2, 50, 50);
 
 	//p->generateVertices();
 	//vertices = p->getVertices();
 
-	c->generateVertices();
-	vertices = c->getVertices();
+	//c->generateVertices();
+	//vertices = c->getVertices();
+
+	s->generateVertices();
+	vertices = s->getVertices();
 
 	//reverse(vertices.begin(), vertices.end());
 
@@ -168,8 +174,8 @@ int main(int argc, char** argv)
 	file << "glEnd();";
 	file.close();
 
-	delete c;
-	c = NULL;
+	delete s;
+	s = NULL;
 
 	getchar();
 	return 0;

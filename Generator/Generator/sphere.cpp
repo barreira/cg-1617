@@ -7,10 +7,8 @@ const float pi = 3.1415926;
 
 class Sphere::SphereImpl {
 	float radius;
-	double alfa;	//ângulo na oriem no plano XZ
-	double beta;	//ângulo na origem no plano XY
-	float stackHeight;	//altura duma stack
-	float sliceWidth;	//largura duma stack
+	double alfa;	//ângulo em relação ao eixo Y no plano XZ
+	double beta;	//ângulo em relação ao eixo Z no plano XY
 	size_t slices;
 	size_t stacks;
 
@@ -31,7 +29,7 @@ public:
 		this->stacks = stacks;
 	
 		alfa = (2 * pi) / ((double) slices);
-		beta = (2 * pi) / ((double) stacks);
+		beta = pi / ((double) stacks);
 	}
 
 	
@@ -40,15 +38,6 @@ public:
 		return radius;
 	}
 
-	double getAlfa(void)
-	{
-		return alfa;
-	}
-
-	double getBeta(void)
-	{
-		return beta;
-	}
 
 	size_t getSlices(void)
 	{
@@ -62,10 +51,58 @@ public:
 	}
 
 
-	std::vector<Vertex*> generateTopAndBottom(void)
+	std::vector<Vertex> generateSphere(void)
 	{
-		std::vector<Vertex*> vertices;
-		double angle = 0;
+		std::vector<Vertex> vertices;
+		
+		float angleAlfa = 0;	//ângulo atual no plano XZ
+		float angleBeta = 0;
+		for (size_t i = 0; i < stacks; i++) {
+			
+			angleBeta = ((float) beta * i);
+
+			for (size_t j = 0; j < slices; j++) {
+
+				angleAlfa = ((float) alfa * j);
+			
+				//Ponto A - canto inferior esquerdo
+				float xA = radius * sin(angleBeta) * sin(angleAlfa);;
+				float yA = radius * cos(angleBeta);
+				float zA = radius * sin(angleBeta) * cos(angleAlfa);
+				Vertex vA = Vertex(xA, yA, zA);
+
+				
+				//Ponto B - canto inferior direito
+				float xB = radius * sin(angleBeta) * sin(angleAlfa + alfa);;
+				float yB = radius * cos(angleBeta);
+				float zB = radius * sin(angleBeta) * cos(angleAlfa + alfa);
+				Vertex vB = Vertex(xB, yB, zB);
+
+				
+				//Ponto C - canto superior direito
+				float xC = radius * sin(angleBeta + beta) * sin(angleAlfa + alfa);;
+				float yC = radius * cos(angleBeta + beta);
+				float zC = radius * sin(angleBeta + beta) * cos(angleAlfa + alfa);
+				Vertex vC = Vertex(xC, yC, zC);
+
+
+				//Ponto D - canto superior esquerdo
+				float xD = radius * sin(angleBeta + beta) * sin(angleAlfa);;
+				float yD = radius * cos(angleBeta + beta);
+				float zD = radius * sin(angleBeta + beta) * cos(angleAlfa);
+				Vertex vD = Vertex(xD, yD, zD);
+
+				vertices.push_back(vA);
+				vertices.push_back(vB);
+				vertices.push_back(vC);
+
+				vertices.push_back(vA);
+				vertices.push_back(vC);
+				vertices.push_back(vD);
+			}
+		}
+
+		return vertices;
 	}
 
 
@@ -90,17 +127,6 @@ float Sphere::getRadius(void)
 }
 
 
-double Sphere::getAlfa(void)
-{
-	return pimpl->getAlfa();
-}
-
-double Sphere::getBeta(void)
-{
-	return pimpl->getBeta();
-}
-
-
 size_t Sphere::getStacks(void)
 {
 	return pimpl->getStacks();
@@ -115,8 +141,11 @@ size_t Sphere::getSlices(void)
 
 void Sphere::generateVertices(void)
 {
+	std::vector<Vertex> vertices = pimpl->generateSphere();
 
-
+	for (size_t i = 0; i < vertices.size(); i++) {
+		addVertex(vertices.at(i));
+	}
 }
 
 
