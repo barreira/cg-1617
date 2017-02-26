@@ -12,6 +12,7 @@ class Box : public Primitive {
 public:
 	Box(void);
 	Box(float dimX, float dimY, float dimZ, size_t numDiv = 0);
+	Box(const Box&);
 
 	float getDimX(void);
 	float getDimY(void);

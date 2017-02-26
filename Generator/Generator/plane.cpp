@@ -42,6 +42,12 @@ Plane::Plane(float dimX, float dimZ)
 	: pimpl{ new PlaneImpl(dimX, dimZ) } {}
 
 
+Plane::Plane(const Plane& p)
+{
+	pimpl = new PlaneImpl(p.pimpl->getDimX(), p.pimpl->getDimZ());
+}
+
+
 float Plane::getDimX(void)
 {
 	return pimpl->getDimX();

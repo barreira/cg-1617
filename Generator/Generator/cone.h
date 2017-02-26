@@ -12,6 +12,7 @@ class Cone : public Primitive {
 public:
 	Cone(void);
 	Cone(float radius, float height, size_t slices = 1, size_t stacks = 1);
+	Cone(const Cone&);
 
 	float getRadius(void);
 	float getHeight(void);

@@ -167,6 +167,13 @@ Cone::Cone(float radius, float height, size_t slices, size_t stacks)
 }
 
 
+Cone::Cone(const Cone& c)
+{
+	pimpl = new ConeImpl(c.pimpl->getRadius(), c.pimpl->getHeight(),
+		                 c.pimpl->getSlices(), c.pimpl->getStacks());
+}
+
+
 float Cone::getRadius(void)
 {
 	return pimpl->getRadius();

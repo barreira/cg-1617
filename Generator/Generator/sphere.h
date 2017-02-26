@@ -12,6 +12,7 @@ class Sphere : public Primitive {
 public:
 	Sphere(void);
 	Sphere(float radius, size_t slices = 1, size_t stacks = 1);
+	Sphere(const Sphere&);
 
 	float getRadius(void);
 	size_t getStacks(void);

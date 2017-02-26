@@ -12,6 +12,7 @@ class Plane : public Primitive {
 public:
 	Plane(void);
 	Plane(float dimX, float dimZ);
+	Plane(const Plane&);
 	
 	float getDimX(void);
 	float getDimZ(void);

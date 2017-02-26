@@ -2,13 +2,13 @@
 #include <math.h>
 
 
-const float pi = 3.1415926;
+const float pi = 3.1415926f;
 
 
 class Sphere::SphereImpl {
 	float radius;
-	double alfa;	//ângulo em relação ao eixo Y no plano XZ
-	double beta;	//ângulo em relação ao eixo Z no plano XY
+	float alfa;	//ângulo em relação ao eixo Y no plano XZ
+	float beta;	//ângulo em relação ao eixo Z no plano XY
 	size_t slices;
 	size_t stacks;
 
@@ -28,8 +28,8 @@ public:
 		this->slices = slices;
 		this->stacks = stacks;
 	
-		alfa = (2 * pi) / ((double) slices);
-		beta = pi / ((double) stacks);
+		alfa = (2 * pi) / ((float) slices);
+		beta = pi / ((float) stacks);
 	}
 
 	
@@ -58,11 +58,9 @@ public:
 		float angleAlfa = 0;	//ângulo atual no plano XZ
 		float angleBeta = 0;
 		for (size_t i = 0; i < stacks; i++) {
-			
 			angleBeta = ((float) beta * i);
 
 			for (size_t j = 0; j < slices; j++) {
-
 				angleAlfa = ((float) alfa * j);
 			
 				//Ponto A - canto inferior esquerdo
@@ -120,6 +118,14 @@ Sphere::Sphere(float radius, size_t slices, size_t stacks)
 
 	pimpl = new SphereImpl(radius, slices, stacks);
 }
+
+
+Sphere::Sphere(const Sphere& s)
+{
+	pimpl = new SphereImpl(s.pimpl->getRadius(), s.pimpl->getStacks(), 
+		                   s.pimpl->getSlices());
+}
+
 
 float Sphere::getRadius(void)
 {

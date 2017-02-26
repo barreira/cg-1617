@@ -4,49 +4,60 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <math.h>
 #include "plane.h"
 #include "box.h"
 #include "cone.h"
 #include "sphere.h"
 
 
-
-using namespace std;
-
-
 #define BOX    "box"
-
+#define BOX_ARGS 4
 
 #define CONE   "cone"
-
+#define CONE_ARGS 5
+#define CONE_CEILS 2
 
 #define PLANE "plane"
-#define PLANE_PARAMS 3
-
+#define PLANE_ARGS 3
+#define PLANE_CEILS 0
 
 #define SPHERE "sphere"
-
+#define SPHERE_ARGS 4
+#define SPHERE_CEILS 2
 
 #define MIN_PARAMS 5
 
 
+std::vector<Vertex> vertices;
+std::string fileName;
+std::vector<float> arguments;
+Primitive *p;
 
-bool isPlane(vector<string> params, vector<float> &dim, string fileName)
+
+bool generateArgs(std::vector<std::string> params, const size_t numParams,
+	              const size_t ceilParams)
 {
 	bool ret = true;
 
-	if (params.size() == PLANE_PARAMS) {
+	if (params.size() == numParams) {
 		fileName = params.back();
 
 		for (size_t i = 0; i < params.size() - 1 && ret; i++) {
-			istringstream iss(params.at(i));
+			std::stringstream ss(params.at(i));
+			
 			float flt = 0;
 
-			if (!(iss >> flt)) {
+			if (!(ss >> flt)) {
 				ret = false;
 			}
 			else {
-				dim.push_back(flt);
+				if (i < params.size() - 1 - ceilParams) {
+					arguments.push_back(flt);
+				}
+				else {
+					arguments.push_back(ceil(flt));
+				}
 			}
 		}
 	}
@@ -58,69 +69,91 @@ bool isPlane(vector<string> params, vector<float> &dim, string fileName)
 }
 
 
-vector<string> generateVertex(float x, float y, float z, 
-	                          float multX, float multY, float multZ)
+bool generateBox(std::vector<std::string> params)
 {
-	vector<string> ret;
-	stringstream aux;
+	bool ret = false;
+	size_t boxCeils = params.size() == BOX_ARGS ? 0 : 1;
 
-	aux << x << " " << y << " " << z;
-	ret.push_back(aux.str());
+	ret = generateArgs(params, params.size(), boxCeils);
 
-	aux.str("");
+	if (ret) {
+		if (boxCeils == 0) {
+			p = new Box(arguments.at(0), arguments.at(1), arguments.at(2));
+		}
+		else {
+			p = new Box(arguments.at(0), arguments.at(1), arguments.at(2),
+				        (size_t) arguments.at(3));
+		}
 
-	aux << -x << " " << -y << " " << -z;
-	ret.push_back(aux.str());
 
-	aux.str("");
-
-	aux << (x * multX) << " " << (y * multY) << " " << (z * multZ);
-	ret.push_back(aux.str());
+		p->generateVertices();
+		vertices = p->getVertices();
+	}
 
 	return ret;
 }
 
 
-bool generatePlane(vector<string> params)
+bool generateCone(std::vector<std::string> params)
 {
-	vector<float> dim;
-	string fileName;
-	vector<string> v1;
-	vector<string> v2;
+	bool ret = generateArgs(params, CONE_ARGS, CONE_CEILS);
 
-	if (isPlane(params, dim, fileName)) {
-		float x = dim.front() / 2;
-		float z = dim.back() / 2;
-
-		v1 = generateVertex(x, 0, z, -1, 1, 1);
-		v2 = generateVertex(x, 0, z, 1, 1, -1);
+	if (ret) {
+		p = new Cone(arguments.at(0), arguments.at(1),
+			         (size_t) arguments.at(2), (size_t) arguments.at(3));
+		p->generateVertices();
+		vertices = p->getVertices();
 	}
 
-	return true;
+	return ret;
 }
 
 
+bool generatePlane(std::vector<std::string> params)
+{
+	bool ret = generateArgs(params, PLANE_ARGS, PLANE_CEILS);
+
+	if (ret) {
+		p = new Plane(arguments.at(0), arguments.at(1));
+		p->generateVertices();
+		vertices = p->getVertices();
+	}
+
+	return ret;
+}
 
 
+bool generateSphere(std::vector<std::string> params)
+{
+	bool ret = generateArgs(params, SPHERE_ARGS, SPHERE_CEILS);
 
-bool isValidParams(string primitive, vector<string> params)
+	if (ret) {
+		p = new Sphere(arguments.at(0),
+			           (size_t)arguments.at(1), (size_t)arguments.at(2));
+		p->generateVertices();
+		vertices = p->getVertices();
+	}
+
+	return ret;
+}
+
+
+bool generatePrimitive(std::string primitive, std::vector<std::string> params)
 {
 	bool ret = false;
-	/*
+	
 	if (primitive.compare(BOX) == 0) {
-	ret = isBox(commands);
+		ret = generateBox(params);
 	}
 	else if (primitive.compare(CONE) == 0) {
-	ret = isCone(commands);
-	}*/
-	//else if (primitive.compare(PLANE) == 0) {
-	
-	ret = generatePlane(params);
-	
-	/*}
+		ret = generateCone(params);
+	}
+	else if (primitive.compare(PLANE) == 0) {
+		ret = generatePlane(params);
+	}
 	else if (primitive.compare(SPHERE) == 0) {
-	ret = isSphere(commands);
-	}*/
+		ret = generateSphere(params);
+	}
 
 	return ret;
 }
@@ -128,54 +161,30 @@ bool isValidParams(string primitive, vector<string> params)
 
 int main(int argc, char** argv)
 {
+	bool ok = false;
+	std::ofstream file;
+
 	if (argc >= MIN_PARAMS) {
-		string primitive(argv[1]);
-		vector<string> params;
+		std::string primitive(argv[1]);
+		std::vector<std::string> params;
 
 		for (int i = 2; i < argc; i++) {
 			params.push_back(argv[i]);
 		}
 
-		if (isValidParams(primitive, params)) {
-
-		}
+		ok = generatePrimitive(primitive, params);
 	}
 
-	ofstream file;
-	file.open("vertices.txt");
+	if (ok) {
+		file.open(fileName);
 
-	vector<Vertex> vertices;
-
-	//Primitive* p = new Box(10, 10, 10, 10);
-//	Primitive* c = new Cone(2, 4, 15, 20);
-	Primitive* s = new Sphere(2, 50, 50);
-
-	//p->generateVertices();
-	//vertices = p->getVertices();
-
-	//c->generateVertices();
-	//vertices = c->getVertices();
-
-	s->generateVertices();
-	vertices = s->getVertices();
-
-	//reverse(vertices.begin(), vertices.end());
-
-	file << "glBegin(GL_TRIANGLES);" << endl;
-
-	for (size_t i = 1; i <= vertices.size(); i++) {
-		file << "glVertex3f(" << vertices.at(i - 1).toString() << ");" << endl;
-
-		if (i % 3 == 0) {
-			file << endl;
+		for (size_t i = 0; i < vertices.size(); i++) {
+			file << vertices.at(i).toString() << std::endl;
 		}
 	}
-
-	file << "glEnd();";
-	file.close();
-
-	delete s;
-	s = NULL;
+	else {
+		std::cout << "Invalid Arguments!" << std::endl;
+	}
 
 	getchar();
 	return 0;
