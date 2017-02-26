@@ -147,15 +147,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="box.cpp" />
+    <ClCompile Include="cone.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="primitive.cpp" />
+    <ClCompile Include="sphere.cpp" />
     <ClCompile Include="vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="box.h" />
+    <ClInclude Include="cone.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="primitive.h" />
+    <ClInclude Include="sphere.h" />
     <ClInclude Include="vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

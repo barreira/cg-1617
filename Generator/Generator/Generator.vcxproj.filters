@@ -30,6 +30,9 @@
     <ClCompile Include="box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

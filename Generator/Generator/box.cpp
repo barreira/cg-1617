@@ -64,7 +64,7 @@ public:
 	}
 
 
-	std::vector<Vertex*> genereteFaceXY(float x, float y, float z)
+	std::vector<Vertex*> generateFaceXY(float x, float y, float z)
 	{
 		std::vector<Vertex*> vertices;
 
@@ -92,7 +92,7 @@ public:
 	}
 
 
-	std::vector<Vertex*> genereteFaceXZ(float x, float y, float z)
+	std::vector<Vertex*> generateFaceXZ(float x, float y, float z)
 	{
 		std::vector<Vertex*> vertices;
 
@@ -121,7 +121,7 @@ public:
 	}
 
 
-	std::vector<Vertex*> genereteFaceYZ(float x, float y, float z)
+	std::vector<Vertex*> generateFaceYZ(float x, float y, float z)
 	{
 		std::vector<Vertex*> vertices;
 
@@ -191,9 +191,9 @@ size_t Box::getNumDiv(void)
 
 void Box::generateVertices(void)
 {
-	std::vector<Vertex*> verticesXY = pimpl->genereteFaceXY(0, 0, pimpl->getDimZ());
-	std::vector<Vertex*> verticesXZ = pimpl->genereteFaceXZ(0, pimpl->getDimY(), 0);
-	std::vector<Vertex*> verticesYZ = pimpl->genereteFaceYZ(pimpl->getDimX(), 0, 0);
+	std::vector<Vertex*> verticesXY = pimpl->generateFaceXY(0, 0, pimpl->getDimZ());
+	std::vector<Vertex*> verticesXZ = pimpl->generateFaceXZ(0, pimpl->getDimY(), 0);
+	std::vector<Vertex*> verticesYZ = pimpl->generateFaceYZ(pimpl->getDimX(), 0, 0);
 
 	for (size_t i = 0; i < verticesXY.size(); i++) {
 		addVertex(verticesXY.at(i));

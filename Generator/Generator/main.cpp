@@ -6,6 +6,7 @@
 #include <fstream>
 #include "plane.h"
 #include "box.h"
+#include "cone.h"
 
 
 using namespace std;
@@ -144,9 +145,14 @@ int main(int argc, char** argv)
 	vector<Vertex*> vertices;
 
 	Primitive* p = new Box(10, 10, 10, 10);
+	Primitive* c = new Cone(2, 4, 15, 20);
 
-	p->generateVertices();
-	vertices = p->getVertices();
+	//p->generateVertices();
+	//vertices = p->getVertices();
+
+	c->generateVertices();
+	vertices = c->getVertices();
+
 
 	//reverse(vertices.begin(), vertices.end());
 
