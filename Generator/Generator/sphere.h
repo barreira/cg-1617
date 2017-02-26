@@ -1,11 +1,13 @@
 #ifndef sphere_h
 #define sphere_h
 
+
 #include "primitive.h"
+
 
 class Sphere : public Primitive {
 	class SphereImpl;
-	std::unique_ptr<SphereImpl> pimpl;
+	SphereImpl* pimpl;
 
 public:
 	Sphere(void);

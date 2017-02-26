@@ -89,13 +89,10 @@ Vertex::Vertex(float x, float y, float z)
 	: pimpl{ new VertexImpl(x, y, z) } {}
 
 
-/*
-Vertex::Vertex(const Vertex& v) : pimpl{ new VertexImpl() } 
+Vertex::Vertex(const Vertex& v) 
 {
-	pimpl->setX(v.pimpl->getX());
-	pimpl->setX(v.pimpl->getY());
-	pimpl->setX(v.pimpl->getZ());
-}*/
+	pimpl = new VertexImpl(v.pimpl->getX(), v.pimpl->getY(), v.pimpl->getZ());
+}
 
 
 float Vertex::getX(void)
@@ -146,4 +143,8 @@ std::string Vertex::toString(void)
 }
 
 
-Vertex::~Vertex(void) = default;
+Vertex::~Vertex(void)
+{
+	delete pimpl;
+	pimpl = NULL;
+}

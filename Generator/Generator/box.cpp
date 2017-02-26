@@ -64,27 +64,27 @@ public:
 	}
 
 
-	std::vector<Vertex*> generateFaceXY(float x, float y, float z)
+	std::vector<Vertex> generateFaceXY(float x, float y, float z)
 	{
-		std::vector<Vertex*> vertices;
+		std::vector<Vertex> vertices;
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = y; j < dimY; j += divY) {
-				vertices.push_back(new Vertex(i - centerX, j - centerY, z - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j - centerY, z - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
+				vertices.push_back(Vertex(i - centerX, j - centerY, z - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
 
-				vertices.push_back(new Vertex(i - centerX, j - centerY, z - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
-				vertices.push_back(new Vertex(i - centerX, j + divY - centerY, z - centerZ));
+				vertices.push_back(Vertex(i - centerX, j - centerY, z - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
+				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - centerZ));
 
-				vertices.push_back(new Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - dimZ - centerZ));
 
-				vertices.push_back(new Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
-				vertices.push_back(new Vertex(i - centerX, j + divY - centerY, z - dimZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - dimZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
 			}
 		}
 
@@ -92,28 +92,28 @@ public:
 	}
 
 
-	std::vector<Vertex*> generateFaceXZ(float x, float y, float z)
+	std::vector<Vertex> generateFaceXZ(float x, float y, float z)
 	{
-		std::vector<Vertex*> vertices;
+		std::vector<Vertex> vertices;
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = z; j < dimZ; j += divZ) {
-				vertices.push_back(new Vertex(i - centerX, y - centerY, j - centerZ));
-				vertices.push_back(new Vertex(i - centerX, y - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY, j - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY, j - centerZ));
 
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j - centerZ));
-				vertices.push_back(new Vertex(i - centerX, y - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY, j - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY, j + divZ - centerZ));
 
 
-				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
-				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
 				
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
-				vertices.push_back(new Vertex(i + divX - centerX, y - centerY - dimY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
+				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j + divZ - centerZ));
+				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
 			}
 		}
 
@@ -121,28 +121,28 @@ public:
 	}
 
 
-	std::vector<Vertex*> generateFaceYZ(float x, float y, float z)
+	std::vector<Vertex> generateFaceYZ(float x, float y, float z)
 	{
-		std::vector<Vertex*> vertices;
+		std::vector<Vertex> vertices;
 
 		for (float i = y; i < dimY; i += divY) {
 			for (float j = z; j < dimZ; j += divZ) {
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX, i - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX, i + divY - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
 
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(x - centerX, i - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX, i - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX, i - centerY, j + divZ - centerZ));
 
 
-				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i + divY - centerY, j - centerZ));
 
-				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j - centerZ));
-				vertices.push_back(new Vertex(x - centerX - dimX, i - centerY, j + divZ - centerZ));
-				vertices.push_back(new Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i - centerY, j - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i - centerY, j + divZ - centerZ));
+				vertices.push_back(Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
 			}
 		}
 
@@ -161,7 +161,7 @@ Box::Box(float dimX, float dimY, float dimZ, size_t numDiv)
 {
 	numDiv = (numDiv < 0) ? 0 : numDiv;
 
-	pimpl = std::unique_ptr<BoxImpl>(new BoxImpl(dimX, dimY, dimZ, numDiv));
+	pimpl = new BoxImpl(dimX, dimY, dimZ, numDiv);
 }
 
 
@@ -191,9 +191,9 @@ size_t Box::getNumDiv(void)
 
 void Box::generateVertices(void)
 {
-	std::vector<Vertex*> verticesXY = pimpl->generateFaceXY(0, 0, pimpl->getDimZ());
-	std::vector<Vertex*> verticesXZ = pimpl->generateFaceXZ(0, pimpl->getDimY(), 0);
-	std::vector<Vertex*> verticesYZ = pimpl->generateFaceYZ(pimpl->getDimX(), 0, 0);
+	std::vector<Vertex> verticesXY = pimpl->generateFaceXY(0, 0, pimpl->getDimZ());
+	std::vector<Vertex> verticesXZ = pimpl->generateFaceXZ(0, pimpl->getDimY(), 0);
+	std::vector<Vertex> verticesYZ = pimpl->generateFaceYZ(pimpl->getDimX(), 0, 0);
 
 	for (size_t i = 0; i < verticesXY.size(); i++) {
 		addVertex(verticesXY.at(i));
@@ -209,4 +209,8 @@ void Box::generateVertices(void)
 }
 
 
-Box::~Box(void) = default;
+Box::~Box(void)
+{
+	delete pimpl;
+	pimpl = NULL;
+}

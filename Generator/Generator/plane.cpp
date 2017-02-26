@@ -59,17 +59,21 @@ void Plane::generateVertices(void)
 	float x = pimpl->getDimX() / 2;
 	float z = pimpl->getDimZ() / 2;
 
-	addVertex(new Vertex(x, 0, -z));
-	addVertex(new Vertex(-x, 0, -z));
-	addVertex(new Vertex(-x, 0, z));
+	addVertex(Vertex(x, 0, -z));
+	addVertex(Vertex(-x, 0, -z));
+	addVertex(Vertex(-x, 0, z));
 
-	addVertex(new Vertex(x, 0, -z));
-	addVertex(new Vertex(-x, 0, z));
-	addVertex(new Vertex(x, 0, z));
+	addVertex(Vertex(x, 0, -z));
+	addVertex(Vertex(-x, 0, z));
+	addVertex(Vertex(x, 0, z));
 }
 
 
-Plane::~Plane(void) = default;
+Plane::~Plane(void)
+{
+	delete pimpl;
+	pimpl = NULL;
+}
 
 
 

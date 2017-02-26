@@ -6,16 +6,16 @@
 
 class Primitive {
 	class PrimitiveImpl;
-	std::unique_ptr<PrimitiveImpl> pimpl;
+	PrimitiveImpl* pimpl;
 
 public:
 	Primitive(void);
 	
-	void addVertex(Vertex*);
-	std::vector<Vertex*> getVertices(void);
+	void addVertex(Vertex);
+	std::vector<Vertex> getVertices(void);
 	virtual void generateVertices(void) = 0;
 
-	~Primitive(void);
+	virtual ~Primitive(void);
 };
 
 #endif 

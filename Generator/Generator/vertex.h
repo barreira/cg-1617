@@ -2,16 +2,16 @@
 #define vertex_h
 
 #include <string>
-#include <memory>
+
 
 class Vertex {
 	class VertexImpl;
-	std::unique_ptr<VertexImpl> pimpl;
+	VertexImpl* pimpl;
 
 public:
 	Vertex(void);
 	Vertex(float x, float y, float z);
-	//Vertex(const Vertex&);
+	Vertex(const Vertex&);
 
 	float getX(void);
 	float getY(void);

@@ -1,7 +1,9 @@
 #include "sphere.h"
 #include <math.h>
 
+
 const float pi = 3.1415926;
+
 
 class Sphere::SphereImpl {
 	float radius;
@@ -64,11 +66,8 @@ public:
 	{
 		std::vector<Vertex*> vertices;
 		double angle = 0;
-
-
-
-
 	}
+
 
 	~SphereImpl(void) = default;
 };
@@ -76,12 +75,13 @@ public:
 
 Sphere::Sphere(void) : pimpl{ new SphereImpl() } {}
 
+
 Sphere::Sphere(float radius, size_t slices, size_t stacks)
 {
 	slices = (slices < 1) ? 1 : slices;
 	stacks = (stacks < 1) ? 1 : stacks;
 
-	pimpl = std::unique_ptr<SphereImpl>(new SphereImpl(radius, slices, stacks));
+	pimpl = new SphereImpl(radius, slices, stacks);
 }
 
 float Sphere::getRadius(void)
@@ -106,10 +106,12 @@ size_t Sphere::getStacks(void)
 	return pimpl->getStacks();
 }
 
+
 size_t Sphere::getSlices(void)
 {
 	return pimpl->getSlices();
 }
+
 
 void Sphere::generateVertices(void)
 {
@@ -117,4 +119,9 @@ void Sphere::generateVertices(void)
 
 }
 
-Sphere::~Sphere(void) = default;
+
+Sphere::~Sphere(void)
+{
+	delete pimpl;
+	pimpl = NULL;
+}

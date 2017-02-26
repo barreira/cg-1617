@@ -1,12 +1,14 @@
 #include "cone.h"
-#include <math.h>
+#include <cmath>
 
-const float pi = 3.1415926;
+
+const float pi = 3.1415926f;
+
 
 class Cone::ConeImpl {
 	float radius;
 	float height;
-	double alfa;		//ângulo ao centro em radianos
+	float alfa;		    //ângulo ao centro em radianos
 	float stackHeight;	//altura de uma stack
 	size_t slices;
 	size_t stacks;
@@ -15,8 +17,7 @@ class Cone::ConeImpl {
 public:
 	ConeImpl(void)
 	{
-		radius = height = stackHeight = 0;
-		alfa = 0;
+		radius = height = stackHeight = alfa = 0;
 		slices = stacks = 0;
 	}
 
@@ -26,7 +27,7 @@ public:
 		this->height = height;
 		this->slices = slices;
 		this->stacks = stacks;
-		alfa = (2 * pi) / ((double) slices);
+		alfa = (2 * pi) / ((float) slices);
 		stackHeight = height / ((float) stacks);
 	}
 
@@ -43,7 +44,7 @@ public:
 	}
 
 
-	double getAlfa(void)
+	float getAlfa(void)
 	{
 		return alfa;
 	}
@@ -67,37 +68,37 @@ public:
 	}
 
 
-	std::vector<Vertex*> generateBase(void)
+	std::vector<Vertex> generateBase(void)
 	{
-		std::vector<Vertex*> vertices;
-		double angle = 0;
+		std::vector<Vertex> vertices;
+		float angle = 0;
 		float x = 0;
-		float y = 0;
+		float y = (-height) / 4;
 		float z = radius;
-		Vertex* center = new Vertex(0, 0, 0);
+		Vertex center(0, y, 0);
 
 
 		for (size_t i = 0; i < slices; i++) {
-			vertices.push_back(new Vertex(x, y, z));
+			vertices.push_back(Vertex(x, y, z));
 			
 			vertices.push_back(center);
 			
-			angle = ((double) (alfa * (i + 1)));
+			angle = alfa * (i + 1);
 
-			x = ((float) radius * sin(angle));
-			z = ((float) radius * cos(angle));
-			vertices.push_back(new Vertex(x, y, z));
-
+			x = radius * sin(angle);
+			z = radius * cos(angle);
+			
+			vertices.push_back(Vertex(x, y, z));
 		}
 
 		return vertices;
 	}
 
 
-	std::vector<Vertex*> generateSides(void)
+	std::vector<Vertex> generateSides(void)
 	{
-		std::vector<Vertex*> vertices;
-		double angle = 0;		//ângulo atual
+		std::vector<Vertex> vertices;
+		float angle = 0;		//ângulo atual
 
 		//coordenadas de referência
 		float lowerR = 0;	//"raio" do círculo dos 2 pontos inferiores
@@ -105,52 +106,50 @@ public:
 		float lowerH = 0;	//coordenada em Y dos 2 pontos inferiores
 		float upperH = 0;	//coordenada em Y dos 2 pontos superiores
 
-
 		for (size_t i = 0; i < stacks; i++) {
-			lowerH = i * stackHeight - height/4;		//Ajustar a altura 
-			upperH = (i + 1) * stackHeight - height/4;	//ao centro de massa
+			lowerH = i * stackHeight;		//Ajustar a altura 
+			upperH = (i + 1) * stackHeight;	//ao centro de massa
 
 			lowerR = radius - radius * lowerH / height;
 			upperR = radius - radius * upperH / height;
 
 
 			for (size_t j = 0; j < slices; j++) {
-				angle = ((double)(alfa * j));
-
+				angle = ((float) alfa * j);
 
 				//Ponto A - canto inferior esquerdo
-				float xA = ((float)lowerR * sin(angle));
-				float yA = lowerH;
-				float zA = ((float)lowerR * cos(angle));
+				float xA = lowerR * sin(angle);
+				float yA = lowerH - (height / 4);
+				float zA = lowerR * cos(angle);
 
 				//Ponto B -  canto inferior direito
-				float xB = ((float)lowerR * sin(angle + alfa));
-				float yB = lowerH;
-				float zB = ((float)lowerR * cos(angle + alfa));
+				float xB = lowerR * sin(angle + alfa);
+				float yB = lowerH - (height / 4);
+				float zB = lowerR * cos(angle + alfa);
 
 				//Ponto C - canto superior direito
-				float xC = ((float)upperR * sin(angle + alfa));
-				float yC = upperH;
-				float zC = ((float)upperR * cos(angle + alfa));
+				float xC = upperR * sin(angle + alfa);
+				float yC = upperH - (height / 4);
+				float zC = upperR * cos(angle + alfa);
 
 				//Ponto D - canto superior esquerdo
-				float xD = ((float)upperR * sin(angle));
-				float yD = upperH;
-				float zD = ((float)upperR * cos(angle));
+				float xD = upperR * sin(angle);
+				float yD = upperH - (height / 4);
+				float zD = upperR * cos(angle);
 
-				vertices.push_back(new Vertex(xA, yA, zA));
-				vertices.push_back(new Vertex(xB, yB, zB));		
-				vertices.push_back(new Vertex(xC, yC, zC));		
+				vertices.push_back(Vertex(xA, yA, zA));
+				vertices.push_back(Vertex(xB, yB, zB));		
+				vertices.push_back(Vertex(xC, yC, zC));		
 
-				vertices.push_back(new Vertex(xA, yA, zA));
-				vertices.push_back(new Vertex(xC, yC, zC));
-				vertices.push_back(new Vertex(xD, yD, zD));
+				vertices.push_back(Vertex(xA, yA, zA));
+				vertices.push_back(Vertex(xC, yC, zC));
+				vertices.push_back(Vertex(xD, yD, zD));
 			}
-			
 		}
 	
 		return vertices;
 	}
+
 
 	~ConeImpl(void) = default;
 };
@@ -158,14 +157,15 @@ public:
 
 Cone::Cone(void) : pimpl{ new ConeImpl() } {}
 
+
 Cone::Cone(float radius, float height, size_t slices, size_t stacks)
 {
 	slices = (slices < 1) ? 1 : slices;
 	stacks = (stacks < 1) ? 1 : stacks;
 
-
-	pimpl = std::unique_ptr<ConeImpl>(new ConeImpl(radius, height, slices, stacks));
+	pimpl = new ConeImpl(radius, height, slices, stacks);
 }
+
 
 float Cone::getRadius(void)
 {
@@ -176,18 +176,6 @@ float Cone::getRadius(void)
 float Cone::getHeight(void)
 {
 	return pimpl->getHeight();
-}
-
-
-double Cone::getAlfa(void)
-{
-	return pimpl->getAlfa();
-}
-
-
-float Cone::getStackHeight(void)
-{
-	return pimpl->getStackHeight();
 }
 
 
@@ -204,8 +192,8 @@ size_t Cone::getSlices(void)
 
 void Cone::generateVertices(void)
 {
-	std::vector<Vertex*> verticesBase = pimpl->generateBase();
-	std::vector<Vertex*> verticesSides = pimpl->generateSides();
+	std::vector<Vertex> verticesBase = pimpl->generateBase();
+	std::vector<Vertex> verticesSides = pimpl->generateSides();
 
 	for (size_t i = 0; i < verticesBase.size(); i++) {
 		addVertex(verticesBase.at(i));
@@ -214,9 +202,11 @@ void Cone::generateVertices(void)
 	for (size_t i = 0; i < verticesSides.size(); i++) {
 		addVertex(verticesSides.at(i));
 	}
-
 }
 
 
-
-Cone::~Cone(void) = default;
+Cone::~Cone(void)
+{
+	delete pimpl;
+	pimpl = NULL;
+}

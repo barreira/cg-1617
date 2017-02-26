@@ -1,11 +1,13 @@
 #ifndef plane_h
 #define plane_h
 
+
 #include "primitive.h"
+
 
 class Plane : public Primitive {
 	class PlaneImpl;
-	std::unique_ptr<PlaneImpl> pimpl;
+	PlaneImpl* pimpl;
 
 public:
 	Plane(void);

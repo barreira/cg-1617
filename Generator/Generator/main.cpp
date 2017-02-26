@@ -142,9 +142,9 @@ int main(int argc, char** argv)
 	ofstream file;
 	file.open("vertices.txt");
 
-	vector<Vertex*> vertices;
+	vector<Vertex> vertices;
 
-	Primitive* p = new Box(10, 10, 10, 10);
+	//Primitive* p = new Box(10, 10, 10, 10);
 	Primitive* c = new Cone(2, 4, 15, 20);
 
 	//p->generateVertices();
@@ -153,13 +153,12 @@ int main(int argc, char** argv)
 	c->generateVertices();
 	vertices = c->getVertices();
 
-
 	//reverse(vertices.begin(), vertices.end());
 
 	file << "glBegin(GL_TRIANGLES);" << endl;
 
 	for (size_t i = 1; i <= vertices.size(); i++) {
-		file << "glVertex3f(" << vertices.at(i - 1)->toString() << ");" << endl;
+		file << "glVertex3f(" << vertices.at(i - 1).toString() << ");" << endl;
 
 		if (i % 3 == 0) {
 			file << endl;
@@ -168,6 +167,9 @@ int main(int argc, char** argv)
 
 	file << "glEnd();";
 	file.close();
+
+	delete c;
+	c = NULL;
 
 	getchar();
 	return 0;

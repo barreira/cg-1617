@@ -1,11 +1,13 @@
 #ifndef box_h
 #define box_h
 
+
 #include "primitive.h"
+
 
 class Box : public Primitive {
 	class BoxImpl;
-	std::unique_ptr<BoxImpl> pimpl;
+	BoxImpl* pimpl;
 
 public:
 	Box(void);
