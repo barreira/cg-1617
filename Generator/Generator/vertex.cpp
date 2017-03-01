@@ -71,7 +71,7 @@ public :
 	{
 		std::stringstream aux;
 
-		aux << x << "," << y << "," << z;
+		aux << x << " " << y << " " << z;
 
 		return aux.str();
 	}

@@ -1,3 +1,15 @@
+/**
+*  @file sphere.cpp
+*
+*  Definição de métodos para calcular as coordenadas dos pontos de uma esfera.
+*
+*  @author Carlos Pereira - A61887
+*  @author João Barreira  - A73831
+*  @author Rafael Braga   - A61799
+*
+*/
+
+
 #include "sphere.h"
 #include <math.h>
 
@@ -6,14 +18,18 @@ const float pi = 3.1415926f;
 
 
 class Sphere::SphereImpl {
-	float radius;
-	float alfa;	//ângulo em relação ao eixo Y no plano XZ
-	float beta;	//ângulo em relação ao eixo Z no plano XY
-	size_t slices;
-	size_t stacks;
+	float radius;	// Raio da esfera
+	float alfa;		// Ângulo em relação ao eixo Y no plano XZ em radianos
+	float beta;		// Ângulo em relação ao eixo Z no plano XY em radianos
+	size_t slices;	// Número de slices a utilizar
+	size_t stacks;	// Número de stacks a utilizar
 
 
 public:
+
+	/**
+	* Construtor vazio.
+	*/
 	SphereImpl(void)
 	{
 		radius = 0;
@@ -22,6 +38,13 @@ public:
 	}
 
 	
+	/**
+	* Construtor por parâmetros.
+	*
+	* @param radius Raio da esfera
+	* @param slices Número de slices a utilizar
+	* @param stacks Número de stacks a utilizar
+	*/
 	SphereImpl(float radius, size_t slices, size_t stacks)
 	{
 		this->radius = radius;
@@ -33,63 +56,93 @@ public:
 	}
 
 	
+	/**
+	* Devolve o valor do raio.
+	*/
 	float getRadius(void)
 	{
 		return radius;
 	}
 
 
+	/**
+	* Devolve o número de slices utilizadas.
+	*/
 	size_t getSlices(void)
 	{
 		return slices;
 	}
 
 
+	/**
+	* Devolve o número de stacks utilizadas.
+	*/
 	size_t getStacks(void)
 	{
 		return stacks;
 	}
 
 
+	/**
+	* Calcula, a partir dos dados recebidos no construtor, as coordenadas de todos
+	* os pontos que definem a esfera.
+	*
+	* @return Vetor com as coordenadas dos pontos.
+	*/
 	std::vector<Vertex> generateSphere(void)
 	{
-		std::vector<Vertex> vertices;
+		std::vector<Vertex> vertices;	// Coordenadas dos pontos a devolver
 		
-		float angleAlfa = 0;	//ângulo atual no plano XZ
-		float angleBeta = 0;
+		float angleAlfa = 0;	// Ângulo atual no plano XZ
+		float angleBeta = 0;	// Ângulo atual no plano XY
+
+
+		// Pontos de referência para aplicar-se a regra da mão direita
+		Vertex vA;			//Ponto A - canto inferior esquerdo
+		float xA, yA, zA;		
+		
+		Vertex vB;			//Ponto B - canto inferior direito
+		float xB, yB, zB;		
+		
+		Vertex vC;			//Ponto C - canto superior direito
+		float xC, yC, zC;		
+		
+		Vertex vD;			//Ponto D - canto superior esquerdo
+		float xD, yD, zD;		
+
 		for (size_t i = 0; i < stacks; i++) {
-			angleBeta = ((float) beta * i);
+			angleBeta = ((float) beta * i);			//Cálculo do ângulo Beta
 
 			for (size_t j = 0; j < slices; j++) {
-				angleAlfa = ((float) alfa * j);
+			
+				angleAlfa = ((float) alfa * j);		//Cálculo do ângulo Alfa
 			
 				//Ponto A - canto inferior esquerdo
-				float xA = radius * sin(angleBeta) * sin(angleAlfa);;
-				float yA = radius * cos(angleBeta);
-				float zA = radius * sin(angleBeta) * cos(angleAlfa);
-				Vertex vA = Vertex(xA, yA, zA);
+				xA = radius * sin(angleBeta) * sin(angleAlfa);;
+				yA = radius * cos(angleBeta);
+				zA = radius * sin(angleBeta) * cos(angleAlfa);
+				vA = Vertex(xA, yA, zA);
 
-				
 				//Ponto B - canto inferior direito
-				float xB = radius * sin(angleBeta) * sin(angleAlfa + alfa);;
-				float yB = radius * cos(angleBeta);
-				float zB = radius * sin(angleBeta) * cos(angleAlfa + alfa);
-				Vertex vB = Vertex(xB, yB, zB);
+				xB = radius * sin(angleBeta) * sin(angleAlfa + alfa);;
+				yB = radius * cos(angleBeta);
+				zB = radius * sin(angleBeta) * cos(angleAlfa + alfa);
+				vB = Vertex(xB, yB, zB);
 
-				
 				//Ponto C - canto superior direito
-				float xC = radius * sin(angleBeta + beta) * sin(angleAlfa + alfa);;
-				float yC = radius * cos(angleBeta + beta);
-				float zC = radius * sin(angleBeta + beta) * cos(angleAlfa + alfa);
-				Vertex vC = Vertex(xC, yC, zC);
-
+				xC = radius * sin(angleBeta + beta) * sin(angleAlfa + alfa);;
+				yC = radius * cos(angleBeta + beta);
+				zC = radius * sin(angleBeta + beta) * cos(angleAlfa + alfa);
+				vC = Vertex(xC, yC, zC);
 
 				//Ponto D - canto superior esquerdo
-				float xD = radius * sin(angleBeta + beta) * sin(angleAlfa);;
-				float yD = radius * cos(angleBeta + beta);
-				float zD = radius * sin(angleBeta + beta) * cos(angleAlfa);
-				Vertex vD = Vertex(xD, yD, zD);
+				xD = radius * sin(angleBeta + beta) * sin(angleAlfa);;
+				yD = radius * cos(angleBeta + beta);
+				zD = radius * sin(angleBeta + beta) * cos(angleAlfa);
+				vD = Vertex(xD, yD, zD);
 
+
+				//Inserção dos pontos na estrutura com os resultados
 				vertices.push_back(vA);
 				vertices.push_back(vB);
 				vertices.push_back(vC);
@@ -111,15 +164,25 @@ public:
 Sphere::Sphere(void) : pimpl{ new SphereImpl() } {}
 
 
+/**
+* Construtor por parâmetros.
+*
+* @param radius Raio da esfera
+* @param slices Número de slices a utilizar
+* @param stacks Número de stacks a utilizar
+*/
 Sphere::Sphere(float radius, size_t slices, size_t stacks)
 {
-	slices = (slices < 1) ? 1 : slices;
-	stacks = (stacks < 1) ? 1 : stacks;
+	slices = (slices < 1) ? 1 : slices;	// Por defeito, o número de slices e de stacks
+	stacks = (stacks < 1) ? 1 : stacks; // é sempre superior ou igual a 1
 
 	pimpl = new SphereImpl(radius, slices, stacks);
 }
 
 
+/**
+* Construtor a partir de outro objecto Sphere.
+*/
 Sphere::Sphere(const Sphere& s)
 {
 	pimpl = new SphereImpl(s.pimpl->getRadius(), s.pimpl->getStacks(), 
@@ -127,28 +190,44 @@ Sphere::Sphere(const Sphere& s)
 }
 
 
+/**
+* Devolve o valor do raio da esfera.
+*/
 float Sphere::getRadius(void)
 {
 	return pimpl->getRadius();
 }
 
 
+/**
+* Devolve o número de stacks.
+*/
 size_t Sphere::getStacks(void)
 {
 	return pimpl->getStacks();
 }
 
 
+/**
+* Devolve o número de slices.
+*/
 size_t Sphere::getSlices(void)
 {
 	return pimpl->getSlices();
 }
 
 
+/**
+* Método que cálcula todos as coordenadas de todos os pontos de uma esfera.
+*
+* @return void
+*/
 void Sphere::generateVertices(void)
 {
+	// Chama o método que cálcula as coordenadas da esfera
 	std::vector<Vertex> vertices = pimpl->generateSphere();
 
+	// Adiciona os vértices laterais ao vetor de vértices 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));
 	}
