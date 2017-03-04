@@ -129,17 +129,14 @@ public:
 
 		// Pontos de referência para aplicar-se a regra da mão direita
 
-		Vertex vA;			//Ponto A - canto inferior esquerdo
-		float xA, yA, zA;		
-		
-		Vertex vB;			//Pon B - canto inferior direito
-		float xB, yB, zB;		
-		
-		Vertex vC;			//Ponto C - canto superior direito
-		float xC, yC, zC;		
-		
-		Vertex vD;			//Ponto D - canto superior esquerdo
-		float xD, yD, zD;		
+					
+		float xA, yA, zA;		//Ponto A - canto inferior esquerdo
+			
+		float xB, yB, zB;		//Ponto B - canto inferior direito
+			
+		float xC, yC, zC;		//Ponto C - canto superior direito
+				
+		float xD, yD, zD;		//Ponto D - canto superior esquerdo
 
 
 		for (size_t i = 0; i < stacks; i++) {
@@ -153,35 +150,31 @@ public:
 				xA = radius * sin(angleBeta) * sin(angleAlfa);;
 				yA = radius * cos(angleBeta);
 				zA = radius * sin(angleBeta) * cos(angleAlfa);
-				vA = Vertex(xA, yA, zA);
 
 				//Ponto B - canto inferior direito
 				xB = radius * sin(angleBeta) * sin(angleAlfa + alfa);;
 				yB = radius * cos(angleBeta);
 				zB = radius * sin(angleBeta) * cos(angleAlfa + alfa);
-				vB = Vertex(xB, yB, zB);
 
 				//Ponto C - canto superior direito
 				xC = radius * sin(angleBeta + beta) * sin(angleAlfa + alfa);;
 				yC = radius * cos(angleBeta + beta);
 				zC = radius * sin(angleBeta + beta) * cos(angleAlfa + alfa);
-				vC = Vertex(xC, yC, zC);
 
 				//Ponto D - canto superior esquerdo
 				xD = radius * sin(angleBeta + beta) * sin(angleAlfa);;
 				yD = radius * cos(angleBeta + beta);
 				zD = radius * sin(angleBeta + beta) * cos(angleAlfa);
-				vD = Vertex(xD, yD, zD);
 
 
 				//Inserção dos pontos na estrutura com os resultados
-				vertices.push_back(vA);
-				vertices.push_back(vB);
-				vertices.push_back(vC);
+				vertices.push_back(Vertex(xA, yA, zA));
+				vertices.push_back(Vertex(xB, yB, zB));
+				vertices.push_back(Vertex(xC, yC, zC));
 
-				vertices.push_back(vA);
-				vertices.push_back(vC);
-				vertices.push_back(vD);
+				vertices.push_back(Vertex(xA, yA, zA));
+				vertices.push_back(Vertex(xC, yC, zC));
+				vertices.push_back(Vertex(xD, yD, zD));
 			}
 		}
 
