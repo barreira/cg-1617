@@ -1,12 +1,12 @@
 /**
-* @file box.cpp
-*
-* Definição de métodos para calcular as coordenadas dos pontos de uma caixa.
-*
-* @author Carlos Pereira - A61887
-* @author João Barreira  - A73831
-* @author Rafael Braga   - A61799
-*/
+ * @file box.cpp
+ *
+ * Definição de métodos para calcular as coordenadas dos pontos de uma caixa.
+ *
+ * @author Carlos Pereira - A61887
+ * @author João Barreira  - A73831
+ * @author Rafael Braga   - A61799
+ */
 
 
 #include "box.h"
@@ -28,8 +28,8 @@ class Box::BoxImpl {
 public:
 
 	/**
-	* Construtor por defeito.
-	*/
+	 * Construtor por defeito. 
+	 */
 	BoxImpl(void)
 	{
 		dimX = dimY = dimZ = divX = divY = divZ = 0;
@@ -39,13 +39,13 @@ public:
 
 
 	/**
-	* Construtor por parâmetros.
-	*
-	* @param dimX Dimensão da caixa no eixo dos xx.
-	* @param dimY Dimensão da caixa no eixo dos yy.
-	* @param dimZ Dimensão da caixa no eixo dos zz.
-	* @param numDiv Número de divisões da caixa.
-	*/
+	 * Construtor por parâmetros.
+	 *
+	 * @param dimX Dimensão da caixa no eixo dos xx.
+	 * @param dimY Dimensão da caixa no eixo dos yy.
+	 * @param dimZ Dimensão da caixa no eixo dos zz.
+	 * @param numDiv Número de divisões da caixa.
+	 */
 	BoxImpl(float dimX, float dimY, float dimZ, size_t numDiv)
 	{
 		this->dimX = dimX;
@@ -54,9 +54,9 @@ public:
 		this->numDiv = numDiv;
 
 		// Dimensão de cada divisão em cada eixo
-		divX = dimX / ((float)numDiv);
-		divY = dimY / ((float)numDiv);
-		divZ = dimZ / ((float)numDiv);
+		divX = dimX / ((float) numDiv);
+		divY = dimY / ((float) numDiv);
+		divZ = dimZ / ((float) numDiv);
 
 		// Coordenadas x, y e z do centro da caixa
 		centerX = dimX / 2;
@@ -66,17 +66,17 @@ public:
 
 
 	/**
-	* Devolve o valor da dimensão da caixa no eixo dos xx.
-	*/
+	 * Devolve o valor da dimensão da caixa no eixo dos xx.
+	 */
 	float getDimX(void)
 	{
 		return dimX;
 	}
-
+	 
 
 	/**
-	* Devolve o valor da dimensão da caixa no eixo dos yy.
-	*/
+	 * Devolve o valor da dimensão da caixa no eixo dos yy.
+	 */
 	float getDimY(void)
 	{
 		return dimY;
@@ -84,8 +84,8 @@ public:
 
 
 	/**
-	* Devolve o valor da dimensão da caixa no eixo dos zz.
-	*/
+	 * Devolve o valor da dimensão da caixa no eixo dos zz.
+	 */
 	float getDimZ(void)
 	{
 		return dimZ;
@@ -93,8 +93,8 @@ public:
 
 
 	/**
-	* Devolve o número de divisões da caixa.
-	*/
+	 * Devolve o número de divisões da caixa.
+	 */
 	size_t getNumDiv(void)
 	{
 		return numDiv;
@@ -102,8 +102,8 @@ public:
 
 
 	/**
-	* Altera o valor da dimensão da caixa no eixo dos xx.
-	*/
+	 * Altera o valor da dimensão da caixa no eixo dos xx.
+	 */
 	void setDimX(float dimX)
 	{
 		divX = dimX / ((float)numDiv);
@@ -113,8 +113,8 @@ public:
 
 
 	/**
-	* Altera o valor da dimensão da caixa no eixo dos yy.
-	*/
+	 * Altera o valor da dimensão da caixa no eixo dos yy.
+	 */
 	void setDimY(float dimY)
 	{
 		divY = dimY / ((float)numDiv);
@@ -124,8 +124,8 @@ public:
 
 
 	/**
-	* Altera o valor da dimensão da caixa no eixo dos zz.
-	*/
+	 * Altera o valor da dimensão da caixa no eixo dos zz.
+	 */
 	void setDimZ(float dimZ)
 	{
 		divZ = dimZ / ((float)numDiv);
@@ -135,8 +135,8 @@ public:
 
 
 	/**
-	* Altera o número de divisões da caixa.
-	*/
+	 * Altera o número de divisões da caixa.
+	 */
 	void setNumDiv(size_t numDiv)
 	{
 		divX = dimX / ((float)numDiv);
@@ -152,32 +152,32 @@ public:
 
 
 	/**
-	* Calcula todos os vértices das duas faces parelelas ao plano XY da caixa.
-	* Os vértices da face da frente são calculados usando a regra da mão
-	* direita no sentido contrário aos ponteiros do relógio. Já os vértices
-	* da face de trás são calculados segundo a regra da mão direita no sentido
-	* dos ponteiros do relógio. Ambas as faces são centradas em relação à
-	* origem.
-	*
-	*   v6----- v7
-	*   |       |
-	* v3------v2|
-	* | |     | |
-	* | |v5---|-|v8
-	* |       |
-	* v1------v4
-	*
-	* @param x Coordenada x do vértice inicial (v1).
-	* @param y Coordenada y do vértice inicial (v1).
-	* @param z Coordenada z do vértice inicial (v1).
-	* @return Vetor com as coordenadas dos vértices das duas faces paralelas
-	*         ao plano XY da caixa.
-	*/
+	 * Calcula todos os vértices das duas faces parelelas ao plano XY da caixa.
+	 * Os vértices da face da frente são calculados usando a regra da mão 
+	 * direita no sentido contrário aos ponteiros do relógio. Já os vértices 
+	 * da face de trás são calculados segundo a regra da mão direita no sentido
+	 * dos ponteiros do relógio. Ambas as faces são centradas em relação à
+	 * origem.
+	 *
+	 *   v6----- v7
+     *   |       |
+     * v3------v2|
+     * | |     | |
+     * | |v5---|-|v8
+     * |       | 
+     * v1------v4
+	 *
+	 * @param x Coordenada x do vértice inicial (v1).
+	 * @param y Coordenada y do vértice inicial (v1).
+	 * @param z Coordenada z do vértice inicial (v1.
+	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
+	 *         ao plano XY da caixa.
+	 */
 	std::vector<Vertex> generateFacesXY(float x, float y, float z)
 	{
-		std::vector<Vertex> vertices;
+		std::vector<Vertex> vertices; 
 
-		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
+		// No total serão calculados 4 triângulos (2 para cada face)
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = y; j < dimY; j += divY) {
@@ -214,38 +214,38 @@ public:
 
 
 	/**
-	* Calcula todos os vértices das duas faces parelelas ao plano XZ da caixa.
-	* Os vértices da face de cima são calculados usando a regra da mão
-	* direita no sentido contrário aos ponteiros do relógio. Já os vértices
-	* da face de baixo são calculados segundo a regra da mão direita no sentido
-	* dos ponteiros do relógio. Ambas as faces são centradas em relação à
-	* origem.
-	*
-	*   v1------v3
-	*  /       /
-	* v2------v4
-	*
-	*   v5------v6
-	*  /       /
-	* v7------v8
-	*
-	* @param x Coordenada x do vértice inicial (v1).
-	* @param y Coordenada y do vértice inicial (v1).
-	* @param z Coordenada z do vértice inicial (v1).
-	* @return Vetor com as coordenadas dos vértices das duas faces paralelas
-	*         ao plano XZ da caixa.
-	*/
+	 * Calcula todos os vértices das duas faces parelelas ao plano XZ da caixa.
+	 * Os vértices da face de cima são calculados usando a regra da mão
+	 * direita no sentido contrário aos ponteiros do relógio. Já os vértices
+	 * da face de baixo são calculados segundo a regra da mão direita no sentido
+	 * dos ponteiros do relógio. Ambas as faces são centradas em relação à
+	 * origem.
+	 *
+	 *   v1------v3
+	 *  /       / 
+	 * v2------v4
+	 *         
+	 *   v5------v6
+	 *  /       /
+	 * v7------v8
+	 *
+	 * @param x Coordenada x do vértice inicial (v1).
+	 * @param y Coordenada y do vértice inicial (v1).
+	 * @param z Coordenada z do vértice inicial (v1.
+	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
+	 *         ao plano XZ da caixa.
+	 */
 	std::vector<Vertex> generateFacesXZ(float x, float y, float z)
 	{
 		std::vector<Vertex> vertices;
 
-		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
+		// No total serão calculados 4 triângulos (2 para cada face)
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = z; j < dimZ; j += divZ) {
 
 				// Face de cima
-
+				
 				// Vértices v1-v2-v3
 				vertices.push_back(Vertex(i - centerX, y - centerY, j - centerZ));
 				vertices.push_back(Vertex(i - centerX, y - centerY, j + divZ - centerZ));
@@ -263,7 +263,7 @@ public:
 				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
 				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
-
+				
 				// Vértices v6-v8-v7
 				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j + divZ - centerZ));
@@ -276,32 +276,32 @@ public:
 
 
 	/**
-	* Calcula todos os vértices das duas faces parelelas ao plano YZ da caixa.
-	* Os vértices da face da direita são calculados usando a regra da mão
-	* direita no sentido contrário aos ponteiros do relógio. Já os vértices
-	* da face da esquerda são calculados segundo a regra da mão direita no
-	* sentido dos ponteiros do relógio. Ambas as faces são centradas em
-	* relação à origem.
-	*
-	*   v7      v2
-	*  /|      /|
-	* v6|     v3|
-	* | |     | |
-	* | |v5   |v1
-	* |/      |/
-	* v8      v4
-	*
-	* @param x Coordenada x do vértice inicial (v1).
-	* @param y Coordenada y do vértice inicial (v1).
-	* @param z Coordenada z do vértice inicial (v1).
-	* @return Vetor com as coordenadas dos vértices das duas faces paralelas
-	*         ao plano YZ da caixa.
-	*/
+	 * Calcula todos os vértices das duas faces parelelas ao plano YZ da caixa.
+	 * Os vértices da face da direita são calculados usando a regra da mão
+	 * direita no sentido contrário aos ponteiros do relógio. Já os vértices
+	 * da face da esquerda são calculados segundo a regra da mão direita no 
+	 * sentido dos ponteiros do relógio. Ambas as faces são centradas em 
+	 * relação à origem.
+	 *
+	 *   v7      v2
+	 *  /|      /|
+	 * v6|     v3|
+	 * | |     | |
+	 * | |v5   |v1
+	 * |/      |/
+	 * v8      v4
+	 *
+	 * @param x Coordenada x do vértice inicial (v1).
+	 * @param y Coordenada y do vértice inicial (v1).
+	 * @param z Coordenada z do vértice inicial (v1.
+	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
+	 *         ao plano YZ da caixa.
+	 */
 	std::vector<Vertex> generateFacesYZ(float x, float y, float z)
 	{
 		std::vector<Vertex> vertices;
 
-		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
+		// No total serão calculados 4 triângulos (2 para cada face)
 
 		for (float i = y; i < dimY; i += divY) {
 			for (float j = z; j < dimZ; j += divZ) {
@@ -338,30 +338,30 @@ public:
 
 
 	/**
-	* Destrutor por defeito.
-	*/
+	 * Destrutor por defeito.
+	 */
 	~BoxImpl(void) = default;
 };
 
 
 /**
-* Construtor por defeito.
-*/
+ * Construtor por defeito.
+ */
 Box::Box(void) : pimpl{ new BoxImpl() } {}
 
 
 /**
-* Construtor por parâmetros.
-*
-* @param dimX Dimensão da caixa no eixo dos xx.
-* @param dimY Dimensão da caixa no eixo dos yy.
-* @param dimZ Dimensão da caixa no eixo dos zz.
-* @param numDiv Número de divisões da caixa.
-*/
+ * Construtor por parâmetros.
+ *
+ * @param dimX Dimensão da caixa no eixo dos xx.
+ * @param dimY Dimensão da caixa no eixo dos yy.
+ * @param dimZ Dimensão da caixa no eixo dos zz.
+ * @param numDiv Número de divisões da caixa.
+ */
 Box::Box(float dimX, float dimY, float dimZ, size_t numDiv)
 {
 	// O número de divisões da caixa tem que ser superior a 1
-	numDiv = (numDiv < 1) ? 1 : numDiv;
+	numDiv = (numDiv < 1) ?	1 : numDiv;
 
 	// Não faz sentido uma dimensão ter um valor negativo
 	dimX = (dimX < 0) ? 0 : dimX;
@@ -375,20 +375,20 @@ Box::Box(float dimX, float dimY, float dimZ, size_t numDiv)
 
 
 /**
-* Construtor de cópia.
-*
-* @param b Objeto da classe Box a ser copiado.
-*/
+ * Construtor de cópia.
+ *
+ * @param b Objeto da classe Box a ser copiado.
+ */
 Box::Box(const Box& b)
 {
-	pimpl = new BoxImpl(b.pimpl->getDimX(), b.pimpl->getDimY(),
-		b.pimpl->getDimZ(), b.pimpl->getNumDiv());
+	pimpl = new BoxImpl(b.pimpl->getDimX(), b.pimpl->getDimY(), 
+		                b.pimpl->getDimZ(), b.pimpl->getNumDiv());
 }
 
 
 /**
-* Devolve o valor da dimensão da caixa no eixo dos xx.
-*/
+ * Devolve o valor da dimensão da caixa no eixo dos xx.
+ */
 float Box::getDimX(void)
 {
 	return pimpl->getDimX();
@@ -396,8 +396,8 @@ float Box::getDimX(void)
 
 
 /**
-* Devolve o valor da dimensão da caixa no eixo dos yy.
-*/
+ * Devolve o valor da dimensão da caixa no eixo dos yy.
+ */
 float Box::getDimY(void)
 {
 	return pimpl->getDimY();
@@ -405,8 +405,8 @@ float Box::getDimY(void)
 
 
 /**
-* Devolve o valor da dimensão da caixa no eixo dos zz.
-*/
+ * Devolve o valor da dimensão da caixa no eixo dos zz.
+ */
 float Box::getDimZ(void)
 {
 	return pimpl->getDimZ();
@@ -414,8 +414,8 @@ float Box::getDimZ(void)
 
 
 /**
-* Devolve o número de divisões da caixa.
-*/
+ * Devolve o número de divisões da caixa.
+ */
 size_t Box::getNumDiv(void)
 {
 	return pimpl->getNumDiv();
@@ -423,8 +423,8 @@ size_t Box::getNumDiv(void)
 
 
 /**
-* Altera o valor da dimensão da caixa no eixo dos xx.
-*/
+ * Altera o valor da dimensão da caixa no eixo dos xx.
+ */
 void Box::setDimX(float dimX)
 {
 	dimX = (dimX < 0) ? 0 : dimX;
@@ -433,8 +433,8 @@ void Box::setDimX(float dimX)
 
 
 /**
-* Altera o valor da dimensão da caixa no eixo dos yy.
-*/
+ * Altera o valor da dimensão da caixa no eixo dos yy.
+ */
 void Box::setDimY(float dimY)
 {
 	dimY = (dimY < 0) ? 0 : dimY;
@@ -443,8 +443,8 @@ void Box::setDimY(float dimY)
 
 
 /**
-* Altera o valor da dimensão da caixa no eixo dos zz.
-*/
+ * Altera o valor da dimensão da caixa no eixo dos zz.
+ */
 void Box::setDimZ(float dimZ)
 {
 	dimZ = (dimZ < 0) ? 0 : dimZ;
@@ -453,8 +453,8 @@ void Box::setDimZ(float dimZ)
 
 
 /**
-* Altera o número de divisões da caixa.
-*/
+ * Altera o número de divisões da caixa.
+ */
 void Box::setNumDiv(size_t numDiv)
 {
 	numDiv = (numDiv < 1) ? 1 : numDiv;
@@ -463,8 +463,8 @@ void Box::setNumDiv(size_t numDiv)
 
 
 /**
-* Método que cálcula todos as coordenadas de todos os pontos de uma caixa.
-*/
+ * Método que cálcula todos as coordenadas de todos os pontos de uma caixa.
+ */
 void Box::generateVertices(void)
 {
 	// Gera os vértices das faces XY, XZ e YZ
@@ -490,11 +490,11 @@ void Box::generateVertices(void)
 
 
 /**
-* Destrutor da classe Box.
-*
-* Liberta a memória ocupada pelo apontador para a parte privada da classe
-* Box.
-*/
+ * Destrutor da classe Box.
+ *
+ * Liberta a memória ocupada pelo apontador para a parte privada da classe
+ * Box.
+ */
 Box::~Box(void)
 {
 	if (pimpl != NULL) {
