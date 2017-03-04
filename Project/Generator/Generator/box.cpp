@@ -169,7 +169,7 @@ public:
 	 *
 	 * @param x Coordenada x do vértice inicial (v1).
 	 * @param y Coordenada y do vértice inicial (v1).
-	 * @param z Coordenada z do vértice inicial (v1.
+	 * @param z Coordenada z do vértice inicial (v1).
 	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
 	 *         ao plano XY da caixa.
 	 */
@@ -177,7 +177,7 @@ public:
 	{
 		std::vector<Vertex> vertices; 
 
-		// No total serão calculados 4 triângulos (2 para cada face)
+		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = y; j < dimY; j += divY) {
@@ -231,7 +231,7 @@ public:
 	 *
 	 * @param x Coordenada x do vértice inicial (v1).
 	 * @param y Coordenada y do vértice inicial (v1).
-	 * @param z Coordenada z do vértice inicial (v1.
+	 * @param z Coordenada z do vértice inicial (v1).
 	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
 	 *         ao plano XZ da caixa.
 	 */
@@ -239,7 +239,7 @@ public:
 	{
 		std::vector<Vertex> vertices;
 
-		// No total serão calculados 4 triângulos (2 para cada face)
+		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
 		for (float i = x; i < dimX; i += divX) {
 			for (float j = z; j < dimZ; j += divZ) {
@@ -293,7 +293,7 @@ public:
 	 *
 	 * @param x Coordenada x do vértice inicial (v1).
 	 * @param y Coordenada y do vértice inicial (v1).
-	 * @param z Coordenada z do vértice inicial (v1.
+	 * @param z Coordenada z do vértice inicial (v1).
 	 * @return Vetor com as coordenadas dos vértices das duas faces paralelas
 	 *         ao plano YZ da caixa.
 	 */
@@ -301,7 +301,7 @@ public:
 	{
 		std::vector<Vertex> vertices;
 
-		// No total serão calculados 4 triângulos (2 para cada face)
+		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
 		for (float i = y; i < dimY; i += divY) {
 			for (float j = z; j < dimZ; j += divZ) {
