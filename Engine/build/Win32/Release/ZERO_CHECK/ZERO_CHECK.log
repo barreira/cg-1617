@@ -1,8 +1,0 @@
-﻿  Checking Build System
-  CMake is re-running because E:/Uminho/CG/Engine/build/CMakeFiles/generate.stamp is out-of-date.
-    the file 'E:/Uminho/CG/Engine/CMakeLists.txt'
-    is newer than 'E:/Uminho/CG/Engine/build/CMakeFiles/generate.stamp.depend'
-    result='-1'
-  -- Configuring done
-  -- Generating done
-  -- Build files have been written to: E:/Uminho/CG/Engine/build
