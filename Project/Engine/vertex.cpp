@@ -16,8 +16,8 @@
 
 class Vertex::VertexImpl {
 	float x;  // Coordenada x de um vértice
-	float y;  // Coordenada x de um vértice
-	float z;  // Coordenada x de um vértice
+	float y;  // Coordenada y de um vértice
+	float z;  // Coordenada z de um vértice
 
 public:
 

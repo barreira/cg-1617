@@ -32,8 +32,8 @@
 #define CONE_ARGS 5
 
 // Dois argumentos do cone são valores inteiros (stacks e slices)
-// por convenção estes são arredondados para cima caso os valores recebidos
-// para estes sejam reais
+// Estes dois argumentos são recebidos como valores reias e posteriormente
+// convertidos para valores inteiros
 #define CONE_CEILS 2
 
 
@@ -48,8 +48,8 @@
 #define SPHERE_ARGS 4
 
 // Dois argumentos do cone são valores inteiros (stacks e slices)
-// por convenção estes são arredondados para cima caso os valores recebidos
-// para estes sejam reais
+// Estes dois argumentos são recebidos como valores reias e posteriormente
+// convertidos para valores inteiros
 #define SPHERE_CEILS 2
 
 
@@ -67,17 +67,17 @@ Primitive *p = NULL;           // Primitiva a ser guardada
 
 
 /**
- * Extrai de um vetor de strings os argumentos de uma primitiva e verifica se
- * são válidos. Ou seja, a última posição do vetor de strings deverá ser o
- * ficheiro onde se irá guardar a informação dos vértices. Os restantes valores
- * do vetor devem ser valores numéricos.
+ * Verifica se os argumentos fornecidos para o cálculo de uma primitiva
+ * são válidos. Ou seja, a última posição do vetor de strings deverá conter o
+ * nome ficheiro onde será guardada a informação dos vértices. As restantes 
+ * posições do vetor devem conter valores numéricos.
  *
  * @param params Lista de parâmetros de uma primitiva.
  * @param numParams Número de parâmetros válidos de uma primitiva.
  * @param ceilParams Número de parâmetros a serem convertidos para valores
  *                   inteiros arredondados para cima.
  *
- * @return Devolve falso se os parâmetros forem inválios e verdadeiro caso
+ * @return Devolve falso se os parâmetros forem inválios ou verdadeiro caso
  *         contrário. Os valores numéricos são guardados em arguments.
  */
 bool generateArgs(std::vector<std::string> params, const size_t numParams,
@@ -98,8 +98,7 @@ bool generateArgs(std::vector<std::string> params, const size_t numParams,
 			
 			float flt = 0;
 
-			// Se não se conseguir converter um valor então os parâmetros 
-			// são inválidos e o ciclo termina
+			// Se não se conseguir converter um valor o ciclo termina
 			if (!(ss >> flt)) {
 				ret = false;
 			}
@@ -135,7 +134,7 @@ bool generateBox(std::vector<std::string> params)
 	bool ret = false;
 
 	// Se foi dado como argumento o número de divisões da caixa, então
-	// este deve ser arredondado (caso seja necessário)
+	// este deve ser convertido para um valor inteiro
 	size_t boxCeils = (params.size() == BOX_ARGS) ? 1 : 0;
 
 	ret = generateArgs(params, params.size(), boxCeils);
@@ -222,13 +221,13 @@ bool generateSphere(std::vector<std::string> params)
 
 
 /**
- * Testa que tipo de primitiva é para ser criada.
+ * Verifica o tipo de primitiva a ser gerada.
  * Caso o tipo de primitiva seja válido então é feita a validade dos seus 
- * parâmetros e respetiva geração de vértices.
+ * parâmetros e respetiva geração dos seus vértices.
  *
  * @params primitive Tipo de primitiva.
  * @params Parâmetros de uma primitiva.
- * @return Falso caso o tipo de primitiva seja inválido e verdadeiro caso
+ * @return Falso caso o tipo de primitiva seja inválido ou verdadeiro caso
  *         contrário.
  */
 bool generatePrimitive(std::string primitive, std::vector<std::string> params)
@@ -264,7 +263,7 @@ int main(int argc, char** argv)
 	std::ofstream file;
 
 	// Começa-se por testar se o número de parâmetros recebidos é
-	// superior ou igual ao mínimo de parâmetros de uma primitiva
+	// superior ou igual ao número mínimo de parâmetros de uma primitiva
 	if (argc >= MIN_PARAMS) {
 
 		// O nome da primitiva corresponde ao primeiro parâmetro
@@ -285,7 +284,7 @@ int main(int argc, char** argv)
 		ok = generatePrimitive(primitive, params);
 	} 
 
-	// Se a primitiva foi bem gerada então armazenam-se os seus vértices no
+	// Se a primitiva foi bem gerada então, armazenam-se os seus vértices no
 	// ficheiro especificado como argumento do programa
 	if (ok) {
 		file.open(fileName);

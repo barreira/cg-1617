@@ -70,6 +70,29 @@ size_t failedModels = 0;      // Número total de modelos presentes no ficheiro
                               // algum motivo
 
 
+float lx = 0;                 // Posição para onde se está a olhar no eixo dos
+                              // xx
+float px = 0;                 // Posição da câmera no eixo dos xx
+
+float ly = 0;                 // Posição para onde se está a olhar no eixo dos
+                              // yy
+float py = 0;                 // Posição da câmera no eixo dos yy
+
+float lz = 0;                 // Posição para onde se está a olhar no eixo dos
+                              // zz
+float pz = 15;                // Posição da câmera no eixo dos zz
+
+float cameraAngleX = 0;       // Ângulo da câmera no eixo dos xx
+float deltaAngleX = 0;        // Ângulo para cálculos auxilares
+int xOrigin = -1;             // Posição x do rato
+
+float cameraAngleY = 0;       // Ângulo da câmera no eixo dos yy
+float deltaAngleY = 0;        // Ângulo para cálculos auxiliares
+int yOrigin = -1;             // Posição y do rato
+
+const float cameraV = 0.005f; // Velocidade de rotação da câmera
+
+
 /**
  * Função que desenha todos os vértices de uma primitiva à custa de 
  * triângulos.
@@ -124,8 +147,8 @@ void renderScene(void)
 
 	// set the camera
 	glLoadIdentity();
-	gluLookAt(10.0, 10.0, 10.0,
-		      0.0, 0.0, 0.0,
+	gluLookAt(px, py, pz,
+		      px + lx, py + ly, pz + lz,
 		      0.0f, 1.0f, 0.0f);
 
 
@@ -276,6 +299,59 @@ void processMenuEvents(int option)
 
 
 /**
+ * Handler para o movimento do rato.
+ */
+void mouseMove(int x, int y) 
+{
+	// Apenas se roda a câmera quando o botão do lado esquerdo do rato
+	// está a ser pressionado
+	if (xOrigin >= 0) {
+
+		// O valor  
+		deltaAngleX = (x - xOrigin) * vCamera;
+
+		// Atualiza-se a direção da câmera
+		lx = sin(cameraAngleX + deltaAngleX);
+		lz = -cos(cameraAngleX + deltaAngleX);
+	}
+
+	if (yOrigin >= 0) {
+		deltaAngleY = (y - yOrigin) * vCamera;
+
+		ly = sin(cameraAngleY + deltaAngleY);
+	}
+
+	glutPostRedisplay();
+}
+
+
+/**
+ * Handler para os eventos do rato.
+ * Atualiza o angulo x e y da câmera.
+ */
+void mouseButton(int button, int state, int x, int y) 
+{
+	// A animação começa apenas quando o botão do lado esquerdo do rato é
+	// pressionado
+	if (button == GLUT_LEFT_BUTTON) {
+
+		// Depois de o botão ser libertado atualizam-se os ângulos da câmera
+		if (state == GLUT_UP) {
+			cameraAngleX += deltaAngleX;
+			xOrigin = -1;
+			
+			cameraAngleY += deltaAngleY;
+			yOrigin = -1;
+		}
+		else {
+			xOrigin = x;
+			yOrigin = y;
+		}
+	}
+}
+
+
+/**
  * Função que inicializa todos os componentes da glut
  */
 void initGlut(int argc, char **argv)
@@ -312,8 +388,14 @@ void initGlut(int argc, char **argv)
 	glutAddMenuEntry("Pink", PINK);
 	glutAddMenuEntry("White", WHITE);
 
-	// O menu é acionado sempre que se pressiona o butão direito do ratp
+	// O menu é acionado sempre que se pressiona o botão direito do rato
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+
+	// Funções de tratamento dos eventos do rato
+	glutMouseFunc(mouseButton);
+	glutMotionFunc(mouseMove);
+
 
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
