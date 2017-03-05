@@ -29,5 +29,5 @@ Arrow keys - Roda a primitiva em torno do eixo dos xx e dos zz
 	
 Botão do lado direito do rato - Faz surgir um pequeno menu com opções de desenho da primitiva.
 
-Botão do lado esquerdo do rato - Permite mudar a perspetiva da câmera com a movimentação
+Botão do lado esquerdo do rato - Permite mudar a perspetiva da câmara com a movimentação
                                                do rato

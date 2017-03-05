@@ -72,25 +72,25 @@ size_t failedModels = 0;      // Número total de modelos presentes no ficheiro
 
 float lx = 0;                 // Posição para onde se está a olhar no eixo dos
                               // xx
-float px = 0;                 // Posição da câmera no eixo dos xx
+float px = 0;                 // Posição da câmara no eixo dos xx
 
 float ly = 0;                 // Posição para onde se está a olhar no eixo dos
                               // yy
-float py = 0;                 // Posição da câmera no eixo dos yy
+float py = 0;                 // Posição da câmara no eixo dos yy
 
 float lz = 0;                 // Posição para onde se está a olhar no eixo dos
                               // zz
-float pz = 15;                // Posição da câmera no eixo dos zz
+float pz = 15;                // Posição da câmara no eixo dos zz
 
-float cameraAngleX = 0;       // Ângulo da câmera no eixo dos xx
+float cameraAngleX = 0;       // Ângulo da câmara no eixo dos xx
 float deltaAngleX = 0;        // Ângulo para cálculos auxilares
 int xOrigin = -1;             // Posição x do rato
 
-float cameraAngleY = 0;       // Ângulo da câmera no eixo dos yy
+float cameraAngleY = 0;       // Ângulo da câmara no eixo dos yy
 float deltaAngleY = 0;        // Ângulo para cálculos auxiliares
 int yOrigin = -1;             // Posição y do rato
 
-const float cameraV = 0.005f; // Velocidade de rotação da câmera
+const float cameraV = 0.005f; // Velocidade de rotação da câmara
 
 
 /**
@@ -303,14 +303,14 @@ void processMenuEvents(int option)
  */
 void mouseMove(int x, int y) 
 {
-	// Apenas se roda a câmera quando o botão do lado esquerdo do rato
+	// Apenas se roda a câmara quando o botão do lado esquerdo do rato
 	// está a ser pressionado
 	if (xOrigin >= 0) {
 
 		// O valor  
 		deltaAngleX = (x - xOrigin) * vCamera;
 
-		// Atualiza-se a direção da câmera
+		// Atualiza-se a direção da câmara
 		lx = sin(cameraAngleX + deltaAngleX);
 		lz = -cos(cameraAngleX + deltaAngleX);
 	}
@@ -327,7 +327,7 @@ void mouseMove(int x, int y)
 
 /**
  * Handler para os eventos do rato.
- * Atualiza o angulo x e y da câmera.
+ * Atualiza o angulo x e y da câmara.
  */
 void mouseButton(int button, int state, int x, int y) 
 {
@@ -335,7 +335,7 @@ void mouseButton(int button, int state, int x, int y)
 	// pressionado
 	if (button == GLUT_LEFT_BUTTON) {
 
-		// Depois de o botão ser libertado atualizam-se os ângulos da câmera
+		// Depois de o botão ser libertado atualizam-se os ângulos da câmara
 		if (state == GLUT_UP) {
 			cameraAngleX += deltaAngleX;
 			xOrigin = -1;

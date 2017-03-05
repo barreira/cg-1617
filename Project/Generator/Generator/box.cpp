@@ -159,13 +159,13 @@ public:
 	 * dos ponteiros do relógio. Ambas as faces são centradas em relação à
 	 * origem.
 	 *
-	 *   v6----- v7
+	 *   v8----- v6
      *   |       |
-     * v3------v2|
+     * v4------v3|
      * | |     | |
-     * | |v5---|-|v8
+     * | |v5---|-|v7
      * |       | 
-     * v1------v4
+     * v1------v2
 	 *
 	 * @param x Coordenada x do vértice inicial (v1).
 	 * @param y Coordenada y do vértice inicial (v1).
@@ -189,7 +189,7 @@ public:
 				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
 
-				// Vértices v1-v4-v2
+				// Vértices v1-v3-v4
 				vertices.push_back(Vertex(i - centerX, j - centerY, z - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
 				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - centerZ));
@@ -202,7 +202,7 @@ public:
 				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - dimZ - centerZ));
 
-				// Vértices v5-v7-v8
+				// Vértices v5-v8-v6
 				vertices.push_back(Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
 				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - dimZ - centerZ));
 				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
@@ -365,7 +365,7 @@ Box::Box(float dimX, float dimY, float dimZ, size_t numDiv)
 
 	// Não faz sentido uma dimensão ter um valor negativo
 	dimX = (dimX < 0) ? 0 : dimX;
-	dimY = (dimY < 0) ? 0 : dimZ;
+	dimY = (dimY < 0) ? 0 : dimY;
 	dimZ = (dimZ < 0) ? 0 : dimZ;
 
 	pimpl = new BoxImpl(dimX, dimY, dimZ, numDiv);
