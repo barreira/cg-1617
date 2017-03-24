@@ -6,6 +6,9 @@
  * @author Carlos Pereira - A61887
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
+ *
+ * @version 24-03-2017 
+ *          Controlo de erros dos ficheiros xml.
  */
 
 
@@ -23,6 +26,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <stack>
+
 #include "tinyxml.h"
 #include "vertex.h"
 #include "operation.h"
@@ -113,6 +118,13 @@ std::vector<Operation*> operations;
 
 void parseTag(TiXmlElement*);
 
+
+void clearOperations(void)
+{
+	for (size_t i = 0; i < operations.size(); i++) {
+		delete operations.at(i);
+	}
+}
 
 
 
@@ -438,6 +450,40 @@ void initGlut(int argc, char **argv)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/****************************************************************************
+ * PARSE FUNCTIONS                                                          *
+ ****************************************************************************/
+
+
+bool invalidDoc = false;
+std::stack<bool> modelsInGroup;
+std::stack<size_t> numModelsTags;
+
+
+void addModelsInGroup(void)
+{
+	size_t aux = numModelsTags.top();
+
+	numModelsTags.pop();
+	numModelsTags.push(++aux);
+	modelsInGroup.pop();
+	modelsInGroup.push(true);
+}
+
+
+
 /**
  * Abre o ficheiro que contém um conjunto de vértices de uma primitiva.
  * Este ficheiro é aberto apenas uma vez.
@@ -454,7 +500,6 @@ std::vector<Vertex> readVertices(const char* fileName)
 	                       // numéricos
 
 	std::vector<Vertex> vertices;
-
 
 	float x = 0;  // Coordenada x de um vértice
 	float y = 0;  // Coordenada y de um vértice
@@ -496,9 +541,25 @@ std::vector<Vertex> readVertices(const char* fileName)
 void parseModel(TiXmlElement* model)
 {
 	std::vector<Vertex> vertices;
+	size_t numFiles = 0;
 
-	for (TiXmlAttribute* a = model->FirstAttribute(); a != NULL; a = a->Next()) {
-		vertices = readVertices(a->Value());
+	numModels++;
+
+	for (TiXmlAttribute* a = model->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
+		std::string attName(a->Name());
+
+		if (attName.compare("file") == 0) {
+			if (numFiles > 0) {
+				invalidDoc = true;
+			}
+			else {
+				vertices = readVertices(a->Value());
+				numFiles++;
+			}
+		}
+		else {
+			invalidDoc = true;
+		}
 	}
 
 	operations.push_back(new TrianglesDrawing(vertices));
@@ -507,14 +568,14 @@ void parseModel(TiXmlElement* model)
 
 void parseModels(TiXmlElement* models)
 {
-	for (TiXmlElement* model = models->FirstChildElement(); model != NULL; model = model->NextSiblingElement()) {
+	for (TiXmlElement* model = models->FirstChildElement(); model != NULL && invalidDoc == false; model = model->NextSiblingElement()) {
 		std::string modelName(model->Value());
 
 		if (modelName.compare(MODEL) == 0) {
 			parseModel(model);
 		}
 		else {
-			// erro 
+			invalidDoc = true;
 		}
 	}
 }
@@ -524,9 +585,12 @@ void parseGroup(TiXmlElement* group)
 {
 	operations.push_back(new PushMatrix());
 
-	for (TiXmlElement* tag = group->FirstChildElement(); tag != NULL; tag = tag->NextSiblingElement()) {
+	for (TiXmlElement* tag = group->FirstChildElement(); tag != NULL && invalidDoc == false; tag = tag->NextSiblingElement()) {
 		parseTag(tag);
 	}
+
+	numModelsTags.pop();
+	modelsInGroup.pop();
 
 	operations.push_back(new PopMatrix());
 }
@@ -539,7 +603,7 @@ void parseTranslate(TiXmlElement* translate)
 	float z = 0;
 	std::stringstream ss("");
 	
-	for (TiXmlAttribute* a = translate->FirstAttribute(); a; a = a->Next()) {
+	for (TiXmlAttribute* a = translate->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
 		std::string attName(a->Name());
 		ss.str(a->Value());
 
@@ -551,6 +615,9 @@ void parseTranslate(TiXmlElement* translate)
 		}
 		else if (attName.compare("Z") == 0) {
 			ss >> z;
+		}
+		else {
+			invalidDoc = true;
 		}
 
 		ss.str("");
@@ -569,7 +636,7 @@ void parseRotate(TiXmlElement* rotate)
 	float axisZ = 0;
 	std::stringstream ss("");
 
-	for (TiXmlAttribute* a = rotate->FirstAttribute(); a; a = a->Next()) {
+	for (TiXmlAttribute* a = rotate->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
 		std::string attName(a->Name());
 		ss.str(a->Value());
 
@@ -581,6 +648,9 @@ void parseRotate(TiXmlElement* rotate)
 		}
 		else if (attName.compare("axisZ") == 0) {
 			ss >> axisZ;
+		}
+		else {
+			invalidDoc = true;
 		}
 
 		ss.str("");
@@ -598,7 +668,7 @@ void parseScale(TiXmlElement* scale)
 	float z = 0;
 	std::stringstream ss("");
 
-	for (TiXmlAttribute* a = scale->FirstAttribute(); a; a = a->Next()) {
+	for (TiXmlAttribute* a = scale->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
 		std::string attName(a->Name());
 		ss.str(a->Value());
 
@@ -610,6 +680,9 @@ void parseScale(TiXmlElement* scale)
 		}
 		else if (attName.compare("Z") == 0) {
 			ss >> z;
+		}
+		else {
+			invalidDoc = true;
 		}
 
 		ss.str("");
@@ -626,27 +699,48 @@ void parseTag(TiXmlElement* tag)
 
 	// Testa se existe uma tag chamada model
 	if (tagName.compare(MODELS) == 0) {
-		parseModels(tag);
-		//std::cout << "Invalid document!" << std::endl;
-		//break;
+		if (numModelsTags.top() >= 1) {
+			invalidDoc = true;
+		}
+		else {
+			addModelsInGroup();
+			parseModels(tag);
+		}
 	}
 	else if (tagName.compare(MODEL) == 0) {
 		parseModel(tag);
 	}
 	else if (tagName.compare(GROUP) == 0) {
+		modelsInGroup.push(false);
+		numModelsTags.push(0);
 		parseGroup(tag);
 	}
 	else if (tagName.compare(TRANSLATE) == 0) {
-		parseTranslate(tag);
+		if (modelsInGroup.top() == true) {
+			invalidDoc = true;
+		}
+		else {
+			parseTranslate(tag);
+		}
 	}
 	else if (tagName.compare(ROTATE) == 0) {
-		parseRotate(tag);
+		if (modelsInGroup.top() == true) {
+			invalidDoc = true;
+		}
+		else {
+			parseRotate(tag);
+		}
 	}
 	else if (tagName.compare(SCALE) == 0) {
-		parseScale(tag);
+		if (modelsInGroup.top() == true) {
+			invalidDoc = true;
+		}
+		else {
+			parseScale(tag);
+		}
 	}
 	else {
-		// erro
+		invalidDoc = true;
 	}
 }
 
@@ -663,48 +757,17 @@ void parseDocument(void)
 
 	// Testa se existe uma tag chamada scene
 	if (scene == NULL || strcmp(scene->Value(), SCENE) != 0) {
+		invalidDoc = true;
 		std::cout << "Failed to load file. No scene element!" << std::endl;
-		doc.Clear();
 		failedModels++;
 	}
 	else {
+		numModelsTags.push(0);
+		modelsInGroup.push(false);
 
 		// Processa cada um dos modelos
-		for (TiXmlElement* tag = scene->FirstChildElement(); tag != NULL; tag = tag->NextSiblingElement()) {
+		for (TiXmlElement* tag = scene->FirstChildElement(); tag != NULL && invalidDoc == false; tag = tag->NextSiblingElement()) {
 			parseTag(tag);
-
-			/*std::string elemName = elem->Value();
-
-			// Testa se existe uma tag chamada model
-			if (elemName.compare(MODELS) == 0) {
-				parseModels(elem);
-				//std::cout << "Invalid document!" << std::endl;
-				//break;
-			}
-			else if (elemName)
-			else if (elemName.compare(GROUP) == 0) {
-				parseGroup(elem);
-			}
-			else if (elemName.compare(TRANSLATE) == 0) {
-				parseTranslate(elem);
-			}
-			else if (elemName.compare(ROTATE) == 0) {
-				parseRotate(elem);
-			}
-			else if (elemName.compare(SCALE) == 0) {
-				parseScale(elem);
-			}
-			else {
-				//erro
-			}*/
-
-			/*
-			numModels++;
-
-			// Processa cada um dos atributos associados à tag model
-			for (TiXmlAttribute* a = elem->FirstAttribute(); a; a = a->Next()) {
-				readVertices(a->Value());
-			}*/
 		}
 	}
 }
@@ -756,19 +819,23 @@ int main(int argc, char **argv)
 
 		// Apenas se inicia a glut se todos os modelos foram processados com
 		// sucesso
-		//if (failedModels < numModels) {
-
-			// Os ficheiros são apenas lidos uma vez
+		if (failedModels < numModels && invalidDoc == false) {
 			initGlut(argc, argv);
-		//}
-		//else {
-			//std::cout << "Could not process the models!" << std::endl;
-		//}
+		}
+		else if (failedModels >= numModels && invalidDoc == false) {
+			std::cout << "Could not process the models!" << std::endl;
+			clearOperations();
+		}
+		else {
+			std::cout << "Invalid document!" << std::endl;
+			clearOperations();
+		}
 	}
 	else {
 		std::cout << "Could not open the xml file!" << std::endl;
 	}
 
+	doc.Clear();
 
 	std::cout << "Press any key to continue..." << std::endl;
 
