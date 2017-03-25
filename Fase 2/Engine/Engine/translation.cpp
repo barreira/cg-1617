@@ -199,7 +199,7 @@ void Translation::setZ(float z)
 }
 
 
-void Translation::compute(void)
+void Translation::execute(void)
 {
 	glTranslatef(pimpl->getX(), pimpl->getY(), pimpl->getZ());
 }

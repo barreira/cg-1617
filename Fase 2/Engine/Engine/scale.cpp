@@ -199,7 +199,7 @@ void Scale::setZ(float z)
 }
 
 
-void Scale::compute(void)
+void Scale::execute(void)
 {
 	glScalef(pimpl->getX(), pimpl->getY(), pimpl->getZ());
 }

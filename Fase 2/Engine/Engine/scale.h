@@ -16,10 +16,10 @@
 #ifndef scale_h
 #define scale_h
 
-#include "operation.h"
+#include "glOperation.h"
 
 
-class Scale : public Operation {
+class Scale : public GLOperation {
 	class ScaleImpl;   // Implementação da classe Scale
 	ScaleImpl* pimpl;  // Apontador para a implementação da classe Scale
 
@@ -85,7 +85,7 @@ public:
 	void setZ(float);
 
 
-	void compute(void);
+	void execute(void);
 
 
 	/**

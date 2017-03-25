@@ -17,10 +17,10 @@
 #ifndef rotation_h
 #define rotation_h
 
-#include "operation.h"
+#include "glOperation.h"
 
 
-class Rotation : public Operation {
+class Rotation : public GLOperation {
 	class RotationImpl;   // Implementação da classe Rotation
 	RotationImpl* pimpl;  // Apontador para a implementação da classe Rotation
 
@@ -99,7 +99,7 @@ public:
 	void setZ(float);
 
 
-	void compute(void);
+	void execute(void);
 
 
 	/**

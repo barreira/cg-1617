@@ -22,11 +22,11 @@
 
 
 #include <vector>
-#include "operation.h"
+#include "glOperation.h"
 #include "vertex.h"
 
 
-class TrianglesDrawing : public Operation {
+class TrianglesDrawing : public GLOperation {
 	class TrianglesDrawingImpl;   // Implementação da classe TrianglesDrawing
 	TrianglesDrawingImpl* pimpl;  // Apontador para a implementação da classe 
 	                              // TrianglesDrawing
@@ -68,7 +68,7 @@ public:
 	void setVertices(std::vector<Vertex>);
 
 
-	void compute(void);
+	void execute(void);
 
 
 	/**

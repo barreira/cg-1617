@@ -240,7 +240,7 @@ void Rotation::setZ(float z)
 }
 
 
-void Rotation::compute(void)
+void Rotation::execute(void)
 {
 	glRotatef(pimpl->getAngle(), pimpl->getX(), pimpl->getY(), pimpl->getZ());
 }

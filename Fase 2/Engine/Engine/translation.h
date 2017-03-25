@@ -15,10 +15,10 @@
 #ifndef translation_h
 #define translation_h
 
-#include "operation.h"
+#include "glOperation.h"
 
 
-class Translation : public Operation {
+class Translation : public GLOperation {
 	class TranslationImpl;   // Implementação da classe Translation
 	TranslationImpl* pimpl;  // Apontador para a implementação da classe 
 	                         // Translation
@@ -85,7 +85,7 @@ public:
 	void setZ(float);
 
 
-	void compute(void);
+	void execute(void);
 
 
 	/**

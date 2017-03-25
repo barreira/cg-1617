@@ -7,8 +7,8 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 24-03-2017 
- *          Controlo de erros dos ficheiros xml.
+ * @version 25-03-2017 
+ *          Organização do parsing.
  */
 
 
@@ -24,31 +24,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
-#include <vector>
-#include <stack>
-
-#include "tinyxml.h"
-#include "vertex.h"
-#include "operation.h"
-#include "popMatrix.h"
-#include "pushMatrix.h"
-#include "rotation.h"
-#include "scale.h"
-#include "translation.h"
-#include "trianglesDrawing.h"
+#include <cmath>
+#include "xmlParser.h"
 
 
-#define FILE "demos/test.xml" // Ficheiro xml por defeito
-
-// Tags do ficheiro xml
-#define SCENE "scene"
-#define MODEL "model"
-#define MODELS "models"
-#define GROUP "group"
-#define TRANSLATE "translate"
-#define ROTATE "rotation"
-#define SCALE "scale"
+#define XML_FILE "demos/test.xml" // Ficheiro xml por defeito
 
 
 // Definição dos valores para o menu
@@ -61,6 +41,9 @@
 #define PURPLE 6 
 #define PINK 7
 #define WHITE 8
+
+
+const float PI = 3.14159265358979323846f;
 
 
 float xPos = 0;    // Posição x
@@ -77,80 +60,42 @@ float blue = 1;
 // Por defeito o modo de desenho é wired
 GLenum mode = GL_LINE;
 
-//std::vector<Vertex> vertices; // Vetor de vértices
-TiXmlDocument doc;            // Documento de xml
+float lx = 0;                  // Posição para onde se está a olhar no eixo dos
+                               // xx
+float px = 0;                  // Posição da câmara no eixo dos xx
 
-size_t numModels = 0;         // Número total de modelos presentes no 
-                              // ficheiro xml
-size_t failedModels = 0;      // Número total de modelos presentes no ficheiro
-                              // xml que não conseguiram ser processados por
-                              // algum motivo
+float ly = 0;                  // Posição para onde se está a olhar no eixo dos
+                               // yy
+float py = 0;                  // Posição da câmara no eixo dos yy
 
+float lz = -1;                 // Posição para onde se está a olhar no eixo dos
+                               // zz
+float pz = 15;                 // Posição da câmara no eixo dos zz
 
-float lx = 0;                 // Posição para onde se está a olhar no eixo dos
-                              // xx
-float px = 0;                 // Posição da câmara no eixo dos xx
+float cameraAngleX = 0;        // Ângulo da câmara no eixo dos xx
+float deltaAngleX = 0;         // Ângulo para cálculos auxilares
+int xOrigin = -1;              // Posição x do rato
 
-float ly = 0;                 // Posição para onde se está a olhar no eixo dos
-                              // yy
-float py = 0;                 // Posição da câmara no eixo dos yy
+float cameraAngleY = 0;        // Ângulo da câmara no eixo dos yy
+float deltaAngleY = 0;         // Ângulo para cálculos auxiliares
+int yOrigin = -1;              // Posição y do rato
 
-float lz = -1;                // Posição para onde se está a olhar no eixo dos
-                              // zz
-float pz = 15;                // Posição da câmara no eixo dos zz
-
-float cameraAngleX = 0;       // Ângulo da câmara no eixo dos xx
-float deltaAngleX = 0;        // Ângulo para cálculos auxilares
-int xOrigin = -1;             // Posição x do rato
-
-float cameraAngleY = 0;       // Ângulo da câmara no eixo dos yy
-float deltaAngleY = 0;        // Ângulo para cálculos auxiliares
-int yOrigin = -1;             // Posição y do rato
-
-const float vCamera = 0.005f; // Velocidade de rotação da câmara
+const float vCameraX = 0.003f; // Velocidade de rotação da câmara
+const float vCameraY = 0.5f;   
 
 
-
-
-
-
-std::vector<Operation*> operations;
-
-void parseTag(TiXmlElement*);
-
-
-void clearOperations(void)
-{
-	for (size_t i = 0; i < operations.size(); i++) {
-		delete operations.at(i);
-	}
-}
-
+std::vector<GLOperation*> glOperations;
 
 
 /**
  * Função que desenha todos os vértices de uma primitiva à custa de 
  * triângulos.
  */
-
 void drawScene(void)
 {	
-
-	for (size_t i = 0; i < operations.size(); i++) {
-		operations.at(i)->compute();
+	for (size_t i = 0; i < glOperations.size(); i++) {
+		glOperations.at(i)->execute();
 	}
-	/*
-	glBegin(GL_TRIANGLES);
-	glColor3f(red, green, blue);
-
-	for (size_t i = 0; i < vertices.size(); i++) {
-		glVertex3f(vertices.at(i).getX(),
-				   vertices.at(i).getY(),
-				   vertices.at(i).getZ());
-	}
-
-	glEnd();
-	*/
 }
 
 
@@ -350,7 +295,7 @@ void mouseMove(int x, int y)
 	if (xOrigin >= 0) {
 
 		// O valor  
-		deltaAngleX = (x - xOrigin) * vCamera;
+		deltaAngleX = (x - xOrigin) * vCameraX;
 
 		// Atualiza-se a direção da câmara
 		lx = sin(cameraAngleX + deltaAngleX);
@@ -358,9 +303,17 @@ void mouseMove(int x, int y)
 	}
 
 	if (yOrigin >= 0) {
-		deltaAngleY = (y - yOrigin) * vCamera;
+		deltaAngleY = (y - yOrigin) * vCameraY;
 
-		ly = sin(cameraAngleY + deltaAngleY);
+		if (cameraAngleY + deltaAngleY >= 90.0) {
+			ly = tan(89.0 * PI / 180);
+		}
+		else if (cameraAngleY + deltaAngleY <= -90.0) {
+			ly = tan(-89.0 * PI / 180);
+		}
+		else {
+			ly = tan((cameraAngleY + deltaAngleY) * PI / 180);
+		}
 	}
 
 	glutPostRedisplay();
@@ -383,6 +336,15 @@ void mouseButton(int button, int state, int x, int y)
 			xOrigin = -1;
 			
 			cameraAngleY += deltaAngleY;
+
+			/*
+			if (cameraAngleY >= 90.0) {
+				cameraAngleY = 89.0;
+			}
+			else if (cameraAngleY <= -90.0) {
+				cameraAngleY = -89.0;
+			}*/
+
 			yOrigin = -1;
 		}
 		else {
@@ -450,349 +412,6 @@ void initGlut(int argc, char **argv)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-/****************************************************************************
- * PARSE FUNCTIONS                                                          *
- ****************************************************************************/
-
-
-bool invalidDoc = false;
-std::stack<bool> modelsInGroup;
-std::stack<size_t> numModelsTags;
-
-
-void addModelsInGroup(void)
-{
-	size_t aux = numModelsTags.top();
-
-	numModelsTags.pop();
-	numModelsTags.push(++aux);
-	modelsInGroup.pop();
-	modelsInGroup.push(true);
-}
-
-
-
-/**
- * Abre o ficheiro que contém um conjunto de vértices de uma primitiva.
- * Este ficheiro é aberto apenas uma vez.
- *
- * @param fileName Nome do ficheiro.
- */
-std::vector<Vertex> readVertices(const char* fileName)
-{
-	std::fstream file;     // Estrutura para abertura de um ficheiro em modo
-	                       // de leitura
-	std::string line;      // String auxiliar que irá corresponder a uma linha
-	                       // do ficheiro
-	std::stringstream ss;  // String auxiliar para converter texto em valores
-	                       // numéricos
-
-	std::vector<Vertex> vertices;
-
-	float x = 0;  // Coordenada x de um vértice
-	float y = 0;  // Coordenada y de um vértice
-	float z = 0;  // Coordenada z de um vértice
-
-	file.open(fileName);
-
-	// Testa se o ficheiro foi bem aberto e inicia a sua leitura
-	if (file.is_open()) {
-
-		// Lê linha a linha
-		while (getline(file, line)) {
-			std::stringstream ss(line);
-
-			// Converte uma linha para as coordenadas x, y e z
-			ss >> x >> y >> z;
-
-			// Adiciona as coordenadas ao vetor de vértices
-			vertices.push_back(Vertex(x, y, z));
-
-			// Limpa a string auxiliar de conversão
-			ss.str("");
-		}
-
-		file.close();
-	}
-	else {
-		std::cout << "Could not read file " << fileName << "!" << std::endl;
-
-		// Se não se conseguiu abrir bem o ficheiro então o módulo atual conta
-		// como um módulo que teve um problema
-		failedModels++;
-	}
-
-	return vertices;
-}
-
-
-void parseModel(TiXmlElement* model)
-{
-	std::vector<Vertex> vertices;
-	size_t numFiles = 0;
-
-	numModels++;
-
-	for (TiXmlAttribute* a = model->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
-		std::string attName(a->Name());
-
-		if (attName.compare("file") == 0) {
-			if (numFiles > 0) {
-				invalidDoc = true;
-			}
-			else {
-				vertices = readVertices(a->Value());
-				numFiles++;
-			}
-		}
-		else {
-			invalidDoc = true;
-		}
-	}
-
-	operations.push_back(new TrianglesDrawing(vertices));
-}
-
-
-void parseModels(TiXmlElement* models)
-{
-	for (TiXmlElement* model = models->FirstChildElement(); model != NULL && invalidDoc == false; model = model->NextSiblingElement()) {
-		std::string modelName(model->Value());
-
-		if (modelName.compare(MODEL) == 0) {
-			parseModel(model);
-		}
-		else {
-			invalidDoc = true;
-		}
-	}
-}
-
-
-void parseGroup(TiXmlElement* group)
-{
-	operations.push_back(new PushMatrix());
-
-	for (TiXmlElement* tag = group->FirstChildElement(); tag != NULL && invalidDoc == false; tag = tag->NextSiblingElement()) {
-		parseTag(tag);
-	}
-
-	numModelsTags.pop();
-	modelsInGroup.pop();
-
-	operations.push_back(new PopMatrix());
-}
-
-
-void parseTranslate(TiXmlElement* translate)
-{
-	float x = 0;
-	float y = 0;
-	float z = 0;
-	std::stringstream ss("");
-	
-	for (TiXmlAttribute* a = translate->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
-		std::string attName(a->Name());
-		ss.str(a->Value());
-
-		if (attName.compare("X") == 0) {
-			ss >> x;
-		}
-		else if (attName.compare("Y") == 0) {
-			ss >> y;
-		}
-		else if (attName.compare("Z") == 0) {
-			ss >> z;
-		}
-		else {
-			invalidDoc = true;
-		}
-
-		ss.str("");
-		attName.clear();
-	}
-
-	operations.push_back(new Translation(x, y, z));
-}
-
-
-void parseRotate(TiXmlElement* rotate)
-{
-	float angle = 0;
-	float axisX = 0;
-	float axisY = 0;
-	float axisZ = 0;
-	std::stringstream ss("");
-
-	for (TiXmlAttribute* a = rotate->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
-		std::string attName(a->Name());
-		ss.str(a->Value());
-
-		if (attName.compare("axisX") == 0) {
-			ss >> axisX;
-		}
-		else if (attName.compare("axisY") == 0) {
-			ss >> axisY;
-		}
-		else if (attName.compare("axisZ") == 0) {
-			ss >> axisZ;
-		}
-		else {
-			invalidDoc = true;
-		}
-
-		ss.str("");
-		attName.clear();
-	}
-
-	operations.push_back(new Rotation(angle, axisX, axisY, axisZ));
-}
-
-
-void parseScale(TiXmlElement* scale)
-{
-	float x = 0;
-	float y = 0;
-	float z = 0;
-	std::stringstream ss("");
-
-	for (TiXmlAttribute* a = scale->FirstAttribute(); a != NULL && invalidDoc == false; a = a->Next()) {
-		std::string attName(a->Name());
-		ss.str(a->Value());
-
-		if (attName.compare("X") == 0) {
-			ss >> x;
-		}
-		else if (attName.compare("Y") == 0) {
-			ss >> y;
-		}
-		else if (attName.compare("Z") == 0) {
-			ss >> z;
-		}
-		else {
-			invalidDoc = true;
-		}
-
-		ss.str("");
-		attName.clear();
-	}
-
-	operations.push_back(new Scale(x, y, z));
-}
-
-
-void parseTag(TiXmlElement* tag)
-{
-	std::string tagName = tag->Value();
-
-	// Testa se existe uma tag chamada model
-	if (tagName.compare(MODELS) == 0) {
-		if (numModelsTags.top() >= 1) {
-			invalidDoc = true;
-		}
-		else {
-			addModelsInGroup();
-			parseModels(tag);
-		}
-	}
-	else if (tagName.compare(MODEL) == 0) {
-		parseModel(tag);
-	}
-	else if (tagName.compare(GROUP) == 0) {
-		modelsInGroup.push(false);
-		numModelsTags.push(0);
-		parseGroup(tag);
-	}
-	else if (tagName.compare(TRANSLATE) == 0) {
-		if (modelsInGroup.top() == true) {
-			invalidDoc = true;
-		}
-		else {
-			parseTranslate(tag);
-		}
-	}
-	else if (tagName.compare(ROTATE) == 0) {
-		if (modelsInGroup.top() == true) {
-			invalidDoc = true;
-		}
-		else {
-			parseRotate(tag);
-		}
-	}
-	else if (tagName.compare(SCALE) == 0) {
-		if (modelsInGroup.top() == true) {
-			invalidDoc = true;
-		}
-		else {
-			parseScale(tag);
-		}
-	}
-	else {
-		invalidDoc = true;
-	}
-}
-
-
-/**
- * Efetua o parsing do documento xml.
- */
-void parseDocument(void)
-{
-	// Estrutura auxiliar para realizar o parsing do documento xml
-	TiXmlElement *scene = doc.FirstChildElement();
-
-	std::cout << "Preparing models..." << std::endl;
-
-	// Testa se existe uma tag chamada scene
-	if (scene == NULL || strcmp(scene->Value(), SCENE) != 0) {
-		invalidDoc = true;
-		std::cout << "Failed to load file. No scene element!" << std::endl;
-		failedModels++;
-	}
-	else {
-		numModelsTags.push(0);
-		modelsInGroup.push(false);
-
-		// Processa cada um dos modelos
-		for (TiXmlElement* tag = scene->FirstChildElement(); tag != NULL && invalidDoc == false; tag = tag->NextSiblingElement()) {
-			parseTag(tag);
-		}
-	}
-}
-
-
-/**
- * Abre um ficheiro xml para realizar o seu parsing.
- *
- * @param fileName Nome do ficheiro.
- * @return Devolve verdadeiro caso se consiga abrir o ficheiro com sucesso ou
- *         falso caso contrário
- */
-bool openXMLFile(const char* fileName)
-{
-	bool ret = true;
-
-	if (!doc.LoadFile(fileName)) {
-		std::cout << doc.ErrorDesc() << std::endl;
-		ret = false;
-	}
-
-	return ret;
-}
-
-
 /**
  * Função principal do programa.
  *
@@ -801,41 +420,40 @@ bool openXMLFile(const char* fileName)
  */
 int main(int argc, char **argv)
 {
-	bool isDocOK = true;
+	XMLParser* parser;
+
+	std::cout << "Processing models..." << std::endl;
 
 	// Se o número de argumentos for maior que 1 então abre o ficheiro
 	// correspondente ao segundo argumento
 	if (argc > 1) {
-		isDocOK = openXMLFile(argv[1]);
+		parser = new XMLParser(argv[1]);
 	}
 	else {
 		// Caso contrário carrega-se o ficheiro por defeito.
-		isDocOK = openXMLFile(FILE);
+		parser = new XMLParser(XML_FILE);
 	}
 
+	glOperations = parser->getGLOperations();
+
 	// Apenas se faz o parsing do documento se este foi aberto com sucesso
-	if (isDocOK) {
-		parseDocument();
+	if (glOperations.size() > 0) {
 
 		// Apenas se inicia a glut se todos os modelos foram processados com
 		// sucesso
-		if (failedModels < numModels && invalidDoc == false) {
+		if (parser->getFailedModels() < parser->getNumModels()) {
+			delete parser;
 			initGlut(argc, argv);
 		}
-		else if (failedModels >= numModels && invalidDoc == false) {
-			std::cout << "Could not process the models!" << std::endl;
-			clearOperations();
-		}
 		else {
-			std::cout << "Invalid document!" << std::endl;
-			clearOperations();
+			std::cout << "Could not process the models!" << std::endl;
 		}
 	}
 	else {
-		std::cout << "Could not open the xml file!" << std::endl;
+		std::cout << parser->getErrorString();
 	}
 
-	doc.Clear();
+	delete parser;
 
 	std::cout << "Press any key to continue..." << std::endl;
 

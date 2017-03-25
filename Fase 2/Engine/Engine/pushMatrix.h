@@ -2,16 +2,16 @@
 #define pushMatrix_h
 
 
-#include "operation.h"
+#include "glOperation.h"
 
 
-class PushMatrix : public Operation {
+class PushMatrix : public GLOperation {
 
 public:
 	PushMatrix(void) = default;
 
 
-	void compute(void)
+	void execute(void)
 	{
 		glPushMatrix();
 	}

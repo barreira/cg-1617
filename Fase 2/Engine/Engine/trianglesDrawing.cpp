@@ -119,7 +119,7 @@ void TrianglesDrawing::setVertices(std::vector<Vertex> vertices)
 }
 
 
-void TrianglesDrawing::compute(void)
+void TrianglesDrawing::execute(void)
 {
 	std::vector<Vertex> vertices = pimpl->getVertices();
 

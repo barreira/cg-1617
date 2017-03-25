@@ -2,16 +2,16 @@
 #define popMatrix_h
 
 
-#include "operation.h"
+#include "glOperation.h"
 
 
-class PopMatrix : public Operation {
+class PopMatrix : public GLOperation {
 
 public:
 	PopMatrix(void) = default;
 
 
-	void compute(void)
+	void execute(void)
 	{
 		glPopMatrix();
 	}
