@@ -488,6 +488,8 @@ class XMLParser::XMLParserImpl {
 			numModelsInContainer.push(0);
 			modelsInContainer.push(false);
 
+			glOperations.push_back(new PushMatrix());
+
 			// Processa cada um dos modelos
 			for (TiXmlElement* tag = scene->FirstChildElement(); 
 			     tag != NULL && invalidDoc == false; 
@@ -495,6 +497,8 @@ class XMLParser::XMLParserImpl {
 				
 				parseTag(tag);
 			}
+
+			glOperations.push_back(new PopMatrix());
 		}
 	}
 
@@ -511,6 +515,7 @@ class XMLParser::XMLParserImpl {
 
 		if (!doc.LoadFile(fileName.c_str())) {
 			errorString.append(doc.ErrorDesc());
+			errorString.append("\n");
 			ret = false;
 		}
 

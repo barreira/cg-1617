@@ -27,6 +27,14 @@
 		<models>
 			<model file="demos/sphere.3d" diffB=1/>
 		</models>
+		<group>
+			<rotate angle=-35 axisX=1/>
+			<translate z=2.7/>
+			<scale x=0.15 y=0.15 z=0.15/>
+			<models>
+				<model file="demos/sphere.3d" diffR=1 diffG=1 diffB=1/>
+			</models>
+		</group>
 	</group>
 	<group>
 		<rotate angle=50 axisY=1/>
