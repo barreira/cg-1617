@@ -10,7 +10,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
+ * @version 26-03-2017
  */
 
 
@@ -99,6 +99,10 @@ public:
 	void setZ(float);
 
 
+	/**
+	 * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em 
+	 * OpenGL.
+	 */
 	void execute(void);
 
 

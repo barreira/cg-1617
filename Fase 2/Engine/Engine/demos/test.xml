@@ -1,16 +1,15 @@
-<scene> 
+<scene>
 	<group>
-		<translate X=10 Y=0 Z=2/>
 		<scale X=0.5 Y=0.5 z=0.2/>
-		<models>
-			<model file="demos/sphere.3d"/>
-		</models>
 		<group>
 			<translate y=10/>
 			<models>
-				<model file="demos/cone.3d"/>
-				<model file="demos/box.3d"/>
+				<model file="demos/cone.3d" diffr=1/>
+				<model file="demos/box.3d" diffB=1 diffg=1/>
 			</models>
 		</group>
+		<models>
+			<model filE="demos/sphere.3d" diffG=1/>
+		</models>
 	</group>
 </scene>

@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
+ * @version 26-03-2017
  */
 
 
@@ -199,6 +199,9 @@ void Translation::setZ(float z)
 }
 
 
+/**
+ * Executa uma translação em x, y ou z em OpenGL.
+ */
 void Translation::execute(void)
 {
 	glTranslatef(pimpl->getX(), pimpl->getY(), pimpl->getZ());

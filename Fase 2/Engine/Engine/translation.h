@@ -9,8 +9,9 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
+ * @version 26-03-2017
  */
+
 
 #ifndef translation_h
 #define translation_h
@@ -85,6 +86,9 @@ public:
 	void setZ(float);
 
 
+	/**
+	 * Executa uma translação em x, y ou z em OpenGL.
+	 */
 	void execute(void);
 
 

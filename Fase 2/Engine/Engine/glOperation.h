@@ -1,5 +1,5 @@
 /**
- * @file operation.h
+ * @file glOperation.h
  *
  * Módulo que representa a classe base para uma operação qualquer em
  * OpenGL (translação, rotação, desenho de primitivas, etc).
@@ -8,11 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
- *
- * TODO: Arranjar um nome melhor para esta classe. Se calhar todas a classes 
- *       derivadas podiam implementar um método abstrato (compute por exemplo)
- *       em que efetuavam uma operação qualquer.
+ * @version 26-03-2017
  */
 
 
@@ -37,7 +33,9 @@ public:
 	GLOperation(void) = default;
 
 
-	// Possibilidade do método abstrato
+	/**
+	 * Método abstrato de uma qualquer operação em OpenGL.
+	 */
 	virtual void execute(void) = 0;
 
 

@@ -8,7 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
+ * @version 26-03-2017
  */
 
 
@@ -17,6 +17,9 @@
 
 class TrianglesDrawing::TrianglesDrawingImpl {
 	std::vector<Vertex> vertices;  // Conjunto de vértices a desenhar
+	float diffR;                   // Valor da difusão em vermelho
+	float diffG;                   // Valor da difusão em verde
+	float diffB;                   // Valor da difusão em azul
 
 
 public:
@@ -24,7 +27,10 @@ public:
 	/**
 	 * Construtor por defeito.
 	 */
-	TrianglesDrawingImpl(void) = default;
+	TrianglesDrawingImpl(void)
+	{
+		diffR = diffG = diffB = 0;
+	}
 
 
 	/**
@@ -32,11 +38,16 @@ public:
 	 *
 	 * @param vertices Conjunto de vértices a desenhar.
 	 */
-	TrianglesDrawingImpl(std::vector<Vertex> vertices)
+	TrianglesDrawingImpl(std::vector<Vertex> vertices,
+		                 float diffR, float diffG, float diffB)
 	{
 		for (size_t i = 0; i < vertices.size(); i++) {
 			this->vertices.push_back(vertices.at(i));
 		}
+
+		this->diffR = diffR;
+		this->diffG = diffG;
+		this->diffB = diffB;
 	}
 
 
@@ -50,6 +61,33 @@ public:
 
 
 	/**
+	 * Devolve o valor da difusão em vermelho.
+	 */
+	float getDiffR(void)
+	{
+		return diffR;
+	}
+
+
+	/**
+ 	 * Devolve o valor da difusão em verde.
+	 */
+	float getDiffG(void)
+	{
+		return diffG;
+	}
+
+
+	/**
+	 * Devolve o valor da difusão em azul.
+	 */
+	float getDiffB(void)
+	{
+		return diffB;
+	}
+
+
+	/**
 	 * Altera o conjunto de vértices a desenhar.
 	 */
 	void setVertices(std::vector<Vertex> vertices)
@@ -57,6 +95,33 @@ public:
 		for (size_t i = 0; i < vertices.size(); i++) {
 			this->vertices.push_back(vertices.at(i));
 		}
+	}
+
+
+	/**
+	 * Altera o valor da difusão em vermelho.
+	 */
+	void setDiffR(float diffR)
+	{
+		this->diffR = diffR;
+	}
+
+
+	/**
+	 * Altera o valor da difusão em verde.
+	 */
+	void setDiffG(float diffG)
+	{
+		this->diffG = diffG;
+	}
+
+
+	/**
+	 * Altera o valor da difusão em azul.
+	 */
+	void setDiffB(float diffB)
+	{
+		this->diffB = diffB;
 	}
 
 
@@ -83,9 +148,10 @@ TrianglesDrawing::TrianglesDrawing(void)
  *
  * @param vertices Conjunto de vértices a desenhar.
  */
-TrianglesDrawing::TrianglesDrawing(std::vector<Vertex> vertices)
+TrianglesDrawing::TrianglesDrawing(std::vector<Vertex> vertices,
+	                               float diffR, float diffG, float diffB)
 {
-	pimpl = new TrianglesDrawingImpl(vertices);
+	pimpl = new TrianglesDrawingImpl(vertices, diffR, diffG, diffB);
 }
 
 
@@ -97,7 +163,10 @@ TrianglesDrawing::TrianglesDrawing(std::vector<Vertex> vertices)
  */
 TrianglesDrawing::TrianglesDrawing(const TrianglesDrawing& t)
 {
-	pimpl = new TrianglesDrawingImpl(t.pimpl->getVertices());
+	pimpl = new TrianglesDrawingImpl(t.pimpl->getVertices(),
+		                             t.pimpl->getDiffR(),
+		                             t.pimpl->getDiffG(),
+		                             t.pimpl->getDiffB());
 }
 
 
@@ -111,6 +180,33 @@ std::vector<Vertex> TrianglesDrawing::getVertices(void)
 
 
 /**
+ * Devolve o valor da difusão em vermelho.
+ */
+float TrianglesDrawing::getDiffR(void)
+{
+	return pimpl->getDiffR();
+}
+
+
+/**
+ * Devolve o valor da difusão em verde.
+ */
+float TrianglesDrawing::getDiffG(void)
+{
+	return pimpl->getDiffG();
+}
+
+
+/**
+ * Devolve o valor da difusão em azul.
+ */
+float TrianglesDrawing::getDiffB(void)
+{
+	return pimpl->getDiffB();
+}
+
+
+/**
  * Altera o conjunto de vértices a desenhar.
  */
 void TrianglesDrawing::setVertices(std::vector<Vertex> vertices)
@@ -119,11 +215,42 @@ void TrianglesDrawing::setVertices(std::vector<Vertex> vertices)
 }
 
 
+/**
+ * Altera o valor da difusão em vermelho.
+ */
+void TrianglesDrawing::setDiffR(float diffR)
+{
+	pimpl->setDiffR(diffR);
+}
+
+
+/**
+ * Altera o valor da difusão em verde.
+ */
+void TrianglesDrawing::setDiffG(float diffG)
+{
+	pimpl->setDiffG(diffG);
+}
+
+
+/**
+ * Altera o valor da difusão em azul.
+ */
+void TrianglesDrawing::setDiffB(float diffB)
+{
+	pimpl->setDiffB(diffB);
+}
+
+
+/**
+ * Desenha os vértices correspondentes a uma primitiva em OpenGL.
+ */
 void TrianglesDrawing::execute(void)
 {
 	std::vector<Vertex> vertices = pimpl->getVertices();
 
 	glBegin(GL_TRIANGLES);
+	glColor3f(pimpl->getDiffR(), pimpl->getDiffG(), pimpl->getDiffB());
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		glVertex3f(vertices.at(i).getX(),

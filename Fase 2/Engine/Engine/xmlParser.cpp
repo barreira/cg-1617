@@ -1,3 +1,17 @@
+/**
+ * @file xmlParser.cpp
+ *
+ * Definição de todos os métodos para se efetuar o parsing de um ficheiro xml
+ * que contenha múltiplas instruções a ser executadas em OpenGL.
+ *
+ * @author Carlos Pereira - A61887
+ * @author João Barreira  - A73831
+ * @author Rafael Braga   - A61799
+ *
+ * @version 26-03-2017
+ */
+
+
 #include <stack>
 #include <algorithm>
 #include <sstream>
@@ -12,6 +26,7 @@
 #include "trianglesDrawing.h"
 
 
+/* Definição de constantes e atributos que caracterizam operações em OpenGL */
 #define SCENE  "scene"
 #define GROUP  "group"
 #define MODELS "models"
@@ -19,6 +34,9 @@
 /* Tag de model e atributos */
 #define MODEL "model"
 #define FILE  "file"
+#define DIFFR "diffr"
+#define DIFFG "diffg"
+#define DIFFB "diffb"
 
 /* Tag de rotate e atributos */
 #define ROTATE "rotate"
@@ -36,19 +54,30 @@
 
 
 class XMLParser::XMLParserImpl {
-	TiXmlDocument doc;
-	bool invalidDoc;
-	size_t numModels;
-	size_t failedModels;
+	TiXmlDocument doc;    // Documento tinyXML 
+	bool invalidDoc;      // Variável para detetar se ocorreu algum erro de 
+	                      // parsing
+	size_t numModels;     // Número total de modelos lidos
+	size_t failedModels;  // Número total de modelos que não se conseguiram 
+	                      // processar
 
-	std::stack<bool> modelsInContainer;
-	std::stack<size_t> numModelsInContainer;
+	std::stack<bool> modelsInContainer;       // Stack para informar se uma 
+	                                          // scene ou um group já possui, 
+	                                          // ou não, uma tag models  
+	std::stack<size_t> numModelsInContainer;  // Stack que possui a informação
+	                                          // acerca do número de tags 
+	                                          // models numa scene ou num group
 
-	std::vector<GLOperation*> glOperations;
-	std::string errorString;
-	std::string fileName;
+	std::vector<GLOperation*> glOperations;   // Vetor de operações em OpenGL
+	std::string errorString;                  // Representação textual de
+	                                          // eventuais erros, ou warnings,
+	                                          // que possam ocorrer
+	std::string fileName;                     // Nome do ficheiro xml
 
 
+	/**
+	 * Limpa o conteúdo do vetor de operações em OpenGL.
+	 */
 	void clearGLOperations(void)
 	{
 		for (size_t i = 0; i < glOperations.size(); i++) {
@@ -59,6 +88,12 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Converte todos os carateres de uma string para minúsculas.
+	 *
+	 * @param str String a ser convertida.
+	 * @return Devolve uma string que contenha apenas minúsculas.
+	 */
 	std::string toLower(const char* str)
 	{
 		std::string aux(str);
@@ -69,6 +104,11 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Incrementa o número total de tags models no topo da stack 
+	 * numModelsInContainer e modifica o topo da stack modelsInContainer para
+	 * true (já possui um tag models).
+	 */
 	void addModelsInContainer(void)
 	{
 		size_t aux = numModelsInContainer.top();
@@ -82,21 +122,22 @@ class XMLParser::XMLParserImpl {
 
 
 	/**
-	* Abre o ficheiro que contém um conjunto de vértices de uma primitiva.
-	* Este ficheiro é aberto apenas uma vez.
-	*
-	* @param fileName Nome do ficheiro.
-	*/
+	 * Abre o ficheiro que contém um conjunto de vértices de uma primitiva.
+	 * Este ficheiro é aberto apenas uma vez.
+	 *
+	 * @param fileName Nome do ficheiro.
+	 * @return Devolve um vetor com os vértices lidos do ficheiro de um modelo.
+	 */
 	std::vector<Vertex> readVertices(const char* file)
 	{
-		std::fstream fp;       // Estrutura para abertura de um ficheiro em modo
-							   // de leitura
-		std::string line;      // String auxiliar que irá corresponder a uma linha
-							   // do ficheiro
-		std::stringstream ss;  // String auxiliar para converter texto em valores
-							   // numéricos
+		std::fstream fp;       // Estrutura para abertura de um ficheiro em
+		                       // modo de leitura
+		std::string line;      // String auxiliar que irá corresponder a uma 
+		                       // linha do ficheiro
+		std::stringstream ss;  // String auxiliar para converter texto em 
+		                       // valores numéricos
 
-		std::vector<Vertex> vertices;
+		std::vector<Vertex> vertices;  // Vetor de vértices
 
 		float x = 0;  // Coordenada x de um vértice
 		float y = 0;  // Coordenada y de um vértice
@@ -125,8 +166,8 @@ class XMLParser::XMLParserImpl {
 			errorString.append(file);
 			errorString.append("!\n");
 
-			// Se não se conseguiu abrir bem o ficheiro então o módulo atual conta
-			// como um módulo que teve um problema
+			// Se não se conseguiu abrir bem o ficheiro então o modelo atual 
+			// conta como um modelo que não pode ser processado
 			failedModels++;
 		}
 
@@ -134,10 +175,21 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Efetua o parsing de um modelo.
+	 *
+	 * @param model Tag model.
+	 */
 	void parseModel(TiXmlElement* model)
 	{
-		std::vector<Vertex> vertices;
-		size_t numFiles = 0;
+		std::vector<Vertex> vertices;  // Vetor de vértices de um modelo.
+		size_t numFiles = 0;           // Número de ficheiros associados à tag
+		                               // model
+
+		// A cor de um modelo é preta por defeito
+		float diffR = 0;  // Valor da difusão em vermelho 
+		float diffG = 0;  // Valor da difusão em verde 
+		float diffB = 0;  // Valor da difusão em azul 
 
 		numModels++;
 
@@ -148,6 +200,8 @@ class XMLParser::XMLParserImpl {
 
 			if (attName.compare(FILE) == 0) {
 				if (numFiles > 0) {
+
+					// Um modelo apenas pode conter um ficheiro
 					invalidDoc = true;
 				}
 				else {
@@ -155,16 +209,34 @@ class XMLParser::XMLParserImpl {
 					numFiles++;
 				}
 			}
+			else if (attName.compare(DIFFR) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> diffR;
+			}
+			else if (attName.compare(DIFFG) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> diffG;
+			}
+			else if (attName.compare(DIFFB) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> diffB;
+			}
 			else {
 				errorString.append("Error: Invalid model attribute!\n");
 				invalidDoc = true;
 			}
 		}
 
-		glOperations.push_back(new TrianglesDrawing(vertices));
+		glOperations.push_back(new TrianglesDrawing(vertices, 
+			                                        diffR, diffG, diffB));
 	}
 
 
+	/**
+	 * Efetua o parsing dos atributos associados à tag models.
+	 *
+	 * @param models Tag models.
+	 */
 	void parseModels(TiXmlElement* models)
 	{
 		for (TiXmlElement* model = models->FirstChildElement(); 
@@ -177,6 +249,9 @@ class XMLParser::XMLParserImpl {
 				parseModel(model);
 			}
 			else {
+
+				// Uma tag models apenas pode ter a si associada filhos do tipo
+				// model
 				errorString.append("Error: Invalid models tag!\n");
 				invalidDoc = true;
 			}
@@ -184,6 +259,14 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Efetua o parsing de um group.
+	 *
+	 * Sempre que se inicia um group é efetuada uma pushMatrix. No final do 
+	 * tratamento de todos os elementos de um group é efetuada uma popMatrix.
+	 *
+	 * @param group Tag group.
+	 */
 	void parseGroup(TiXmlElement* group)
 	{
 		glOperations.push_back(new PushMatrix());
@@ -195,6 +278,8 @@ class XMLParser::XMLParserImpl {
 			parseTag(tag);
 		}
 
+		// Como já se processaram os elementos de um group então remove-se
+		// a informação deste nas stacks auxiliares
 		numModelsInContainer.pop();
 		modelsInContainer.pop();
 
@@ -202,6 +287,11 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Efetua o parsing de uma translate.
+	 *
+     * @param translate Tag translate.
+	 */
 	void parseTranslate(TiXmlElement* translate)
 	{
 		float x = 0;
@@ -233,6 +323,11 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Efetua o parsing de uma rotate.
+	 *
+	 * @param rotate Tag rotate.
+	 */
 	void parseRotate(TiXmlElement* rotate)
 	{
 		float angle = 0;
@@ -268,6 +363,11 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Efetua o parsing de uma scale.
+	 *
+	 * @param scale Tag scale.
+	 */
 	void parseScale(TiXmlElement* scale)
 	{
 		float x = 0;
@@ -299,12 +399,21 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Testa a que tipo pertence uma tag e para cada tipo efetua o seu 
+	 * respetivo parsing.
+	 *
+	 * @param tag Tag recebida.
+	 */
 	void parseTag(TiXmlElement* tag)
 	{
 		std::string tagName = toLower(tag->Value());
 
 		// Testa se existe uma tag chamada model
 		if (tagName.compare(MODELS) == 0) {
+
+			// Se o número de models tags for igual ou superior a 1 então o
+			// parsing termina
 			if (numModelsInContainer.top() >= 1) {
 				errorString.append("Error: Duplicated models tag in group!\n");
 				invalidDoc = true;
@@ -331,6 +440,9 @@ class XMLParser::XMLParserImpl {
 				parseTranslate(tag);
 			}
 		}
+
+		// Não faz sentido haver rotates, translates ou scales no final de um
+		// group ou de uma scene
 		else if (tagName.compare(ROTATE) == 0) {
 			if (modelsInContainer.top() == true) {
 				errorString.append("Error: Misplaced rotate tag!\n");
@@ -350,12 +462,17 @@ class XMLParser::XMLParserImpl {
 				parseScale(tag);
 			}
 		}
+
+		// Apenas são admitidas tags dos tipos mencionados acima
 		else {
 			invalidDoc = true;
 		}
 	}
 
 
+	/**
+	 * Efetua o parsing de um documento xml.
+	 */
 	void parseDocument(void)
 	{
 		// Estrutura auxiliar para realizar o parsing do documento xml
@@ -382,6 +499,12 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	/**
+	 * Abre um documento xml para ser efetuado o seu parsing.
+	 * 
+	 * @return Devolve true caso o ficheiro tenha sido aberto com sucesso ou 
+	 *         false caso contrário.
+	 */
 	bool openXMLFile(void)
 	{
 		bool ret = true;
@@ -398,6 +521,9 @@ class XMLParser::XMLParserImpl {
 public:
 
 
+	/**
+	 * Construtor por defeito.
+	 */
 	XMLParserImpl(void)
 	{
 		invalidDoc = false;
@@ -407,6 +533,11 @@ public:
 	}
 
 
+	/**
+	 * Construtor por parâmetros.
+	 *
+	 * @param fileName Nome do ficheiro.
+	 */
 	XMLParserImpl(std::string fileName) 
 	{
 		invalidDoc = false;
@@ -414,27 +545,40 @@ public:
 		errorString = "";
 		this->fileName = fileName;
 
+		// Abre o ficheiro com o nome fileName para ser efetuado o seu parsing
 		if (openXMLFile() == true) {
 			parseDocument();
 		}
 	}
 
 
+	/**
+	 * Devolve o número total de modelos lidos do ficheiro xml.
+	 */
 	size_t getNumModels(void)
 	{
 		return numModels;
 	}
 
 
+	/**
+	 * Devolve o número de modelos que não se conseguiu processar.
+	 */
 	size_t getFailedModels(void)
 	{
 		return failedModels;
 	}
 
 
+	/**
+	 * Devolve o vetor com o conjunto de operações em OpenGL.
+ 	 */
 	std::vector<GLOperation*> getGLOperations(void)
 	{
 		if (invalidDoc == true) {
+
+			// Se houve algum erro são limpas eventuais operações que já
+			// tenham sido armazendas no vetor
 			clearGLOperations();
 		}
 
@@ -442,64 +586,104 @@ public:
 	}
 
 
+	/**
+	 * Devolve uma representação textual de eventuais erros, ou warnings, do
+	 * parsing do ficheiro xml, caso estes existam.
+	 */
 	std::string getErrorString(void)
 	{
 		return errorString;
 	}
 
 
+	/**
+	 * Devolve o nome do ficheiro xml que se efetuou o parsing.
+	 */
 	std::string getFileName(void)
 	{
 		return fileName;
 	}
 
 
+	/**
+	 * Destrutor (por defeito em c++).
+	 */
 	~XMLParserImpl(void) = default;
 };
 
 
+/**
+ * Construtor por defeito.
+ */
 XMLParser::XMLParser(void)
 {
 	pimpl = new XMLParserImpl();
 }
 
 
+/**
+ * Construtor por parâmetros.
+ *
+ * @param fileName Nome do ficheiro.
+ */
 XMLParser::XMLParser(std::string fileName)
 {
 	pimpl = new XMLParserImpl(fileName);
 }
 
 
+/**
+ * Construtor de cópia.
+ *
+ * @param x Objeto da classe XMLParser a copiar.
+ */
 XMLParser::XMLParser(const XMLParser& x)
 {
 	pimpl = new XMLParserImpl(x.pimpl->getFileName());
 }
 
 
+/**
+ * Devolve o número total de modelos lidos do ficheiro xml.
+ */
 size_t XMLParser::getNumModels(void) 
 {
 	return pimpl->getNumModels();
 }
 
 
+/**
+ * Devolve o número de modelos que não se conseguiu processar.
+ */
 size_t XMLParser::getFailedModels(void)
 {
 	return pimpl->getFailedModels();
 }
 
 
+/**
+ * Devolve o vetor com o conjunto de operações em OpenGL.
+ */
 std::vector<GLOperation*> XMLParser::getGLOperations(void)
 {
 	return pimpl->getGLOperations();
 }
 
 
+/**
+ * Devolve uma representação textual de eventuais erros, ou warnings, do
+ * parsing do ficheiro xml, caso estes existam.
+ */
 std::string XMLParser::getErrorString(void)
 {
 	return pimpl->getErrorString();
 }
 
 
+/**
+ * Destrutor da classe XMLParser. Liberta a memória ocupada pelo apontador para
+ * implementação da classe XMLParser.
+ */
 XMLParser::~XMLParser(void)
 {
 	if (pimpl != NULL) {

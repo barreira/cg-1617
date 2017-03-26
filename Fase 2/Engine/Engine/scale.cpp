@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
+ * @version 26-03-2017
  */
 
 
@@ -199,6 +199,9 @@ void Scale::setZ(float z)
 }
 
 
+/**
+ * Efetua uma escala em x, y ou z em OpenGL.
+ */
 void Scale::execute(void)
 {
 	glScalef(pimpl->getX(), pimpl->getY(), pimpl->getZ());

@@ -7,8 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 25-03-2017 
- *          Organização do parsing.
+ * @version 26-03-2017 
  */
 
 
@@ -28,22 +27,13 @@
 #include "xmlParser.h"
 
 
-#define XML_FILE "demos/test.xml" // Ficheiro xml por defeito
+// Ficheiro xml por defeito
+#define XML_FILE "demos/solarSystem.xml" 
 
+#define FRONT_AND_BACK 1  // Desenhar a parte da frente e de trás de
+                          // uma primitiva
 
-// Definição dos valores para o menu
-#define RED 0
-#define ORANGE 1 
-#define YELLOW 2 
-#define GREEN 3
-#define CYAN 4
-#define BLUE 5
-#define PURPLE 6 
-#define PINK 7
-#define WHITE 8
-
-
-const float PI = 3.14159265358979323846f;
+const float PI = 3.14159265358979323846f;  // Valor da constante pi
 
 
 float xPos = 0;    // Posição x
@@ -52,13 +42,12 @@ float angleX = 0;  // Ângulo em relação ao eixo dos xx
 float angleY = 0;  // Ângulo em relação ao eixo dos yy
 
 
-// A cor por defeito é branca (red = 1, green = 1, blue = 1)
-float red = 1;   
-float green = 1;  
-float blue = 1;
-
 // Por defeito o modo de desenho é wired
 GLenum mode = GL_LINE;
+
+// Por defeito desenham-se ambos os lados de uma primitiva
+GLenum drawMode = FRONT_AND_BACK;
+
 
 float lx = 0;                  // Posição para onde se está a olhar no eixo dos
                                // xx
@@ -80,16 +69,17 @@ float cameraAngleY = 0;        // Ângulo da câmara no eixo dos yy
 float deltaAngleY = 0;         // Ângulo para cálculos auxiliares
 int yOrigin = -1;              // Posição y do rato
 
-const float vCameraX = 0.003f; // Velocidade de rotação da câmara
-const float vCameraY = 0.5f;   
+const float vCameraX = 0.003f; // Velocidade de rotação da câmara em X
+const float vCameraY = 0.5f;   // Velocidade de rotação da câmara em Y
 
 
-std::vector<GLOperation*> glOperations;
+std::vector<GLOperation*> glOperations;  // Vetor de operações em OpenGL
 
 
 /**
- * Função que desenha todos os vértices de uma primitiva à custa de 
- * triângulos.
+ * Função responsável pela representação de uma cena em OpenGL. Percorre
+ * o vetor de operações em openGL (translações, rotações, desenho de 
+ * triângulos, ...) e executa cada uma destas.
  */
 void drawScene(void)
 {	
@@ -143,8 +133,17 @@ void renderScene(void)
 	glRotatef(angleY, 0, 1, 0);
 	glRotatef(angleX, 1, 0, 0);
 
+	if (drawMode != FRONT_AND_BACK) {
+		glEnable(GL_CULL_FACE);
+		glCullFace(drawMode);
+	}
+	else {
+		glDisable(GL_CULL_FACE);
+	}
+
 	glPolygonMode(GL_FRONT_AND_BACK, mode);
 
+	// Representa a cena correspondente a um conjunto de operações em OpenGL
 	drawScene();
 
 	glutSwapBuffers();
@@ -235,50 +234,14 @@ void processMenuEvents(int option)
 		// Desenha apenas os vértices da primitiva
 		mode = GL_POINT;
 	}
-	else if (option == RED) {
-		red = 1;
-		blue = 0;
-		green = 0;
+	else if (option == GL_BACK) {
+		drawMode = GL_BACK;
 	}
-	else if (option == ORANGE) {
-		red = 1;
-		blue = 0;
-		green = 0.5;
+	else if (option == GL_FRONT) {
+		drawMode = GL_FRONT;
 	}
-	else if (option == YELLOW) {
-		red = 1;
-		blue = 0;
-		green = 1;
-	}
-	else if (option == GREEN) {
-		red = 0;
-		blue = 0;
-		green = 1;
-	}
-	else if (option == CYAN) {
-		red = 0;
-		blue = 1;
-		green = 1;
-	}
-	else if (option == BLUE) {
-		red = 0;
-		blue = 1;
-		green = 0;
-	}
-	else if (option == PURPLE) {
-		red = 0.5;
-		blue = 1;
-		green = 0;
-	}
-	else if (option == PINK) {
-		red = 1;
-		blue = 1;
-		green = 0;
-	}
-	else if (option == WHITE) {
-		red = 1;
-		blue = 1;
-		green = 1;
+	else if (option == FRONT_AND_BACK) {
+		drawMode = FRONT_AND_BACK;
 	}
 
 	glutPostRedisplay();
@@ -305,6 +268,7 @@ void mouseMove(int x, int y)
 	if (yOrigin >= 0) {
 		deltaAngleY = (y - yOrigin) * vCameraY;
 
+		// Limita-se o ângulo da câmara em Y entre -90 e 90 graus
 		if (cameraAngleY + deltaAngleY >= 90.0) {
 			ly = tan(89.0 * PI / 180);
 		}
@@ -336,14 +300,6 @@ void mouseButton(int button, int state, int x, int y)
 			xOrigin = -1;
 			
 			cameraAngleY += deltaAngleY;
-
-			/*
-			if (cameraAngleY >= 90.0) {
-				cameraAngleY = 89.0;
-			}
-			else if (cameraAngleY <= -90.0) {
-				cameraAngleY = -89.0;
-			}*/
 
 			yOrigin = -1;
 		}
@@ -382,29 +338,19 @@ void initGlut(int argc, char **argv)
 	glutAddMenuEntry("GL_FILL", GL_FILL);
 	glutAddMenuEntry("GL_LINE", GL_LINE);
 	glutAddMenuEntry("GL_POINT", GL_POINT);
-	glutAddMenuEntry("Red", RED);
-	glutAddMenuEntry("Orange", ORANGE);
-	glutAddMenuEntry("Yellow", YELLOW);
-	glutAddMenuEntry("Green", GREEN);
-	glutAddMenuEntry("Cyan", CYAN);
-	glutAddMenuEntry("Blue", BLUE);
-	glutAddMenuEntry("Purple", PURPLE);
-	glutAddMenuEntry("Pink", PINK);
-	glutAddMenuEntry("White", WHITE);
+	glutAddMenuEntry("DRAW_FRONT", GL_BACK);
+	glutAddMenuEntry("DRAW_BACK", GL_FRONT);
+	glutAddMenuEntry("DRAW_FRONT_AND_BACK", FRONT_AND_BACK);
 
 	// O menu é acionado sempre que se pressiona o botão direito do rato
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-
 
 	// Funções de tratamento dos eventos do rato
 	glutMouseFunc(mouseButton);
 	glutMotionFunc(mouseMove);
 
-
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
 
 
 	// enter GLUT's main cycle
@@ -436,7 +382,7 @@ int main(int argc, char **argv)
 
 	glOperations = parser->getGLOperations();
 
-	// Apenas se faz o parsing do documento se este foi aberto com sucesso
+	// Testa-se se o parsing foi efetuado com sucesso
 	if (glOperations.size() > 0) {
 
 		// Apenas se inicia a glut se todos os modelos foram processados com

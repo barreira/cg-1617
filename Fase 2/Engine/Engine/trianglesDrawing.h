@@ -11,9 +11,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 18-03-2017
- * 
- * TODO: Arranjar um nome melhor para esta classe 
+ * @version 26-03-2017
  */
 
 
@@ -44,8 +42,12 @@ public:
 	 * Construtor por parâmetros.
 	 *
 	 * @param vertices Conjunto de vértices a desenhar.
+	 * @param diffR    Valor da difusão em vermelho.
+	 * @param diffG    Valor da difusão em verde.
+	 * @param diffB    Valor da difusão em azul.
 	 */
-	TrianglesDrawing(std::vector<Vertex> vertices);
+	TrianglesDrawing(std::vector<Vertex> vertices, 
+		             float diffR, float diffG, float diffB);
 
 
 	/**
@@ -63,11 +65,50 @@ public:
 	
 	
 	/**
+	 * Devolve o valor da difusão em vermelho.
+	 */
+	float getDiffR(void);
+
+
+	/**
+	 * Devolve o valor da difusão em verde.
+	 */
+	float getDiffG(void);
+
+
+	/**
+	 * Devolve o valor da difusão em azul.
+	 */
+	float getDiffB(void);
+
+
+	/**
 	 * Altera o conjunto de vértices a desenhar.
 	 */
 	void setVertices(std::vector<Vertex>);
 
 
+	/**
+	 * Altera o valor da difusão em vermelho.
+	 */
+	void setDiffR(float);
+
+
+	/**
+	 * Altera o valor da difusão em verde.
+	 */
+	void setDiffG(float);
+
+
+	/**
+	 * Altera o valor da difusão em azul.
+	 */
+	void setDiffB(float);
+
+
+	/**
+	 * Desenha um conjunto de vértices de uma primitiva em OpenGL.
+	 */
 	void execute(void);
 
 
