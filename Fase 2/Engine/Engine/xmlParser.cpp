@@ -186,10 +186,11 @@ class XMLParser::XMLParserImpl {
 		size_t numFiles = 0;           // Número de ficheiros associados à tag
 		                               // model
 
-		// A cor de um modelo é preta por defeito
 		float diffR = 0;  // Valor da difusão em vermelho 
 		float diffG = 0;  // Valor da difusão em verde 
 		float diffB = 0;  // Valor da difusão em azul 
+
+		size_t numColors = 0;  // Número de atributos relativamente a cores
 
 		numModels++;
 
@@ -212,19 +213,27 @@ class XMLParser::XMLParserImpl {
 			else if (attName.compare(DIFFR) == 0) {
 				std::stringstream ss(a->Value());
 				ss >> diffR;
+				numColors++;
 			}
 			else if (attName.compare(DIFFG) == 0) {
 				std::stringstream ss(a->Value());
 				ss >> diffG;
+				numColors++;
 			}
 			else if (attName.compare(DIFFB) == 0) {
 				std::stringstream ss(a->Value());
 				ss >> diffB;
+				numColors++;
 			}
 			else {
 				errorString.append("Error: Invalid model attribute!\n");
 				invalidDoc = true;
 			}
+		}
+
+		// A cor de um modelo é branca por defeito
+		if (numColors == 0) {
+			diffR = diffG = diffB = 1;
 		}
 
 		glOperations.push_back(new TrianglesDrawing(vertices, 
@@ -514,8 +523,9 @@ class XMLParser::XMLParserImpl {
 		bool ret = true;
 
 		if (!doc.LoadFile(fileName.c_str())) {
-			errorString.append(doc.ErrorDesc());
-			errorString.append("\n");
+			errorString.append("Could not read file ");
+			errorString.append(fileName);
+			errorString.append("...\n");
 			ret = false;
 		}
 
