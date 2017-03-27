@@ -32,7 +32,7 @@
 			<translate z=2.7/>
 			<scale x=0.15 y=0.15 z=0.15/>
 			<models>
-				<model file="demos/sphere.3d" diffR=1 diffG=1 diffB=1/>
+				<model file="demos/sphere.3d"/>
 			</models>
 		</group>
 	</group>

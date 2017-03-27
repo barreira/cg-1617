@@ -45,6 +45,9 @@
     <ClCompile Include="scale.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xmlParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinystr.h">
@@ -54,9 +57,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="operation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rotation.h">
@@ -75,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="popMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glOperation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xmlParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

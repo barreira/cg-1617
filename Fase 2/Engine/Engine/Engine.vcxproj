@@ -162,9 +162,10 @@
     <ClCompile Include="translation.cpp" />
     <ClCompile Include="trianglesDrawing.cpp" />
     <ClCompile Include="vertex.cpp" />
+    <ClCompile Include="xmlParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="operation.h" />
+    <ClInclude Include="glOperation.h" />
     <ClInclude Include="popMatrix.h" />
     <ClInclude Include="pushMatrix.h" />
     <ClInclude Include="rotation.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="translation.h" />
     <ClInclude Include="trianglesDrawing.h" />
     <ClInclude Include="vertex.h" />
+    <ClInclude Include="xmlParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
