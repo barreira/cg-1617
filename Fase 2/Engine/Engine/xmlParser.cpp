@@ -303,6 +303,9 @@ class XMLParser::XMLParserImpl {
 	{
 		glOperations.push_back(new PushMatrix());
 
+		modelsInContainer.push(false);
+		numModelsInContainer.push(0);
+
 		for (TiXmlElement* tag = group->FirstChildElement(); 
 		     tag != NULL && invalidDoc == false; 
 		     tag = tag->NextSiblingElement()) {
@@ -459,8 +462,6 @@ class XMLParser::XMLParserImpl {
 			parseModel(tag);
 		}
 		else if (tagName.compare(GROUP) == 0) {
-			modelsInContainer.push(false);
-			numModelsInContainer.push(0);
 			parseGroup(tag);
 		}
 		else if (tagName.compare(TRANSLATE) == 0) {
