@@ -498,6 +498,7 @@ class XMLParser::XMLParserImpl {
 
 		// Apenas são admitidas tags dos tipos mencionados acima
 		else {
+			errorString.append("Error: Invalid tag!\n");
 			invalidDoc = true;
 		}
 	}

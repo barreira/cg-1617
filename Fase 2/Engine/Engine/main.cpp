@@ -28,7 +28,7 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE "demos/solarSystem.xml" 
+#define XML_FILE "demos/invalidGroup.xml" 
 
 #define FRONT_AND_BACK 1  // Desenhar a parte da frente e de trás de
                           // uma primitiva
@@ -388,6 +388,9 @@ int main(int argc, char **argv)
 		// Apenas se inicia a glut se todos os modelos foram processados com
 		// sucesso
 		if (parser->getFailedModels() < parser->getNumModels()) {
+			// Mostra no ecrã eventuais warnings que possam ter ocorrido
+			std::cout << parser->getErrorString();
+			
 			delete parser;
 			initGlut(argc, argv);
 		}
