@@ -8,12 +8,14 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 26-03-2017
+ * @version 29-03-2017
  */
 
 
 #include <stack>
 #include <algorithm>
+#include <map>
+#include <stdexcept>
 #include <sstream>
 #include <fstream>
 #include "xmlParser.h"
@@ -73,6 +75,9 @@ class XMLParser::XMLParserImpl {
 	                                          // eventuais erros, ou warnings,
 	                                          // que possam ocorrer
 	std::string fileName;                     // Nome do ficheiro xml
+
+	// Map que associa o nome de um ficheiro a um conjunto de vértices
+	std::map<std::string, std::vector<Vertex>> mapFileVertices;
 
 
 	/**
@@ -143,32 +148,50 @@ class XMLParser::XMLParserImpl {
 		float y = 0;  // Coordenada y de um vértice
 		float z = 0;  // Coordenada z de um vértice
 
-		fp.open(file);
-
-		// Testa se o ficheiro foi bem aberto e inicia a sua leitura
-		if (fp.is_open()) {
-
-			// Lê linha a linha
-			while (getline(fp, line)) {
-				std::stringstream ss(line);
-
-				// Converte uma linha para as coordenadas x, y e z
-				ss >> x >> y >> z;
-
-				// Adiciona as coordenadas ao vetor de vértices
-				vertices.push_back(Vertex(x, y, z));
-			}
-
-			fp.close();
+		// Extrai do mapa de ficheiros e vértices, os vértices associados
+		// à string file, caso estes existam
+		try {
+			vertices = mapFileVertices.at(file);
 		}
-		else {
-			errorString.append("Warning: Could not read file ");
-			errorString.append(file);
-			errorString.append("!\n");
+		catch (std::out_of_range) {
+			// Caso o map não possua esse ficheiro deve-se proceder à abertura
+			// do ficheiro e respetiva leitura de vértices
 
-			// Se não se conseguiu abrir bem o ficheiro então o modelo atual 
-			// conta como um modelo que não pode ser processado
-			failedModels++;
+			fp.open(file);
+
+			// Testa se o ficheiro foi bem aberto e inicia a sua leitura
+			if (fp.is_open()) {
+
+				// Lê linha a linha
+				while (getline(fp, line)) {
+					std::stringstream ss(line);
+
+					// Converte uma linha para as coordenadas x, y e z
+					ss >> x >> y >> z;
+
+					// Adiciona as coordenadas ao vetor de vértices
+					vertices.push_back(Vertex(x, y, z));
+				}
+
+				fp.close();
+
+				std::string aux(file);   // String auxliar para a conversão
+
+				// O ficheiro lido e conjunto de vértices são adicionados ao
+				// mapa. Assim, não será necessário proceder-se à leitura deste
+				// ficheiro novamente
+				mapFileVertices.insert(
+					std::pair<std::string, std::vector<Vertex>>(file, vertices));
+			}
+			else {
+				errorString.append("Warning: Could not read file ");
+				errorString.append(file);
+				errorString.append("!\n");
+
+				// Se não se conseguiu abrir bem o ficheiro então o modelo atual 
+				// conta como um modelo que não pode ser processado
+				failedModels++;
+			}
 		}
 
 		return vertices;
