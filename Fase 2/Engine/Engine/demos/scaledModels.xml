@@ -1,17 +1,21 @@
 <scene>
 	<group>
-		<scale X=0.5 Y=0.5 z=0.2/>
-		<group>
-			<translate y=10/>
-			<scale x=5 y=5 Z=5/>
-			<models>
-				<model file="demos/cone.3d" diffr=1/>
-				<model file="demos/ring.3d"/>
-			</models>
-		</group>
+		<translate x=3/>
+		<scale x=1 y=2 Z=2/>
 		<models>
-			<model filE="demos/sphere.3d" diffG=1/>
-			<model file="demos/box.3d" diffB=1 diffg=1/>
+			<model file="demos/sphere.3d" diffr=1/>
+		</models>
+	</group>
+	<group>
+		<translate x = -3/>
+		<scale X=1 Y=0.5 z=1.5/>
+		<models>
+			<model file="demos/sphere.3d" diffG=1/>
 		</models>
 	</group>
 </scene>
+
+
+
+
+
