@@ -169,12 +169,13 @@ public:
 
 				//Inserção dos pontos na estrutura com os resultados
 				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xB, yB, zB));
 				vertices.push_back(Vertex(xC, yC, zC));
+				vertices.push_back(Vertex(xB, yB, zB));
+
 
 				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xC, yC, zC));
 				vertices.push_back(Vertex(xD, yD, zD));
+				vertices.push_back(Vertex(xC, yC, zC));
 			}
 		}
 

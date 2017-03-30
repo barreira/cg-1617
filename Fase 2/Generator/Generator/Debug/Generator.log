@@ -1,2 +1,10 @@
-﻿  main.cpp
-  Generator.vcxproj -> E:\Uminho\Git\cg-1617\Project\Generator\Debug\Generator.exe
+﻿  vertex.cpp
+  sphere.cpp
+  primitive.cpp
+  plane.cpp
+  main.cpp
+  cone.cpp
+  box.cpp
+  Generating Code...
+  Generator.vcxproj -> D:\UM\Informática\3º Ano\2º Semestre\CG\cg-1617\Fase 2\Generator\Debug\Generator.exe
+  Generator.vcxproj -> D:\UM\Informática\3º Ano\2º Semestre\CG\cg-1617\Fase 2\Generator\Debug\Generator.pdb (Full PDB)
