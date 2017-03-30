@@ -63,12 +63,21 @@ class XMLParser::XMLParserImpl {
 	size_t failedModels;  // Número total de modelos que não se conseguiram 
 	                      // processar
 
-	std::stack<bool> modelsInContainer;       // Stack para informar se uma 
-	                                          // scene ou um group já possui, 
-	                                          // ou não, uma tag models  
-	std::stack<size_t> numModelsInContainer;  // Stack que possui a informação
-	                                          // acerca do número de tags 
-	                                          // models numa scene ou num group
+	std::stack<bool> rotatesInContainer;    // Stack para guardar a informação
+	                                        // acerca de um container possuir
+	                                        // ou não uma rotação
+	std::stack<bool> scalesInContainer;     // Stack para guardar a informação
+	                                        // acerca de um container possuir
+	                                        // ou não uma escala
+	std::stack<bool> translatesInContainer;	// Stack para guardar a informação
+	                                        // acerca de um container possuir
+	                                        // ou não uma translação
+	std::stack<bool> somethingInContainer;  // Stack para guardar a informação
+	                                        // acerca de um container possuir
+	                                        // ou não uma qualquer tag
+	std::stack<bool> modelsInContainer;     // Stack para guardar a informação
+	                                        // acerca de um container possuir
+	                                        // ou não uma tag models
 
 	std::vector<GLOperation*> glOperations;   // Vetor de operações em OpenGL
 	std::string errorString;                  // Representação textual de
@@ -110,20 +119,30 @@ class XMLParser::XMLParserImpl {
 
 
 	/**
-	 * Incrementa o número total de tags models no topo da stack 
-	 * numModelsInContainer e modifica o topo da stack modelsInContainer para
-	 * true (já possui um tag models).
+	 * Inicializa as stacks de um container. Sempre que se inicia o parsing
+	 * de um container todas as stacks recebem o valor falso.
 	 */
-	void addModelsInContainer(void)
+	void pushContainerStacks(void)
 	{
-		size_t aux = numModelsInContainer.top();
-
-		numModelsInContainer.pop();
-		numModelsInContainer.push(++aux);
-		modelsInContainer.pop();
-		modelsInContainer.push(true);
+		somethingInContainer.push(false);
+		rotatesInContainer.push(false);
+		scalesInContainer.push(false);
+		translatesInContainer.push(false);
+		modelsInContainer.push(false);
 	}
 
+
+	/**
+	 * Remove-se a informação relativa a um container das stacks auxiliares.
+	 */
+	void popContainerStacks(void)
+	{
+		somethingInContainer.pop();
+		rotatesInContainer.pop();
+		scalesInContainer.pop();
+		translatesInContainer.pop();
+		modelsInContainer.pop();
+	}
 
 
 	/**
@@ -303,8 +322,7 @@ class XMLParser::XMLParserImpl {
 	{
 		glOperations.push_back(new PushMatrix());
 
-		modelsInContainer.push(false);
-		numModelsInContainer.push(0);
+		pushContainerStacks();
 
 		for (TiXmlElement* tag = group->FirstChildElement(); 
 		     tag != NULL && invalidDoc == false; 
@@ -315,8 +333,7 @@ class XMLParser::XMLParserImpl {
 
 		// Como já se processaram os elementos de um group então remove-se
 		// a informação deste nas stacks auxiliares
-		numModelsInContainer.pop();
-		modelsInContainer.pop();
+		popContainerStacks();
 
 		glOperations.push_back(new PopMatrix());
 	}
@@ -446,59 +463,88 @@ class XMLParser::XMLParserImpl {
 
 		// Testa se existe uma tag chamada model
 		if (tagName.compare(MODELS) == 0) {
+			if (somethingInContainer.top() == false) {
+				somethingInContainer.pop();
+				somethingInContainer.push(true);
+			}
 
 			// Se o número de models tags for igual ou superior a 1 então o
 			// parsing termina
-			if (numModelsInContainer.top() >= 1) {
+			if (modelsInContainer.top() == true) {
 				errorString.append("Error: Duplicated models tag in group!\n");
 				invalidDoc = true;
 			}
 			else {
-				addModelsInContainer();
+
+				// O container passa a possuir uma models tag
+				modelsInContainer.pop();
+				modelsInContainer.push(true);
 				parseModels(tag);
 			}
 		}
-		else if (tagName.compare(MODEL) == 0) {
-			parseModel(tag);
-		}
 		else if (tagName.compare(GROUP) == 0) {
+			if (somethingInContainer.top() == false) {
+				somethingInContainer.pop();
+				somethingInContainer.push(true);
+			}
+
 			parseGroup(tag);
 		}
 		else if (tagName.compare(TRANSLATE) == 0) {
-			if (modelsInContainer.top() == true) {
+
+			// Caso já haja uma translate num group ou caso a translate ocorra
+			// depois de uma tag models ou group o parsing termina
+			if (somethingInContainer.top() == true || 
+				translatesInContainer.top() == true) {
 				errorString.append("Error: Misplaced translate tag!\n");
 				invalidDoc = true;
 			}
 			else {
+				translatesInContainer.pop();
+				translatesInContainer.push(true);
+
 				parseTranslate(tag);
 			}
 		}
-
-		// Não faz sentido haver rotates, translates ou scales no final de um
-		// group ou de uma scene
 		else if (tagName.compare(ROTATE) == 0) {
-			if (modelsInContainer.top() == true) {
+
+			// Caso já haja uma rotate num group ou caso a rotate ocorra
+			// depois de uma tag models ou group o parsing termina
+			if (somethingInContainer.top() == true ||
+				rotatesInContainer.top() == true) {
 				errorString.append("Error: Misplaced rotate tag!\n");
 
 				invalidDoc = true;
 			}
 			else {
+				rotatesInContainer.pop();
+				rotatesInContainer.push(true);
+
 				parseRotate(tag);
 			}
 		}
 		else if (tagName.compare(SCALE) == 0) {
-			if (modelsInContainer.top() == true) {
+
+			// Caso já haja uma scale num group ou caso a scale ocorra
+			// depois de uma tag models ou group o parsing termina
+			if (somethingInContainer.top() == true || 
+				scalesInContainer.top() == true) {
 				errorString.append("Error: Misplaced scale tag!\n");
 				invalidDoc = true;
 			}
 			else {
+				scalesInContainer.pop();
+				scalesInContainer.push(true);
+
 				parseScale(tag);
 			}
 		}
 
 		// Apenas são admitidas tags dos tipos mencionados acima
 		else {
-			errorString.append("Error: Invalid tag!\n");
+			errorString.append("Error: ");
+			errorString.append(tagName);
+			errorString.append(" is not a valid tag!\n");
 			invalidDoc = true;
 		}
 	}
@@ -519,8 +565,7 @@ class XMLParser::XMLParserImpl {
 			failedModels++;
 		}
 		else {
-			numModelsInContainer.push(0);
-			modelsInContainer.push(false);
+			pushContainerStacks();
 
 			glOperations.push_back(new PushMatrix());
 
@@ -531,6 +576,8 @@ class XMLParser::XMLParserImpl {
 				
 				parseTag(tag);
 			}
+
+			popContainerStacks();
 
 			glOperations.push_back(new PopMatrix());
 		}
