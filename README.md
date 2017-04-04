@@ -1,5 +1,4 @@
-CG
-==
+# CG
 
 Trabalho prático da U.C. de Computação Gráfica (2016/17)
 
