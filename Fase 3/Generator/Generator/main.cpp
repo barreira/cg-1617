@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 4-4-2017
+ * @version 8-4-2017
  */
 
 
@@ -179,6 +179,7 @@ bool generateCone(std::vector<std::string> params)
 			         (int)arguments.at(2), (int)arguments.at(3));
 	
 		vertices = p->getVertices();
+		indexes = p->getIndexes();
 	}
 
 	return ret;
@@ -223,6 +224,7 @@ bool generateSphere(std::vector<std::string> params)
 			           (int)arguments.at(1), (int)arguments.at(2));
 	
 		vertices = p->getVertices();
+		indexes = p->getIndexes();
 	}
 
 	return ret;

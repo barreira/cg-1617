@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 4-4-2017 
+ * @version 8-4-2017 
  */
 
 
@@ -30,7 +30,7 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE "demos/boxdiv.xml" 
+#define XML_FILE "demos/solarsystem.xml" 
 
 #define FRONT_AND_BACK 1  // Desenhar a parte da frente e de trás de
                           // uma primitiva

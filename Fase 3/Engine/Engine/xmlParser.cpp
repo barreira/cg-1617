@@ -8,8 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 4-04-2017
- * TODO: Tratar da otimização de ficheiros repetidos.
+ * @version 8-04-2017
  */
 
 
@@ -88,6 +87,9 @@ class XMLParser::XMLParserImpl {
 
 	// Map que associa o nome de um ficheiro a um conjunto de vértices
 	std::map<std::string, std::vector<GLfloat>> mapFileVertices;
+
+	// Map que associa o nome de um ficheiro a um conjunto de índices
+	std::map<std::string, std::vector<size_t>> mapFileIndexes;
 
 
 	/**
@@ -173,14 +175,16 @@ class XMLParser::XMLParserImpl {
 
 		bool indexesMode = false;
 
-		// Extrai do mapa de ficheiros e vértices, os vértices associados
+		// Extrai dos mapas, os vértices e os índices associados
 		// à string file, caso estes existam
 		try {
 			vertices = mapFileVertices.at(file);
+			indexes = mapFileIndexes.at(file);
 		}
 		catch (std::out_of_range) {
-			// Caso o map não possua esse ficheiro deve-se proceder à abertura
-			// do ficheiro e respetiva leitura de vértices
+			// Caso os maps não possua esse ficheiro deve-se proceder à 
+			// abertura do ficheiro e respetiva leitura dos vértices e dos
+			// índices
 
 			fp.open(file);
 
@@ -219,11 +223,14 @@ class XMLParser::XMLParserImpl {
 
 				std::string aux(file);   // String auxliar para a conversão
 
-				// O ficheiro lido e conjunto de vértices são adicionados ao
-				// mapa. Assim, não será necessário proceder-se à leitura deste
-				// ficheiro novamente
+				// O ficheiro lido e conjunto de vértices e índices são 
+				// adicionados aos mapas. Assim, não será necessário 
+				// proceder-se à leitura deste ficheiro novamente
 				mapFileVertices.insert(std::pair<std::string, 
 					                   std::vector<GLfloat>>(file, vertices));
+
+				mapFileIndexes.insert(std::pair < std::string,
+					                  std::vector < size_t >> (file, indexes));
 			}
 			else {
 				errorString.append("Warning: Could not read file ");

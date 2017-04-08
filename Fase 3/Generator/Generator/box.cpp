@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 4-4-2017
+ * @version 8-4-2017
  */
 
 
@@ -23,9 +23,9 @@ class Box::BoxImpl {
 	float divZ;     // Dimensão de uma divisão da caixa no eixo dos zz
 	float centerX;  // Coordenada x do centro da caixa
 	float centerY;  // Coordenada y do centro da caixa
-	float centerZ;  // Coordenada z do centro da caix
+	float centerZ;  // Coordenada z do centro da caixa
 	int numDiv;     // Número de divisões da caixa
-	size_t index;   // Índice atual do conjunto de índices.
+	size_t index;   // Índice atual do conjunto de índices
 
 
 	/**
@@ -55,10 +55,15 @@ class Box::BoxImpl {
 		                 std::vector<Vertex>& vertices,
 		                 std::vector<size_t>& indexes)
 	{
+		int a = 0;
+		int b = 0;
+		float i = x;
+		float j = y;
+
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (float i = x; i < dimX - 0.000001f; i += divX) {
-			for (float j = y; j < dimY - 0.000001f; j += divY) {
+		for (a = 0; a < numDiv; a++, i += divX) {
+			for (b = 0; b < numDiv; b++, j += divY) {
 
 				// Face da frente
 
@@ -94,6 +99,8 @@ class Box::BoxImpl {
 
 				index += 8;
 			}
+
+			j = y;
 		}
 	}
 
@@ -125,10 +132,15 @@ class Box::BoxImpl {
 		                 std::vector<Vertex>& vertices,
 		                 std::vector<size_t>& indexes)
 	{
+		int a = 0;
+		int b = 0;
+		float i = x;
+		float j = z;
+
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (float i = x; i < dimX - 0.000001f; i += divX) {
-			for (float j = z; j < dimZ - 0.000001f; j += divZ) {
+		for (a = 0; a < numDiv; a++, i += divX) {
+			for (b = 0; b < numDiv; b++, j += divZ) {
 
 				// Face de cima
 
@@ -163,6 +175,8 @@ class Box::BoxImpl {
 
 				index += 8;
 			}
+
+			j = z;
 		}
 	}
 
@@ -194,10 +208,15 @@ class Box::BoxImpl {
 		                 std::vector<Vertex>& vertices,
 		                 std::vector<size_t>& indexes)
 	{
+		int a = 0;
+		int b = 0;
+		float i = y;
+		float j = z;
+
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (float i = y; i < dimY - 0.000001f; i += divY) {
-			for (float j = z; j < dimZ - 0.000001f; j += divZ) {
+		for (a = 0; a < numDiv; a++, i += divY) {
+			for (b = 0; b < numDiv; b++, j += divZ) {
 
 				// Face da direita
 
@@ -232,6 +251,8 @@ class Box::BoxImpl {
 
 				index += 8;
 			}
+
+			j = z;
 		}
 	}
 
@@ -373,8 +394,8 @@ public:
 	 * @param indexes  Conjunto de índices.
 	 * @return O resultado é guardado em vertices e em indexes.
 	 */
-	void generateVertices(std::vector<Vertex>& vertices,
-		                  std::vector<size_t>& indexes)
+	void generateBox(std::vector<Vertex>& vertices,
+		             std::vector<size_t>& indexes)
 	{
 		// Gera os vértices das faces XY, XZ e YZ
 		generateFacesXY(0, 0, dimZ, vertices, indexes);
@@ -518,7 +539,7 @@ void Box::generateVertices(void)
 	std::vector<Vertex> vertices;
 	std::vector<size_t> indexes;
 
-	pimpl->generateVertices(vertices, indexes);
+	pimpl->generateBox(vertices, indexes);
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));

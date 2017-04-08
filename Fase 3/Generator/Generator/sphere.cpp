@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 4-4-2017
+ * @version 8-4-2017
  */
 
 
@@ -119,12 +119,13 @@ public:
 	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de 
 	 * todos os vértices que definem a esfera.
 	 *
-	 * @return Vetor com as coordenadas dos vértices.
+	 * @param vertices Conjunto de vértices.
+	 * @param indexes  Conjunto de índices.
+	 * @return O resultado é guardado em vertices e em indexes.
 	 */
-	std::vector<Vertex> generateSphere(void)
+	void generateSphere(std::vector<Vertex>& vertices,
+		                std::vector<size_t>& indexes)
 	{
-		std::vector<Vertex> vertices;	// Coordenadas dos pontos a devolver
-		
 		float angleAlfa = 0;	// Ângulo atual no plano XZ
 		float angleBeta = 0;	// Ângulo atual no plano XY
 
@@ -140,6 +141,7 @@ public:
 				
 		float xD, yD, zD;		//Ponto D - canto superior esquerdo
 
+		size_t index = 0;       // Índice atual do conjunto de índices
 
 		for (size_t i = 0; i < (size_t)stacks; i++) {
 			angleBeta = ((float) beta * i);			//Cálculo do ângulo Beta
@@ -176,14 +178,18 @@ public:
 				vertices.push_back(Vertex(xA, yA, zA));
 				vertices.push_back(Vertex(xB, yB, zB));
 				vertices.push_back(Vertex(xC, yC, zC));
-
-				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xC, yC, zC));
 				vertices.push_back(Vertex(xD, yD, zD));
+
+				indexes.push_back(index);
+				indexes.push_back(index + 1);
+				indexes.push_back(index + 2);
+				indexes.push_back(index);
+				indexes.push_back(index + 2);
+				indexes.push_back(index + 3);
+
+				index += 4;
 			}
 		}
-
-		return vertices;
 	}
 
 
@@ -297,12 +303,17 @@ void Sphere::setSlices(int slices)
  */
 void Sphere::generateVertices(void)
 {
-	// Chama o método que cálcula as coordenadas da esfera
-	std::vector<Vertex> vertices = pimpl->generateSphere();
+	std::vector<Vertex> vertices;
+	std::vector<size_t> indexes;
 
-	// Adiciona os vértices laterais ao vetor de vértices 
+	pimpl->generateSphere(vertices, indexes);
+
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));
+	}
+
+	for (size_t i = 0; i < indexes.size(); i++) {
+		addIndex(indexes.at(i));
 	}
 }
 

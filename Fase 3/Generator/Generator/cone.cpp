@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 4-4-2017
+ * @version 8-4-2017
  */
 
 
@@ -25,6 +25,153 @@ class Cone::ConeImpl {
 	float stackHeight;	// altura de uma stack
 	int slices;		    // número de slices
 	int stacks;		    // número de stacks
+	size_t index;       // Índice atual do conjunto de índices
+
+	
+	/**
+	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de
+	 * todos os pontos que pertencem à base do cone.
+	 *
+	 * @param vertices Conjunto de vértices.
+	 * @param indexes  Conjunto de índices.
+	 * @return O resultado é guardado em vertices e em indexes.
+	 */
+	void generateBase(std::vector<Vertex>& vertices,
+		              std::vector<size_t>& indexes)
+	{
+		float angle = 0;	// Ângulo ao centro
+
+
+		// Definição do primeiro ponto da base que é utilizado como 
+		// referência na contrução
+
+		float x = 0;					// Coordenada em X
+		float y = (-height) / 4;		// Coordenada em Y
+		float z = radius;				// Coordenada em Z
+		bool firstIt = true;            // Flag que verifica se é a primeira
+		                                // iteração da geração da base
+
+		vertices.push_back(Vertex(x, y, z));
+
+		// Definição do centro da base
+		vertices.push_back(Vertex(0, y, 0));
+
+
+
+		// Para cada slice utilizada calculam-se as coordenadas dos pontos 
+		// que a caracterizam. 
+		for (size_t i = 0; i < (size_t)slices; i++) {
+			
+			// Primeiro ponto do triângulo (índice da iteração anterior)
+			indexes.push_back(index);
+
+			// Segundo ponto do triângulo que é sempre o centro da base 
+			indexes.push_back(1);
+
+			if (firstIt == true) {
+				firstIt = false;
+				index++;
+			}
+
+			// Cálculo do ângulo ao centro do terceiro ponto
+			// que também é o ângulo ao centro do primeiro
+			// ponto do triângulo da próxima slice 
+			angle += alfa;
+
+			// Cálculo das coordenadas do terceiro ponto do triângulo
+			x = radius * sin(angle);
+			z = radius * cos(angle);
+
+			// Inserção do terceiro ponto
+			vertices.push_back(Vertex(x, y, z));
+			indexes.push_back(++index);
+		}
+
+		// Final dos índices da base
+		index++;
+	}
+
+
+	/**
+	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de
+	 * todos os pontos que pertencem à superfície lateral do cone.
+	 *
+	 * @param vertices Conjunto de vértices.
+	 * @param indexes  Conjunto de índices.
+	 * @return O resultado é guardado em vertices e em indexes.
+	 */
+	void generateSides(std::vector<Vertex>& vertices,
+		               std::vector<size_t>& indexes)
+	{
+		float angle = 0;				// Ângulo ao centro
+
+		// Coordenadas de referência
+		float lowerR = 0;		// Raio do círculo dos 2 pontos inferiores
+		float upperR = 0;		// Raio do círculo dos 2 pontos superiores
+		float lowerH = 0;		// Coordenada em Y dos 2 pontos inferiores
+		float upperH = 0;		// Coordenada em Y dos 2 pontos superiores
+
+		// Pontos de referência para aplicar-se a regra da mão direita
+		float xA, yA, zA;		//Ponto A - canto inferior esquerdo
+		float xB, yB, zB;		//Ponto B - canto inferior direito
+		float xC, yC, zC;		//Ponto C - canto superior direito
+		float xD, yD, zD;		//Ponto D - canto superior esquerdo
+
+		// Para cada stack, calcula-se as alturas em que cada uma
+		// está compreendida e os raios dos círculos superior
+		// e inferior onde está inserida
+		for (size_t i = 0; i < (size_t)stacks; i++) {
+			lowerH = i * stackHeight;
+			upperH = (i + 1) * stackHeight;
+
+			lowerR = radius - radius * lowerH / height;
+			upperR = radius - radius * upperH / height;
+
+			// Percorrem-se as slices e calculam-se as coordenadas
+			// dos pontos de referência para a stack e slice atuais
+			for (size_t j = 0; j < (size_t)slices; j++) {
+				angle = alfa * j;
+
+				// Cálculo das novas coordenadas do ponto A
+				xA = lowerR * sin(angle);
+				yA = lowerH - (height / 4);
+				zA = lowerR * cos(angle);
+
+
+				// Cálculo das novas coordenadas do ponto B
+				xB = lowerR * sin(angle + alfa);
+				yB = lowerH - (height / 4);
+				zB = lowerR * cos(angle + alfa);
+
+				// Cálculo das novas coordenadas do ponto C
+				xC = upperR * sin(angle + alfa);
+				yC = upperH - (height / 4);
+				zC = upperR * cos(angle + alfa);
+
+				// Cálculo das novas coordenadas do ponto D
+				xD = upperR * sin(angle);
+				yD = upperH - (height / 4);
+				zD = upperR * cos(angle);
+
+
+				// Inserção dos pontos na estrutura com os resultados
+
+				vertices.push_back(Vertex(xA, yA, zA));
+				vertices.push_back(Vertex(xB, yB, zB));
+				vertices.push_back(Vertex(xC, yC, zC));
+				vertices.push_back(Vertex(xD, yD, zD));
+
+				indexes.push_back(index);
+				indexes.push_back(index + 1);
+				indexes.push_back(index + 2);
+				indexes.push_back(index);
+				indexes.push_back(index + 2);
+				indexes.push_back(index + 3);
+
+				index += 4;
+			}
+		}
+	}
 
 
 public:
@@ -36,6 +183,7 @@ public:
 	{
 		radius = height = stackHeight = alfa = 0;
 		slices = stacks = 0;
+		index = 0;
 	}
 
 
@@ -59,6 +207,8 @@ public:
 		
 		// Cálculo da altura de uma stack
 		stackHeight = height / ((float) stacks);  
+		
+		index = 0;
 	}
 
 
@@ -157,131 +307,19 @@ public:
 
 
 	/**
-	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de 
-	 * todos os pontos que pertencem à base do cone.
+	 * Gera o conjunto de vértices de um cone, bem como o conjunto de índices
+	 * associado a este vetor.
 	 *
-	 * @return Vetor com as coordenadas dos pontos.
+	 * @param vertices Conjunto de vértices.
+	 * @param indexes  Conjunto de índices.
+	 * @return O resultado é guardado em vertices e em indexes.
 	 */
-	std::vector<Vertex> generateBase(void)
+	void generateCone(std::vector<Vertex>& vertices,
+		              std::vector<size_t>& indexes)
 	{
-		std::vector<Vertex> vertices;	// Coordenadas dos pontos a devolver
-		float angle = 0;				// Ângulo ao centro
-		
-
-	    // Definição do primeiro ponto da base que é utilizado como 
-		// referência na contrução
-
-		float x = 0;					// Coordenada em X
-		float y = (-height) / 4;		// Coordenada em Y
-		float z = radius;				// Coordenada em Z
-		
-
-		// Definição do centro da base
-		Vertex center(0, y, 0);
-
-
-		// Para cada slice utilizada calculam-se as coordenadas dos pontos 
-		// que a caracterizam. 
-		
-		for (size_t i = 0; i < (size_t)slices; i++) {
-			// Primeiro ponto do triângulo
-			vertices.push_back(Vertex(x, y, z));	
-			
-			// Segundo ponto do triângulo que é sempre o centro da base 
-			vertices.push_back(center);				
-			
-			// Cálculo do ângulo ao centro do terceiro ponto
-			// que também é o ângulo ao centro do primeiro
-			// ponto do triângulo da próxima slice 
-			angle += alfa; 				
-
-			// Cálculo das coordenadas do terceiro ponto do triângulo
-			x = radius * sin(angle);				
-			z = radius * cos(angle);			
-			
-			// Inserção do terceiro ponto
-			vertices.push_back(Vertex(x, y, z));	
-		}
-
-		return vertices;						
-	}
-
-
-	/**
-	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de 
-	 * todos os pontos que pertencem à superfície lateral do cone.
-	 *
-	 * @return Vetor com as coordenadas dos pontos.
-	 */
-	std::vector<Vertex> generateSides(void)
-	{
-		std::vector<Vertex> vertices;	// Coordenadas dos pontos a devolver
-		float angle = 0;				// Ângulo ao centro
-
-
-		// Coordenadas de referência
-		float lowerR = 0;		// Raio do círculo dos 2 pontos inferiores
-		float upperR = 0;		// Raio do círculo dos 2 pontos superiores
-		float lowerH = 0;		// Coordenada em Y dos 2 pontos inferiores
-		float upperH = 0;		// Coordenada em Y dos 2 pontos superiores
-
-
-		// Pontos de referência para aplicar-se a regra da mão direita
-		float xA, yA, zA;		//Ponto A - canto inferior esquerdo
-		float xB, yB, zB;		//Ponto B - canto inferior direito
-		float xC, yC, zC;		//Ponto C - canto superior direito
-		float xD, yD, zD;		//Ponto D - canto superior esquerdo
-
-
-		// Para cada stack, calcula-se as alturas em que cada uma
-		// está compreendida e os raios dos círculos superior
-		// e inferior onde está inserida
-		for (size_t i = 0; i < (size_t)stacks; i++) {
-			lowerH = i * stackHeight;
-			upperH = (i + 1) * stackHeight;
-
-			lowerR = radius - radius * lowerH / height;
-			upperR = radius - radius * upperH / height;
-
-			// Percorrem-se as slices e calculam-se as coordenadas
-			// dos pontos de referência para a stack e slice atuais
-			for (size_t j = 0; j < (size_t)slices; j++) {
-				angle =  alfa * j;
-
-				// Cálculo das novas coordenadas do ponto A
-				xA = lowerR * sin(angle);
-				yA = lowerH - (height / 4);
-				zA = lowerR * cos(angle);
-
-
-				// Cálculo das novas coordenadas do ponto B
-				xB = lowerR * sin(angle + alfa);
-				yB = lowerH - (height / 4);
-				zB = lowerR * cos(angle + alfa);
-
-				// Cálculo das novas coordenadas do ponto C
-				xC = upperR * sin(angle + alfa);
-				yC = upperH - (height / 4);
-				zC = upperR * cos(angle + alfa);
-
-				// Cálculo das novas coordenadas do ponto D
-				xD = upperR * sin(angle);
-				yD = upperH - (height / 4);
-				zD = upperR * cos(angle);
-
-
-				// Inserção dos pontos na estrutura com os resultados
-				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xB, yB, zB));		
-				vertices.push_back(Vertex(xC, yC, zC));		
-
-				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xC, yC, zC));
-				vertices.push_back(Vertex(xD, yD, zD));
-			}
-		}
-	
-		return vertices;
+		// Gera os vértices da base e dos lados do cone
+		generateBase(vertices, indexes);
+		generateSides(vertices, indexes);
 	}
 
 
@@ -418,20 +456,17 @@ void Cone::setSlices(int slices)
  */
 void Cone::generateVertices(void)
 {
-	// Chama o método que cálcula as coordenadas da base
-	std::vector<Vertex> verticesBase = pimpl->generateBase();
+	std::vector<Vertex> vertices;
+	std::vector<size_t> indexes;
 
-	// Chama o método que cálcula as coordenadas da superfície lateral
-	std::vector<Vertex> verticesSides = pimpl->generateSides();
+	pimpl->generateCone(vertices, indexes);
 
-	// Adiciona os vértices da base ao vetor de vértices 
-	for (size_t i = 0; i < verticesBase.size(); i++) {
-		addVertex(verticesBase.at(i));
+	for (size_t i = 0; i < vertices.size(); i++) {
+		addVertex(vertices.at(i));
 	}
 
-	// Adiciona os vértices laterais ao vetor de vértices 
-	for (size_t i = 0; i < verticesSides.size(); i++) {
-		addVertex(verticesSides.at(i));
+	for (size_t i = 0; i < indexes.size(); i++) {
+		addIndex(indexes.at(i));
 	}
 }
 
