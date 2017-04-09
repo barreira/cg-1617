@@ -8,7 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 8-04-2017
+ * @version 9-04-2017
  */
 
 
@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <fstream>
+#include <ctime>
 #include "xmlParser.h"
 #include "tinyxml.h"
 #include "popMatrix.h"
@@ -34,11 +35,17 @@
 #define MODELS "models"
 
 /* Tag de model e atributos */
-#define MODEL "model"
-#define FILE  "file"
-#define DIFFR "diffr"
-#define DIFFG "diffg"
-#define DIFFB "diffb"
+#define MODEL  "model"
+#define FILE   "file"
+#define DIFFR  "diffr"
+#define DIFFG  "diffg"
+#define DIFFB  "diffb"
+#define RAND   "rand"
+#define XZMINR "xzminr"
+#define XZMAXR "xzmaxr"
+#define YMINR  "yminr"
+#define YMAXR  "ymaxr"
+
 
 /* Tag de rotate e atributos */
 #define ROTATE "rotate"
@@ -53,6 +60,9 @@
 #define X         "x"
 #define Y         "y"
 #define Z         "z"
+
+
+const float PI = 3.14159265358979323846f;  // Valor da constante pi
 
 
 class XMLParser::XMLParserImpl {
@@ -132,6 +142,95 @@ class XMLParser::XMLParserImpl {
 		scalesInContainer.push(false);
 		translatesInContainer.push(false);
 		modelsInContainer.push(false);
+	}
+
+
+	/**
+	 * Gera um valor real aleatório entre 0 e 1;
+	 */
+	float getRandom(void)
+	{
+		float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+		return r;
+	}
+
+
+	/**
+	 * Gera uma posição (x, y, z) aleatória dentro da área da gama de valores
+	 * recebidos.
+	 * 
+	 * @param xzMinR Raio xz mínimo da área a serem geradas as coordenadas x 
+	 *               e z.
+	 * @param xzMaxR Raio xz máximo da área a serem geradas as coordenadas x e
+	 *               e z.
+	 * @param yMinR  Raio y mínimo da área a ser gerada uma coordenada y.
+	 * @param yMax   Raio y máximo da área a ser gerada uma coordenada y.
+	 */
+	void generateRandomPos(float xzMinR, float xzMaxR, 
+		                   float yMinR, float yMaxR)
+	{
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		
+		float xzArea = xzMaxR - xzMinR;
+		float yArea = yMaxR - yMinR;
+
+		float xzAngle = getRandom() * 360.0;
+		float xzR = (getRandom() * xzArea) + xzMinR;
+
+		float yAngle = getRandom() * 360.0 - 180.0;
+		float yR = (getRandom() * yArea) + yMinR;
+
+		x = xzR * sin(xzAngle * PI / 180.0);
+		y = yR * cos(yAngle * PI / 180.0);
+		z = xzR * cos(xzAngle * PI / 180.0);
+
+		glOperations.push_back(new Translation(x, y, z));
+	}
+
+
+	/**
+	 * Testa se os valores recebidos para a geração de posições (x, y, z) 
+	 * aleatórias são válidos.
+	 *
+	 * @param existsXZ Indica se foi fornecida a área máxima em x e z.
+	 * @param existsY  Indica se foi fornecida a área mínima em y.
+	 * @param minXZ    Área mínima em x e z.
+	 * @param maxXZ    Áream máxima em x e z.
+	 * @param minY     Área mínima em y.
+	 * @param maxY     Áream máxima em y.
+	 */
+	bool randPosError(bool existsXZ, bool existsY, float minXZ, float maxXZ,
+		              float minY, float maxY)
+	{
+		if (existsXZ == false && existsY == false) {
+			errorString.append("Error: No area values!\n");
+			invalidDoc = true;
+		}
+		else if (minXZ != 0 && existsXZ == false) {
+			errorString.append("Error: MaxXZ area is required!\n");
+			invalidDoc = true;
+		}
+		else if (minY != 0 && existsY == false) {
+			errorString.append("Error: MaxY area is required!\n");
+			invalidDoc = true;
+		}
+		else if (minXZ >= maxXZ) {
+			errorString.append("Error: MaxXZ area must be greater than MinXZ area!\n");
+			invalidDoc = true;
+		}
+		else if (minY >= maxY) {
+			errorString.append("Error: MaxY area must be greater than MinY area!\n");
+			invalidDoc = true;
+		}
+		else if (minXZ < 0 || maxXZ < 0 || minY < 0 || maxY < 0) {
+			errorString.append("Error: Area values must be positive!\n");
+			invalidDoc = true;
+		}
+
+		return invalidDoc;
 	}
 
 
@@ -261,6 +360,22 @@ class XMLParser::XMLParserImpl {
 		float diffR = 0;  // Valor da difusão em vermelho 
 		float diffG = 0;  // Valor da difusão em verde 
 		float diffB = 0;  // Valor da difusão em azul 
+		
+		size_t rand = 0;          // Quantidade de modelos a serem gerados 
+		                          // em posições aleatórias
+		bool existsXZMax = false; // Determina se foi fornecida a área máxima
+		                          // para a geração das coordenas x e z 
+		                          // aleatórias
+		bool existsYMax = false;  // Determina se foi fornecida a área máxima
+		                          // para a geração da coordenada y aleatória
+		float xzMinR = 0;         // Área mínima para a geração das coodenadas
+		                          // aleatórias x e z
+		float xzMaxR = 0;         // Área máxima para a geração das coodenadas
+		                          // aleatórias x e z
+		float yMinR = 0;          // Área mínima para a geração da coodenada
+		                          // aleatória y
+		float yMaxR = 0;          // Área máxima para a geração da coodenada
+		                          // aleatória y
 
 		size_t numColors = 0;  // Número de atributos relativamente a cores
 
@@ -297,6 +412,28 @@ class XMLParser::XMLParserImpl {
 				ss >> diffB;
 				numColors++;
 			}
+			else if(attName.compare(RAND) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> rand;
+			}
+			else if (attName.compare(XZMINR) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> xzMinR;
+			}
+			else if (attName.compare(XZMAXR) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> xzMaxR;
+				existsXZMax = true;
+			}
+			else if (attName.compare(YMINR) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> yMinR;
+				existsYMax = true;
+			}
+			else if (attName.compare(YMAXR) == 0) {
+				std::stringstream ss(a->Value());
+				ss >> yMaxR;
+			}
 			else {
 				errorString.append("Error: Invalid model attribute!\n");
 				invalidDoc = true;
@@ -308,8 +445,27 @@ class XMLParser::XMLParserImpl {
 			diffR = diffG = diffB = 1;
 		}
 
-		glOperations.push_back(new TrianglesDrawing(vertices, indexes,
-			                                        diffR, diffG, diffB));
+		if (rand > 0) {
+			if (randPosError(existsXZMax, existsYMax, xzMinR, 
+				             xzMaxR, yMinR, yMaxR) == false) {
+				for (size_t i = 0; i < rand; i++) {
+					glOperations.push_back(new PushMatrix());
+					generateRandomPos(xzMinR, xzMaxR, yMinR, yMaxR);
+					
+					glOperations.push_back(new TrianglesDrawing(vertices, 
+						                                        indexes,
+						                                        diffR, 
+						                                        diffG, 
+						                                        diffB));
+					
+					glOperations.push_back(new PopMatrix());
+				}
+			}
+		}
+		else {
+			glOperations.push_back(new TrianglesDrawing(vertices, indexes,
+				                                        diffR, diffG, diffB));
+		}
 	}
 
 
@@ -647,6 +803,7 @@ public:
 		numModels = failedModels = 0;
 		errorString = "";
 		fileName = "";
+		srand(time(NULL));
 	}
 
 
@@ -661,6 +818,7 @@ public:
 		numModels = failedModels = 0;
 		errorString = "";
 		this->fileName = fileName;
+		srand(time(NULL));
 
 		// Abre o ficheiro com o nome fileName para ser efetuado o seu parsing
 		if (openXMLFile() == true) {

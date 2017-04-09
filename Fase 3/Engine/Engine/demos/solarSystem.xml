@@ -45,6 +45,11 @@
 		</models>
 	</group>
 	<group>
+		<models>
+			<model file="demos/box.3d" diffR=0.4 diffG=0.2 diffB=0 rand=1000 xzMinR=20 xzMaxR=22 yMaxR=1/>
+		</models>
+	</group>
+	<group>
 		<rotate angle=-170 axisY=1/>
 		<translate z=-28/>
 		<models>
