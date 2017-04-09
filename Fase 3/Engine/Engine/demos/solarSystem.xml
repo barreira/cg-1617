@@ -46,7 +46,7 @@
 	</group>
 	<group>
 		<models>
-			<model file="demos/box.3d" diffR=0.4 diffG=0.2 diffB=0 rand=1000 xzMinR=20 xzMaxR=22 yMaxR=1/>
+			<model file="demos/asteroid.3d" diffR=0.4 diffG=0.2 diffB=0 rand=1000 xzMinR=20 xzMaxR=22 yMaxR=1/>
 		</models>
 	</group>
 	<group>
@@ -60,9 +60,15 @@
 		<rotate angle=-190 axisY=1/>
 		<translate z=-33/>
 		<scale x=0.8 y=0.8 z=0.8/>
+		<group>
+			<scale x=0.4 y=0.4 z=0.4/>
+			<models>
+				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=500 xzMaxR=8.125 xzMinR=7.25/>
+				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=500 xzMaxR=9  xzMinR=8.5/>
+			</models>
+		</group>
 		<models>
 			<model file="demos/sphere.3d" diffR=1 diffG=1 diffB=0.8/>
-			<model file="demos/plane.3d" diffR=0.37 diffG=0.37 diffB=0.37/>
 		</models>
 	</group>
 	<group>

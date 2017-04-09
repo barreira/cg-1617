@@ -217,11 +217,11 @@ class XMLParser::XMLParserImpl {
 			errorString.append("Error: MaxY area is required!\n");
 			invalidDoc = true;
 		}
-		else if (minXZ >= maxXZ) {
+		else if (minXZ >= maxXZ && existsXZ == true) {
 			errorString.append("Error: MaxXZ area must be greater than MinXZ area!\n");
 			invalidDoc = true;
 		}
-		else if (minY >= maxY) {
+		else if (minY >= maxY && existsY == true) {
 			errorString.append("Error: MaxY area must be greater than MinY area!\n");
 			invalidDoc = true;
 		}
@@ -445,7 +445,7 @@ class XMLParser::XMLParserImpl {
 			diffR = diffG = diffB = 1;
 		}
 
-		if (rand > 0) {
+		if (rand > 0 && invalidDoc == false) {
 			if (randPosError(existsXZMax, existsYMax, xzMinR, 
 				             xzMaxR, yMinR, yMaxR) == false) {
 				for (size_t i = 0; i < rand; i++) {
