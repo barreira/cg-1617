@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 26-03-2017
+ * @version 12-04-2017
  */
 
 
@@ -16,10 +16,24 @@
 
 
 class Rotation::RotationImpl {
-	float angle;  // Ângulo de uma rotação
-	float x;      // Valor de uma rotação em x
-	float y;      // Valor de uma rotação em y
-	float z;      // Valor de uma rotação em z
+	float angle;          // Ângulo de uma rotação
+	float x;              // Valor de uma rotação em x
+	float y;              // Valor de uma rotação em y
+	float z;              // Valor de uma rotação em z
+	float totalTime;
+	float timeAcc;
+	size_t elapsedTime;
+
+
+	size_t getDeltaTime(void)
+	{
+		size_t actualTime = glutGet(GLUT_ELAPSED_TIME);
+		size_t deltaTime = actualTime - elapsedTime;
+
+		elapsedTime = actualTime;
+
+		return deltaTime;
+	}
 
 
 public:
@@ -31,6 +45,8 @@ public:
 	RotationImpl(void)
 	{
 		angle = x = y = z = 0.0;
+		totalTime = timeAcc = 0.0;
+		elapsedTime = 0;
 	}
 
 
@@ -48,8 +64,22 @@ public:
 		this->x = x;
 		this->y = y;
 		this->z = z;
+		totalTime = elapsedTime = 0;
+		timeAcc = 0;
 	}
 
+
+	RotationImpl(float angle, float totalTime, float x, float y, float z)
+	{
+		this->angle = angle;
+		this->totalTime = totalTime;
+		this->x = x;
+		this->y = y;
+		this->z = z;
+
+		timeAcc = 0.0;
+		elapsedTime = 0;
+	}
 
 	/**
 	 * Devolve o valor do ângulo de uma rotação.
@@ -57,6 +87,12 @@ public:
 	float getAngle(void)
 	{
 		return angle;
+	}
+
+
+	float getTotalTime(void)
+	{
+		return totalTime;
 	}
 
 
@@ -96,6 +132,14 @@ public:
 	}
 
 
+	void setTotalTime(float totalTime)
+	{
+		this->totalTime = totalTime;
+		timeAcc = 0.0;
+		elapsedTime = 0;
+	}
+
+
 	/**
 	 * Altera o valor de uma rotação em x.
 	 */
@@ -120,6 +164,21 @@ public:
 	void setZ(float z)
 	{
 		this->z = z;
+	}
+
+
+	void execute(void)
+	{
+		size_t deltaTime = getDeltaTime();
+		float auxTime = ((float)deltaTime) / 1000.0;
+
+		timeAcc += auxTime;
+
+		if (timeAcc >= (float)totalTime) {
+			timeAcc = 0.0;
+		}
+
+		glRotatef(timeAcc * 360.0 / ((float)totalTime), x, y, z);
 	}
 
 
@@ -149,9 +208,9 @@ Rotation::Rotation(void)
  * @param y     Valor de uma rotação em y.
  * @param z     Valor de uma rotação em z.
  */
-Rotation::Rotation(float angle, float x, float y, float z)
+Rotation::Rotation(float angle, float totalTime, float x, float y, float z)
 {
-	pimpl = new RotationImpl(angle, x, y, z);
+	pimpl = new RotationImpl(angle, totalTime, x, y, z);
 }
 
 
@@ -163,7 +222,9 @@ Rotation::Rotation(float angle, float x, float y, float z)
  */
 Rotation::Rotation(const Rotation& r)
 {
-	pimpl = new RotationImpl(r.pimpl->getAngle(), r.pimpl->getX(), 
+	pimpl = new RotationImpl(r.pimpl->getAngle(), 
+		                     r.pimpl->getTotalTime(),
+						     r.pimpl->getX(), 
 		                     r.pimpl->getY(), r.pimpl->getZ());
 }
 
@@ -174,6 +235,12 @@ Rotation::Rotation(const Rotation& r)
 float Rotation::getAngle(void)
 {
 	return pimpl->getAngle();
+}
+
+
+float Rotation::getTotalTime(void)
+{
+	return pimpl->getTotalTime();
 }
 
 
@@ -213,6 +280,12 @@ void Rotation::setAngle(float angle)
 }
 
 
+void Rotation::setTotalTime(float totalTime)
+{
+	pimpl->setTotalTime(totalTime);
+}
+
+
 /**
  * Altera o valor de uma rotação em x.
  */
@@ -246,7 +319,12 @@ void Rotation::setZ(float z)
  */
 void Rotation::execute(void)
 {
-	glRotatef(pimpl->getAngle(), pimpl->getX(), pimpl->getY(), pimpl->getZ());
+	if (pimpl->getTotalTime() > 0) {
+		pimpl->execute();
+	}
+	else {
+		glRotatef(pimpl->getAngle(), pimpl->getX(), pimpl->getY(), pimpl->getZ());
+	}
 }
 
 

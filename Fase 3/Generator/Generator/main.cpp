@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 8-4-2017
+ * @version 12-4-2017
  */
 
 
@@ -262,6 +262,82 @@ bool generatePrimitive(std::string primitive, std::vector<std::string> params)
 }
 
 
+bool readBezierPatches(char* fileName)
+{
+	bool ret = true;
+
+	std::fstream fp;
+
+	std::string line;      // String auxiliar que irá corresponder a uma 
+						   // linha do ficheiro
+	std::stringstream ss;  // String auxiliar para converter texto em 
+						   // valores numéricos
+
+	float coord[3];
+
+	size_t coordIndex = 0;
+	size_t index = 0;
+	size_t numPatches = 0;
+	size_t lineNumber = 0;
+
+	bool firstLine = true;
+
+	fp.open(fileName);
+
+	// Testa se o ficheiro foi bem aberto e inicia a sua leitura
+	if (fp.is_open()) {
+
+		// Lê linha a linha
+		while (getline(fp, line)) {
+			std::stringstream ss(line);
+
+			// Entra em modo de leitura de índices caso encontre uma
+			// linha vazia
+			if (firstLine == true) {
+				ss >> numPatches;
+				firstLine = false;
+			}
+			
+			if (lineNumber >= 1 && lineNumber <= numPatches) {
+				std::string token;
+
+				while (std::getline(ss, token, ',')) {
+					std::stringstream aux(token);
+					aux >> index;
+					indexes.push_back(index);
+				}
+			}
+			
+			if (lineNumber > numPatches + 1) {
+				std::string token;
+
+				while (std::getline(ss, token, ',')) {
+					std::stringstream aux(token);
+					aux >> coord[coordIndex];
+
+					// Adiciona as coordenadas ao vetor de vértices
+
+					if (++coordIndex == 3) {
+						vertices.push_back(Vertex(coord[0], coord[1], coord[2]));
+						coordIndex = 0;
+					}
+				}
+			}
+
+			lineNumber++;
+		}
+		
+		fp.close();
+	}
+	else {
+		ret = false;
+	}
+	
+
+	return ret;
+}
+
+
 /**
  * Função principal do programa.
  *
@@ -294,6 +370,10 @@ int main(int argc, char** argv)
 
 		ok = generatePrimitive(primitive, params);
 	} 
+	else if (argc == 3) {
+		ok = readBezierPatches(argv[1]);
+		fileName = argv[2];
+	}
 
 	// Se a primitiva foi bem gerada então, armazenam-se os seus vértices no
 	// ficheiro especificado como argumento do programa

@@ -6,6 +6,8 @@
  * @author Carlos Pereira - A61887
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
+ *
+ * @version 12-04-2017
  */
 
 

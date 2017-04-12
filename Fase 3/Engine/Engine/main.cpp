@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 8-4-2017 
+ * @version 12-4-2017 
  */
 
 
@@ -38,10 +38,10 @@
 const float PI = 3.14159265358979323846f;  // Valor da constante pi
 
 
-float xPos = 0;    // Posição x
-float zPos = 0;    // Posição z
-float angleX = 0;  // Ângulo em relação ao eixo dos xx
-float angleY = 0;  // Ângulo em relação ao eixo dos yy
+float xPos = 0.0;    // Posição x
+float zPos = 0.0;    // Posição z
+float angleX = 0.0;  // Ângulo em relação ao eixo dos xx
+float angleY = 0.0;  // Ângulo em relação ao eixo dos yy
 
 
 // Por defeito o modo de desenho é wired
@@ -51,28 +51,28 @@ GLenum mode = GL_LINE;
 GLenum drawMode = FRONT_AND_BACK;
 
 
-float lx = 0;                  // Posição para onde se está a olhar no eixo dos
-                               // xx
-float px = 0;                  // Posição da câmara no eixo dos xx
+float lx = 0.0;                  // Posição para onde se está a olhar no eixo dos
+                                 // xx
+float px = 0.0;                  // Posição da câmara no eixo dos xx
 
-float ly = 0;                  // Posição para onde se está a olhar no eixo dos
-                               // yy
-float py = 0;                  // Posição da câmara no eixo dos yy
+float ly = 0.0;                  // Posição para onde se está a olhar no eixo dos
+                                 // yy
+float py = 0.0;                  // Posição da câmara no eixo dos yy
 
-float lz = -1;                 // Posição para onde se está a olhar no eixo dos
-                               // zz
-float pz = 15;                 // Posição da câmara no eixo dos zz
+float lz = -1.0;                 // Posição para onde se está a olhar no eixo dos
+                                 // zz
+float pz = 15.0;                 // Posição da câmara no eixo dos zz
 
-float cameraAngleX = 0;        // Ângulo da câmara no eixo dos xx
-float deltaAngleX = 0;         // Ângulo para cálculos auxilares
-int xOrigin = -1;              // Posição x do rato
+float cameraAngleX = 0.0;        // Ângulo da câmara no eixo dos xx
+float deltaAngleX = 0.0;         // Ângulo para cálculos auxilares
+int xOrigin = -1;                // Posição x do rato
 
-float cameraAngleY = 0;        // Ângulo da câmara no eixo dos yy
-float deltaAngleY = 0;         // Ângulo para cálculos auxiliares
-int yOrigin = -1;              // Posição y do rato
+float cameraAngleY = 0.0;        // Ângulo da câmara no eixo dos yy
+float deltaAngleY = 0.0;         // Ângulo para cálculos auxiliares
+int yOrigin = -1;                // Posição y do rato
 
-const float vCameraX = 0.003f; // Velocidade de rotação da câmara em X
-const float vCameraY = 0.5f;   // Velocidade de rotação da câmara em Y
+const float vCameraX = 0.003;    // Velocidade de rotação da câmara em X
+const float vCameraY = 0.5;      // Velocidade de rotação da câmara em Y
 
 
 std::vector<GLOperation*> glOperations;  // Vetor de operações em OpenGL
@@ -177,8 +177,6 @@ void keyboardEvent(unsigned char key, int x, int y)
 		// Move um modelo para a esquerda
 		xPos += 0.3;
 	}
-
-	glutPostRedisplay();
 }
 
 
@@ -191,28 +189,26 @@ void rotateEvent(int key, int x, int y)
 
 		// Roda o modelo em torno do eixo dos yy no sentido dos 
 		// ponteiros do relógio
-		angleY -= 3;
+		angleY -= 3.0;
 	}
 	else if (key == GLUT_KEY_RIGHT) {
 		
 		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
 		// ponteiros do relógio
-		angleY += 3;
+		angleY += 3.0;
 	}
 	else if (key == GLUT_KEY_UP) {
 
 		// Roda o modelo em torno do eixo dos yy no sentido dos 
 		// ponteiros do relógio
-		angleX -= 3;
+		angleX -= 3.0;
 	}
 	else if (key == GLUT_KEY_DOWN) {
 
 		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
 		// ponteiros do relógio
-		angleX += 3;
+		angleX += 3.0;
 	}
-
-	glutPostRedisplay();
 }
 
 
@@ -245,8 +241,6 @@ void processMenuEvents(int option)
 	else if (option == FRONT_AND_BACK) {
 		drawMode = FRONT_AND_BACK;
 	}
-
-	glutPostRedisplay();
 }
 
 
@@ -272,17 +266,15 @@ void mouseMove(int x, int y)
 
 		// Limita-se o ângulo da câmara em Y entre -90 e 90 graus
 		if (cameraAngleY + deltaAngleY >= 90.0) {
-			ly = tan(89.0 * PI / 180);
+			ly = tan(89.0 * PI / 180.0);
 		}
 		else if (cameraAngleY + deltaAngleY <= -90.0) {
-			ly = tan(-89.0 * PI / 180);
+			ly = tan(-89.0 * PI / 180.0);
 		}
 		else {
-			ly = tan((cameraAngleY + deltaAngleY) * PI / 180);
+			ly = tan((cameraAngleY + deltaAngleY) * PI / 180.0);
 		}
 	}
-
-	glutPostRedisplay();
 }
 
 
@@ -332,6 +324,7 @@ void initGlut(int argc, char **argv)
 
 
 	// Registos de funções
+	glutIdleFunc(renderScene);
 	glutKeyboardFunc(keyboardEvent);
 	glutSpecialFunc(rotateEvent);
 	menu = glutCreateMenu(processMenuEvents);

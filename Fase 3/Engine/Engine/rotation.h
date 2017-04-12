@@ -10,12 +10,13 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 26-03-2017
+ * @version 12-04-2017
  */
 
 
 #ifndef rotation_h
 #define rotation_h
+
 
 #include "glOperation.h"
 
@@ -40,7 +41,10 @@ public:
 	 * @param y     Valor de uma rotação em y.
 	 * @param z     Valor de uma rotação em z.
 	 */
-	Rotation(float angle, float x, float y, float z);
+	Rotation(float angle, float X, float Y, float z);
+
+
+	Rotation(float angle, float totalTime, float x, float y, float z);
 
 
 	/**
@@ -75,6 +79,9 @@ public:
 	float getZ(void);
 
 
+	float getTotalTime(void);
+
+
 	/**
 	 * Altera o valor do ângulo de uma rotação.
 	 */
@@ -97,6 +104,9 @@ public:
 	 * Altera o valor de uma rotação em z.
 	 */
 	void setZ(float);
+
+
+	void setTotalTime(float);
 
 
 	/**

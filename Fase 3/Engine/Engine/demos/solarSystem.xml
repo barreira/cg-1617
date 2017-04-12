@@ -1,11 +1,13 @@
 <scene>
 	<group>
+		<rotate axisY=1 time=10/>
 		<scale x=2 y=2 z=2/>
 		<models>
 			<model file="demos/sphere.3d" diffR=1 diffG=0.2 diffB=0.2/>
 		</models>
 	</group>
 	<group>
+		<rotate axisY=1 time=0.24/>
 		<translate z=-5/>
 		<scale x=0.1 y=0.1 z=0.1/>
 		<models>
@@ -13,7 +15,7 @@
 		</models>
 	</group>
 	<group>
-		<rotate angle=50 axisY=1/>
+		<rotate axisY=-1 time=0.63/>
 		<translate z=-10/>
 		<scale x=0.3 y=0.3 z=0.3/>
 		<models>
@@ -21,7 +23,7 @@
 		</models>
 	</group>
 	<group>
-		<rotate angle=-90 axisY=1/>
+		<rotate axisY=1 time=1/>
 		<translate z=-15/>
 		<scale x=0.3 y=0.3 z=0.3/>
 		<models>
@@ -37,7 +39,7 @@
 		</group>
 	</group>
 	<group>
-		<rotate angle=50 axisY=1/>
+		<rotate axisY=1 time=1.93/>
 		<translate z=-18/>
 		<scale x=0.3 y=0.3 z=0.3/>
 		<models>
@@ -45,19 +47,20 @@
 		</models>
 	</group>
 	<group>
+		<rotate axisY=1 time=10/>
 		<models>
 			<model file="demos/asteroid.3d" diffR=0.4 diffG=0.2 diffB=0 rand=1000 xzMinR=20 xzMaxR=22 yMaxR=1/>
 		</models>
 	</group>
 	<group>
-		<rotate angle=-170 axisY=1/>
+		<rotate axisY=1 time=11.9/>
 		<translate z=-28/>
 		<models>
 			<model file="demos/sphere.3d" diffR=1 diffG=0.8 diffB=0.6/>
 		</models>
 	</group>
 	<group>
-		<rotate angle=-190 axisY=1/>
+		<rotate axisY=1 time=29.5/>
 		<translate z=-33/>
 		<scale x=0.8 y=0.8 z=0.8/>
 		<group>
@@ -72,7 +75,7 @@
 		</models>
 	</group>
 	<group>
-		<rotate angle=-210 axisY=1/>
+		<rotate axisY=1 time=84/>
 		<translate z=-38/>
 		<scale x=0.6 y=0.6 z=0.6/>
 		<models>
@@ -80,7 +83,7 @@
 		</models>
 	</group>
 	<group>
-		<rotate angle=-230 axisY=1/>
+		<rotate axisY=1 time=165/>
 		<translate z=-43/>
 		<scale x=0.6 y=0.6 z=0.6/>
 		<models>
@@ -88,11 +91,22 @@
 		</models>
 	</group>
 	<group>
-		<rotate angle=-210 axisY=1/>
+		<rotate axisY=1 time=200/>
 		<translate z=-48/>
 		<scale x=0.05 y=0.05 z=0.05/>
 		<models>
 			<model file="demos/sphere.3d" diffR=0.25 diffG=0.25 diffB=0.25/>
+		</models>
+	</group>
+	<group>
+		<translate z=-5 time=1>
+			<point x=10 y=0 z=-5/>
+			<point x=0.707 y=0.707 z=1/>
+			<point x=0 y=1 z=10/>
+			<point x=-1 y=20 z=20/>
+		</translate>
+		<models>
+			<model file="demos/teapot.3d"/>
 		</models>
 	</group>
 </scene>

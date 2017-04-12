@@ -26,7 +26,7 @@ public:
 	 */
 	VertexImpl(void)
 	{
-		x = y = z = 0;
+		x = y = z = 0.0;
 	}
 
 
@@ -138,7 +138,10 @@ public:
 /**
  * Construtor por defeito.
  */
-Vertex::Vertex(void) : pimpl{ new VertexImpl() } {}
+Vertex::Vertex(void) 
+{
+	pimpl = new VertexImpl(); 
+}
 
 
 /**
@@ -148,8 +151,10 @@ Vertex::Vertex(void) : pimpl{ new VertexImpl() } {}
  * @param y Coordenada y.
  * @param z Coordenada z.
  */
-Vertex::Vertex(float x, float y, float z)
-	: pimpl{ new VertexImpl(x, y, z) } {}
+Vertex::Vertex(float x, float y, float z) 
+{
+	pimpl = new VertexImpl(x, y, z);
+} 
 
 
 /**

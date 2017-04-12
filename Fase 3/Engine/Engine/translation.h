@@ -9,14 +9,17 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 26-03-2017
+ * @version 12-04-2017
  */
 
 
 #ifndef translation_h
 #define translation_h
 
+
+#include <vector>
 #include "glOperation.h"
+#include "vertex.h"
 
 
 class Translation : public GLOperation {
@@ -40,6 +43,17 @@ public:
 	 * @param z Valor de uma translação em z.
 	 */
 	Translation(float x, float y, float z);
+
+
+	/**
+	 * Construtor por parâmetros.
+	 *
+	 * @param x Valor de uma translação em x.
+	 * @param y Valor de uma translação em y.
+	 * @param z Valor de uma translação em z.
+	 */
+	Translation(float x, float y, float z,
+		        std::vector<Vertex> catmullPoints, float totalTime);
 
 
 	/**
@@ -68,6 +82,12 @@ public:
 	float getZ(void);
 
 
+	std::vector<Vertex> getCatmullPoints(void);
+
+
+	float getTotalTime(void);
+
+
 	/**
 	 * Altera o valor de uma translação em x.
 	 */
@@ -84,6 +104,12 @@ public:
 	 * Altera o valor de uma translação em z.
 	 */
 	void setZ(float);
+
+
+	void setCatmullPoints(std::vector<Vertex>);
+
+
+	void setTotalTime(float);
 
 
 	/**

@@ -8,7 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 9-04-2017
+ * @version 12-04-2017
  */
 
 
@@ -57,9 +57,11 @@
 /* Tags de scale e translate e respetivos atributos */
 #define SCALE     "scale"
 #define TRANSLATE "translate"
+#define POINT     "point"
 #define X         "x"
 #define Y         "y"
 #define Z         "z"
+#define TIME      "time"
 
 
 const float PI = 3.14159265358979323846f;  // Valor da constante pi
@@ -266,9 +268,9 @@ class XMLParser::XMLParserImpl {
 		std::stringstream ss;  // String auxiliar para converter texto em 
 		                       // valores numéricos
 
-		float x = 0;  // Coordenada x de um vértice
-		float y = 0;  // Coordenada y de um vértice
-		float z = 0;  // Coordenada z de um vértice
+		float x = 0.0;  // Coordenada x de um vértice
+		float y = 0.0;  // Coordenada y de um vértice
+		float z = 0.0;  // Coordenada z de um vértice
 
 		size_t index = 0;
 
@@ -357,9 +359,9 @@ class XMLParser::XMLParserImpl {
 		size_t numFiles = 0;            // Número de ficheiros associados à tag
 		                                // model
 
-		float diffR = 0;  // Valor da difusão em vermelho 
-		float diffG = 0;  // Valor da difusão em verde 
-		float diffB = 0;  // Valor da difusão em azul 
+		float diffR = 0.0;  // Valor da difusão em vermelho 
+		float diffG = 0.0;  // Valor da difusão em verde 
+		float diffB = 0.0;  // Valor da difusão em azul 
 		
 		size_t rand = 0;          // Quantidade de modelos a serem gerados 
 		                          // em posições aleatórias
@@ -368,13 +370,13 @@ class XMLParser::XMLParserImpl {
 		                          // aleatórias
 		bool existsYMax = false;  // Determina se foi fornecida a área máxima
 		                          // para a geração da coordenada y aleatória
-		float xzMinR = 0;         // Área mínima para a geração das coodenadas
+		float xzMinR = 0.0;       // Área mínima para a geração das coodenadas
 		                          // aleatórias x e z
-		float xzMaxR = 0;         // Área máxima para a geração das coodenadas
+		float xzMaxR = 0.0;       // Área máxima para a geração das coodenadas
 		                          // aleatórias x e z
-		float yMinR = 0;          // Área mínima para a geração da coodenada
+		float yMinR = 0.0;        // Área mínima para a geração da coodenada
 		                          // aleatória y
-		float yMaxR = 0;          // Área máxima para a geração da coodenada
+		float yMaxR = 0.0;        // Área máxima para a geração da coodenada
 		                          // aleatória y
 
 		size_t numColors = 0;  // Número de atributos relativamente a cores
@@ -442,12 +444,13 @@ class XMLParser::XMLParserImpl {
 
 		// A cor de um modelo é branca por defeito
 		if (numColors == 0) {
-			diffR = diffG = diffB = 1;
+			diffR = diffG = diffB = 1.0;
 		}
 
 		if (rand > 0 && invalidDoc == false) {
 			if (randPosError(existsXZMax, existsYMax, xzMinR, 
 				             xzMaxR, yMinR, yMaxR) == false) {
+
 				for (size_t i = 0; i < rand; i++) {
 					glOperations.push_back(new PushMatrix());
 					generateRandomPos(xzMinR, xzMaxR, yMinR, yMaxR);
@@ -525,6 +528,47 @@ class XMLParser::XMLParserImpl {
 	}
 
 
+	Vertex parsePoint(TiXmlElement* point)
+	{
+		float x = 0.0;
+		float y = 0.0;
+		float z = 0.0;
+
+		std::string pointName = toLower(point->Value());
+
+		if (pointName.compare(POINT) == 0) {
+			for (TiXmlAttribute* a = point->FirstAttribute();
+			     a != NULL && invalidDoc == false; a = a->Next()) {
+
+				std::string attName(toLower(a->Name()));
+				std::stringstream ss(a->Value());
+
+				if (attName.compare(X) == 0) {
+					ss >> x;
+				}
+				else if (attName.compare(Y) == 0) {
+					ss >> y;
+				}
+				else if (attName.compare(Z) == 0) {
+					ss >> z;
+				}
+				else {
+					errorString.append("Error: Invalid translate attribute!\n");
+					invalidDoc = true;
+				}
+			}
+		}
+		else {
+			errorString.append("Error: ");
+			errorString.append(pointName);
+			errorString.append(" is not a valid tag!\n");
+			invalidDoc = true;
+		}
+
+		return Vertex(x, y, z);
+	}
+
+
 	/**
 	 * Efetua o parsing de uma translate.
 	 *
@@ -532,9 +576,11 @@ class XMLParser::XMLParserImpl {
 	 */
 	void parseTranslate(TiXmlElement* translate)
 	{
-		float x = 0;
-		float y = 0;
-		float z = 0;
+		float x = 0.0;
+		float y = 0.0;
+		float z = 0.0;
+		float time = 0.0;
+		std::vector<Vertex> catmullPoints;
 
 		for (TiXmlAttribute* a = translate->FirstAttribute(); 
 		     a != NULL && invalidDoc == false; a = a->Next()) {
@@ -551,13 +597,33 @@ class XMLParser::XMLParserImpl {
 			else if (attName.compare(Z) == 0) {
 				ss >> z;
 			}
+			else if (attName.compare(TIME) == 0) {
+				ss >> time;
+
+				if (time > 0.0) {
+					for (TiXmlElement* point = translate->FirstChildElement();
+					     point != NULL && invalidDoc == false;
+						 point = point->NextSiblingElement()) {
+
+						catmullPoints.push_back(parsePoint(point));
+					}
+				}
+				else {
+					errorString.append("Error: Invalid time value!\n");
+					invalidDoc = true;
+				}
+			}
 			else {
 				errorString.append("Error: Invalid translate attribute!\n");
 				invalidDoc = true;
 			}
 		}
 
-		glOperations.push_back(new Translation(x, y, z));
+		if (time > 0.0 && catmullPoints.size() < 4) {
+			errorString.append("Error: The number of Catmull-Rom points must be at least 4!\n");
+		}
+
+		glOperations.push_back(new Translation(x, y, z, catmullPoints, time));
 	}
 
 
@@ -568,10 +634,11 @@ class XMLParser::XMLParserImpl {
 	 */
 	void parseRotate(TiXmlElement* rotate)
 	{
-		float angle = 0;
-		float axisX = 0;
-		float axisY = 0;
-		float axisZ = 0;
+		float angle = 0.0;
+		float axisX = 0.0;
+		float axisY = 0.0;
+		float axisZ = 0.0;
+		float time = 0.0;
 
 		for (TiXmlAttribute* a = rotate->FirstAttribute(); 
 		     a != NULL && invalidDoc == false; a = a->Next()) {
@@ -591,13 +658,21 @@ class XMLParser::XMLParserImpl {
 			else if (attName.compare(AXISZ) == 0) {
 				ss >> axisZ;
 			}
+			else if (attName.compare(TIME) == 0) {
+				ss >> time;
+
+				if (time < 0.0) {
+					errorString.append("Error: Invalid time value!\n");
+					invalidDoc = true;
+				}
+			}
 			else {
 				errorString.append("Error: Invalid rotate attribute!\n");
 				invalidDoc = true;
 			}
 		}
-
-		glOperations.push_back(new Rotation(angle, axisX, axisY, axisZ));
+		
+		glOperations.push_back(new Rotation(angle, time, axisX, axisY, axisZ));
 	}
 
 
@@ -608,9 +683,9 @@ class XMLParser::XMLParserImpl {
 	 */
 	void parseScale(TiXmlElement* scale)
 	{
-		float x = 0;
-		float y = 0;
-		float z = 0;
+		float x = 0.0;
+		float y = 0.0;
+		float z = 0.0;
 
 		for (TiXmlAttribute* a = scale->FirstAttribute(); 
 		     a != NULL && invalidDoc == false; a = a->Next()) {
