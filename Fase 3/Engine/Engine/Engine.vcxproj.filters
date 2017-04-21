@@ -48,6 +48,9 @@
     <ClCompile Include="xmlParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cubicCurves.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinystr.h">
@@ -81,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xmlParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cubicCurves.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,12 +7,13 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 12-04-2017
+ * @version 21-04-2017
  */
 
 
 #include <cstddef>
 #include "translation.h"
+#include "cubicCurves.h"
 
 
 class Translation::TranslationImpl {
@@ -43,96 +44,6 @@ class Translation::TranslationImpl {
 	}
 
 
-	void buildRotMatrix(float* x, float* y, float* z, float* m)
-	{
-		m[0] = x[0]; m[1] = x[1]; m[2] = x[2]; m[3] = 0;
-		m[4] = y[0]; m[5] = y[1]; m[6] = y[2]; m[7] = 0;
-		m[8] = z[0]; m[9] = z[1]; m[10] = z[2]; m[11] = 0;
-		m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
-	}
-
-
-	void cross(float* a, float* b, float* res) 
-	{
-		res[0] = a[1] * b[2] - a[2] * b[1];
-		res[1] = a[2] * b[0] - a[0] * b[2];
-		res[2] = a[0] * b[1] - a[1] * b[0];
-	}
-
-
-	void normalize(float* a) 
-	{
-		float l = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-		
-		a[0] = a[0] / l;
-		a[1] = a[1] / l;
-		a[2] = a[2] / l;
-	}
-
-
-	float length(float* v) 
-	{
-		float res = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-		
-		return res;
-	}
-
-
-	void multMatrixVector(float* m, float* v, float* res) 
-	{
-		for (int j = 0; j < 4; ++j) {
-			res[j] = 0;
-			
-			for (int k = 0; k < 4; ++k) {
-				res[j] += v[k] * m[j * 4 + k];
-			}
-		}
-	}
-
-
-	void getCatmullRomPoint(float t, 
-		                    Vertex v0, Vertex v1, Vertex v2, Vertex v3, 
-		                    float* pos, float* deriv) 
-	{
-
-		// catmull-rom matrix
-		float m[4][4] = { { -0.5f,  1.5f, -1.5f,  0.5f },
-		                  { 1.0f, -2.5f,  2.0f, -0.5f },
-		                  { -0.5f,  0.0f,  0.5f,  0.0f },
-		                  { 0.0f,  1.0f,  0.0f,  0.0f } };
-
-		// Compute A = M * P
-
-		float ax[4];
-		float ay[4];
-		float az[4];
-
-		float px[4] = { v0.getX(), v1.getX(), v2.getX(), v3.getX() };
-		float py[4] = { v0.getY(), v1.getY(), v2.getY(), v3.getY() };
-		float pz[4] = { v0.getZ(), v1.getZ(), v2.getZ(), v3.getZ() };
-
-		multMatrixVector((float*)m, px, ax);
-		multMatrixVector((float*)m, py, ay);
-		multMatrixVector((float*)m, pz, az);
-
-		// Compute pos = T * A
-
-		float T[4] = { t * t * t, t * t, t, 1 };
-
-		pos[0] = (T[0] * ax[0]) + (T[1] * ax[1]) + (T[2] * ax[2]) + (T[3] * ax[3]);
-		pos[1] = (T[0] * ay[0]) + (T[1] * ay[1]) + (T[2] * ay[2]) + (T[3] * ay[3]);
-		pos[2] = (T[0] * az[0]) + (T[1] * az[1]) + (T[2] * az[2]) + (T[3] * az[3]);
-
-		// compute deriv = T' * A
-
-		float TDeriv[4] = { 3 * (t * t), 2 * t, 1, 0 };
-
-		deriv[0] = (TDeriv[0] * ax[0]) + (TDeriv[1] * ax[1]) + (TDeriv[2] * ax[2]) + (TDeriv[3] * ax[3]);
-		deriv[1] = (TDeriv[0] * ay[0]) + (TDeriv[1] * ay[1]) + (TDeriv[2] * ay[2]) + (TDeriv[3] * ay[3]);
-		deriv[2] = (TDeriv[0] * az[0]) + (TDeriv[1] * az[1]) + (TDeriv[2] * az[2]) + (TDeriv[3] * az[3]);
-	}
-
-
 	// given  global t, returns the point in the curve3
 	void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv) 
 	{
@@ -142,19 +53,22 @@ class Translation::TranslationImpl {
 		float t = gt * numPoints; // this is the real global t
 		int index = floor(t);  // which segment
 		
+		float p[12];
+
 		t = t - index; // where within  the segment
 
 		indexes[0] = (index + numPoints - 1) % numPoints;
 		indexes[1] = (indexes[0] + 1) % numPoints;
 		indexes[2] = (indexes[1] + 1) % numPoints;
 		indexes[3] = (indexes[2] + 1) % numPoints;
+		 
+		for (size_t i = 0; i < 4; i++) {
+			p[i * 3] = catmullPoints.at(indexes[i]).getX();
+			p[i * 3 + 1] = catmullPoints.at(indexes[i]).getY();
+			p[i * 3 + 2] = catmullPoints.at(indexes[i]).getZ();
+		}
 
-		getCatmullRomPoint(t, 
-			               catmullPoints.at(indexes[0]), 
-			               catmullPoints.at(indexes[1]), 
-			               catmullPoints.at(indexes[2]),
-			               catmullPoints.at(indexes[3]),
-			               pos, deriv);
+		getCatmullRomPoint(t, p, p + 3, p + 6, p + 9, pos, deriv);
 	}
 
 

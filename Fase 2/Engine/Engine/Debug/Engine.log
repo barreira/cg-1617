@@ -1,2 +1,13 @@
-﻿  main.cpp
-  Engine.vcxproj -> E:\Uminho\CG\Engine\Debug\Engine.exe
+﻿  xmlParser.cpp
+  vertex.cpp
+  trianglesDrawing.cpp
+  translation.cpp
+  tinyxmlparser.cpp
+  tinyxmlerror.cpp
+  tinyxml.cpp
+  tinystr.cpp
+  scale.cpp
+  rotation.cpp
+  main.cpp
+  Generating Code...
+  Engine.vcxproj -> E:\Uminho\Git\cg-1617\Fase 2\Engine\Debug\Engine.exe

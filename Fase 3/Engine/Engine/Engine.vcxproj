@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cubicCurves.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="rotation.cpp" />
     <ClCompile Include="scale.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="xmlParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cubicCurves.h" />
     <ClInclude Include="glOperation.h" />
     <ClInclude Include="popMatrix.h" />
     <ClInclude Include="pushMatrix.h" />

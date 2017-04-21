@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 12-4-2017
+ * @version 21-4-2017
  */
 
 
@@ -22,6 +22,7 @@
 #include "box.h"
 #include "cone.h"
 #include "sphere.h"
+#include "cubicCurves.h"
 
 
 // Uma Box possui 5 parâmetros: <dimX> <dimY> <dimZ> <numDiv (opcional)> <fich>  
@@ -262,7 +263,68 @@ bool generatePrimitive(std::string primitive, std::vector<std::string> params)
 }
 
 
-bool readBezierPatches(char* fileName)
+void generateBezierPatches(std::vector<Vertex> pVertices,
+	                       std::vector<size_t> pIndexes,
+	                       size_t t)
+{
+	size_t i = 0;
+	size_t j = 0;
+	size_t w = 0;
+	size_t z = 0;
+	size_t start = 0;
+	size_t index = 0;
+	size_t patch = 0;
+
+	float u = 0.0f;
+	float v = 0.0f;
+
+	float pos[3];
+	float pMatrixX[4][4];
+	float pMatrixY[4][4];
+	float pMatrixZ[4][4];
+
+
+	for (start = 0; start < pIndexes.size(); start += 16) {
+		for (i = 0; i <= t; i++) {
+			u = ((float)i) / ((float)t);
+
+			for (j = 0; j <= t; j++) {
+				v = ((float)j) / ((float)t);
+
+				for (w = 0; w < 4; w++) {
+					for (z = 0; z < 4; z++) {
+						pMatrixX[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getX();
+						pMatrixY[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getY();
+						pMatrixZ[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getZ();
+					}
+				}
+
+				getBezierPoint(u, v, (float**)pMatrixX, (float**)pMatrixY, (float**)pMatrixZ, pos);			
+
+				vertices.push_back(Vertex(pos[0], pos[1], pos[2]));
+			}
+		}
+	}
+
+	for (start = 0; start < pIndexes.size() / 16; start++) {
+		patch = (t + 1) * (t + 1) * start;
+
+		for (i = 0; i < t; i++) {
+			for (j = 0; j < t; j++) {
+				indexes.push_back(patch + j);
+				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
+				indexes.push_back(patch + j + 1);
+
+				indexes.push_back(patch + j);
+				indexes.push_back(patch + (t + 1) * (i + 1) + j);
+				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
+			}
+		}
+	}
+}
+
+
+bool readBezierPatches(char* fileName, size_t t)
 {
 	bool ret = true;
 
@@ -281,6 +343,9 @@ bool readBezierPatches(char* fileName)
 	size_t lineNumber = 0;
 
 	bool firstLine = true;
+
+	std::vector<Vertex> auxVertices;
+	std::vector<size_t> auxIndexes;
 
 	fp.open(fileName);
 
@@ -304,7 +369,7 @@ bool readBezierPatches(char* fileName)
 				while (std::getline(ss, token, ',')) {
 					std::stringstream aux(token);
 					aux >> index;
-					indexes.push_back(index);
+					auxIndexes.push_back(index);
 				}
 			}
 			
@@ -318,7 +383,7 @@ bool readBezierPatches(char* fileName)
 					// Adiciona as coordenadas ao vetor de vértices
 
 					if (++coordIndex == 3) {
-						vertices.push_back(Vertex(coord[0], coord[1], coord[2]));
+						auxVertices.push_back(Vertex(coord[0], coord[1], coord[2]));
 						coordIndex = 0;
 					}
 				}
@@ -334,6 +399,9 @@ bool readBezierPatches(char* fileName)
 	}
 	
 
+	generateBezierPatches(auxVertices, auxIndexes, t);
+
+
 	return ret;
 }
 
@@ -348,6 +416,7 @@ int main(int argc, char** argv)
 {
 	bool ok = false;
 	std::ofstream file;
+	size_t t = 0;
 
 	// Começa-se por testar se o número de parâmetros recebidos é
 	// superior ou igual ao número mínimo de parâmetros de uma primitiva
@@ -370,9 +439,12 @@ int main(int argc, char** argv)
 
 		ok = generatePrimitive(primitive, params);
 	} 
-	else if (argc == 3) {
-		ok = readBezierPatches(argv[1]);
-		fileName = argv[2];
+	else if (argc == 4) {
+		std::stringstream ss(argv[2]);
+		ss >> t;
+
+		ok = readBezierPatches(argv[1], t);
+		fileName = argv[3];
 	}
 
 	// Se a primitiva foi bem gerada então, armazenam-se os seus vértices no
