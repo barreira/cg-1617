@@ -1,14 +1,14 @@
 /**
- * @file main.cpp
- *
- * @brief Definição de todos métodos para o funcionamento do programa Generator.
- *
- * @author Carlos Pereira - A61887
- * @author João Barreira  - A73831
- * @author Rafael Braga   - A61799
- *
- * @version 21-4-2017
- */
+* @file main.cpp
+*
+* @brief Definição de todos métodos para o funcionamento do programa Generator.
+*
+* @author Carlos Pereira - A61887
+* @author João Barreira  - A73831
+* @author Rafael Braga   - A61799
+*
+* @version 29-4-2017
+*/
 
 
 #include <string>
@@ -63,18 +63,18 @@
 
 std::vector<Vertex> vertices;  // Conjunto de vértices de uma primitiva
 std::vector<size_t> indexes;   // Conjunto de índices dos vértices de uma 
-                               // primitiva
+							   // primitiva
 std::string fileName;          // Nome do ficheiro que irá conter os vértices
-                               // de uma primitiva
+							   // de uma primitiva
 std::vector<float> arguments;  // Conjunto de argumentos numéricos de uma
-                               // primitiva
+							   // primitiva
 Primitive *p = NULL;           // Primitiva a ser guardada
 
 
 /**
  * Verifica se os argumentos fornecidos para o cálculo de uma primitiva
  * são válidos. Ou seja, a última posição do vetor de strings deverá conter o
- * nome ficheiro onde será guardada a informação dos vértices. As restantes 
+ * nome ficheiro onde será guardada a informação dos vértices. As restantes
  * posições do vetor devem conter valores numéricos.
  *
  * @param params Lista de parâmetros de uma primitiva.
@@ -86,7 +86,7 @@ Primitive *p = NULL;           // Primitiva a ser guardada
  *         contrário. Os valores numéricos são guardados em arguments.
  */
 bool generateArgs(std::vector<std::string> params, const size_t numParams,
-	              const size_t ceilParams)
+	const size_t ceilParams)
 {
 	bool ret = true; // Por defeito assume-se que os parâmetros são válidos
 
@@ -100,7 +100,7 @@ bool generateArgs(std::vector<std::string> params, const size_t numParams,
 		// Extraem-se todos os valores numéricos da primitiva
 		for (size_t i = 0; i < params.size() - 1 && ret; i++) {
 			std::stringstream ss(params.at(i));
-			
+
 			float flt = 0;
 
 			// Se não se conseguir converter um valor o ciclo termina
@@ -132,7 +132,7 @@ bool generateArgs(std::vector<std::string> params, const size_t numParams,
  * Cria uma instância da classe Box bem como os seus vértices.
  *
  * @params Parâmetros de uma box.
- * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso 
+ * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso
  *         contrário. Os vértices são guardados em vertices.
  */
 bool generateBox(std::vector<std::string> params)
@@ -142,7 +142,7 @@ bool generateBox(std::vector<std::string> params)
 	// Se foi dado como argumento o número de divisões da caixa, então
 	// este deve ser convertido para um valor inteiro
 	size_t boxCeils = (params.size() == BOX_ARGS) ? 1 : 0;
-	
+
 	if (params.size() >= BOX_ARGS - 1) {
 		ret = generateArgs(params, params.size(), boxCeils);
 
@@ -152,7 +152,7 @@ bool generateBox(std::vector<std::string> params)
 			}
 			else {
 				p = new Box(arguments.at(0), arguments.at(1), arguments.at(2),
-					        (int)arguments.at(3));
+					(int)arguments.at(3));
 			}
 
 			vertices = p->getVertices();
@@ -177,8 +177,8 @@ bool generateCone(std::vector<std::string> params)
 
 	if (ret) {
 		p = new Cone(arguments.at(0), arguments.at(1),
-			         (int)arguments.at(2), (int)arguments.at(3));
-	
+			(int)arguments.at(2), (int)arguments.at(3));
+
 		vertices = p->getVertices();
 		indexes = p->getIndexes();
 	}
@@ -200,7 +200,7 @@ bool generatePlane(std::vector<std::string> params)
 
 	if (ret) {
 		p = new Plane(arguments.at(0), arguments.at(1));
-		
+
 		vertices = p->getVertices();
 		indexes = p->getIndexes();
 	}
@@ -222,8 +222,8 @@ bool generateSphere(std::vector<std::string> params)
 
 	if (ret) {
 		p = new Sphere(arguments.at(0),
-			           (int)arguments.at(1), (int)arguments.at(2));
-	
+			(int)arguments.at(1), (int)arguments.at(2));
+
 		vertices = p->getVertices();
 		indexes = p->getIndexes();
 	}
@@ -234,7 +234,7 @@ bool generateSphere(std::vector<std::string> params)
 
 /**
  * Verifica o tipo de primitiva a ser gerada.
- * Caso o tipo de primitiva seja válido então é feita a validade dos seus 
+ * Caso o tipo de primitiva seja válido então é feita a validade dos seus
  * parâmetros e respetiva geração dos seus vértices.
  *
  * @params primitive Tipo de primitiva.
@@ -245,7 +245,7 @@ bool generateSphere(std::vector<std::string> params)
 bool generatePrimitive(std::string primitive, std::vector<std::string> params)
 {
 	bool ret = false;
-	
+
 	if (primitive.compare(BOX) == 0) {
 		ret = generateBox(params);
 	}
@@ -263,9 +263,17 @@ bool generatePrimitive(std::string primitive, std::vector<std::string> params)
 }
 
 
+/*
+ * A partir dos vetores de vértices e índices, gera os pontos
+ * correspondentes às patches de Bezier.
+ *
+ * @param pVertices Vetor de vértices
+ * @param pIndexes  Vetor de índices
+ * @param t         Tesselagem
+ */
 void generateBezierPatches(std::vector<Vertex> pVertices,
-	                       std::vector<size_t> pIndexes,
-	                       size_t t)
+	std::vector<size_t> pIndexes,
+	size_t t)
 {
 	size_t i = 0;
 	size_t j = 0;
@@ -299,7 +307,7 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 					}
 				}
 
-				getBezierPoint(u, v, (float**)pMatrixX, (float**)pMatrixY, (float**)pMatrixZ, pos);			
+				getBezierPoint(u, v, (float**)pMatrixX, (float**)pMatrixY, (float**)pMatrixZ, pos);
 
 				vertices.push_back(Vertex(pos[0], pos[1], pos[2]));
 			}
@@ -311,11 +319,11 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 
 		for (i = 0; i < t; i++) {
 			for (j = 0; j < t; j++) {
-				indexes.push_back(patch + j);
+				indexes.push_back(patch + ((t + 1) * i) + j);
 				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
-				indexes.push_back(patch + j + 1);
+				indexes.push_back(patch + ((t + 1) * i) + j + 1);
 
-				indexes.push_back(patch + j);
+				indexes.push_back(patch + ((t + 1) * i) + j);
 				indexes.push_back(patch + (t + 1) * (i + 1) + j);
 				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
 			}
@@ -324,6 +332,15 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 }
 
 
+/*
+ * Lê os vértices e os índices de um ficheiro com a descrição
+ * das patches de Bezier.
+ *
+ * @param fileName Nome do ficheiro que contém as patches
+ * @param t        Valor da tesselagem
+ *
+ * @return Falso caso o ficheiro não tenha sido bem aberto
+ */
 bool readBezierPatches(char* fileName, size_t t)
 {
 	bool ret = true;
@@ -362,26 +379,34 @@ bool readBezierPatches(char* fileName, size_t t)
 				ss >> numPatches;
 				firstLine = false;
 			}
-			
+
+			// Se a linha atual estiver na zona dos índices
 			if (lineNumber >= 1 && lineNumber <= numPatches) {
 				std::string token;
 
+				// Retiram-se os índices que se encontram separados
+				// por vírgulas
 				while (std::getline(ss, token, ',')) {
 					std::stringstream aux(token);
 					aux >> index;
+
+					// Adiciona-se o índice retirado do ficheiro
+					// ao vetor dos índices
 					auxIndexes.push_back(index);
 				}
 			}
-			
+
+			// Se a linha atual estiver na zona dos vértices
 			if (lineNumber > numPatches + 1) {
 				std::string token;
 
+				// Retiram-se os vértices que se encontram separados
+				// por vírgulas
 				while (std::getline(ss, token, ',')) {
 					std::stringstream aux(token);
 					aux >> coord[coordIndex];
 
-					// Adiciona as coordenadas ao vetor de vértices
-
+					// Adicionam-se as coordenadas ao vetor de vértices
 					if (++coordIndex == 3) {
 						auxVertices.push_back(Vertex(coord[0], coord[1], coord[2]));
 						coordIndex = 0;
@@ -391,16 +416,16 @@ bool readBezierPatches(char* fileName, size_t t)
 
 			lineNumber++;
 		}
-		
+
 		fp.close();
 	}
 	else {
 		ret = false;
 	}
-	
 
+	// A partir dos vetores dos vértices e dos índices retirados do
+	// ficheiro, são geradas as patches de Bezier
 	generateBezierPatches(auxVertices, auxIndexes, t);
-
 
 	return ret;
 }
@@ -425,8 +450,8 @@ int main(int argc, char** argv)
 		// O nome da primitiva corresponde ao primeiro parâmetro
 		std::string primitive(argv[1]);
 
-		std::transform(primitive.begin(), primitive.end(), primitive.begin(), 
-			           tolower);
+		std::transform(primitive.begin(), primitive.end(), primitive.begin(),
+			tolower);
 
 
 		// Os argumentos da primitiva correspondem a todos os outros
@@ -438,12 +463,16 @@ int main(int argc, char** argv)
 		}
 
 		ok = generatePrimitive(primitive, params);
-	} 
+	}
 	else if (argc == 4) {
 		std::stringstream ss(argv[2]);
+
+		// Lê-se o valor da tesselagem
 		ss >> t;
 
+		// Invoca-se a função de leitura do ficheiro de patches de Bezier
 		ok = readBezierPatches(argv[1], t);
+
 		fileName = argv[3];
 	}
 

@@ -3,14 +3,14 @@
  *
  * @brief Módulo que apresenta métodos para se efetuar uma rotação em OpenGL.
  *
- * Uma rotação pode ser definida à custa de um ângulo e à escolha de um dos 
+ * Uma rotação pode ser definida à custa de um ângulo e à escolha de um dos
  * três eixos: x, y ou z.
  *
  * @author Carlos Pereira - A61887
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 12-04-2017
+ * @version 29-04-2017
  */
 
 
@@ -25,6 +25,7 @@ class Rotation : public GLOperation {
 	class RotationImpl;   // Implementação da classe Rotation
 	RotationImpl* pimpl;  // Apontador para a implementação da classe Rotation
 
+
 public:
 
 	/**
@@ -33,7 +34,7 @@ public:
 	Rotation(void);
 
 
-	/** 
+	/**
 	 * Construtor por parâmetros.
 	 *
 	 * @param angle Ângulo de uma rotação.
@@ -44,6 +45,15 @@ public:
 	Rotation(float angle, float X, float Y, float z);
 
 
+	/**
+	 * Construtor por parâmetros.
+	 *
+	 * @param angle     Ângulo de uma rotação.
+	 * @param totalTime Tempo total de uma rotação.
+	 * @param x         Valor de uma rotação em x.
+	 * @param y         Valor de uma rotação em y.
+	 * @param z         Valor de uma rotação em z.
+	 */
 	Rotation(float angle, float totalTime, float x, float y, float z);
 
 
@@ -63,7 +73,7 @@ public:
 
 	/**
 	 * Devolve o valor de uma rotação em x.
-	 */
+ 	 */ 
 	float getX(void);
 
 
@@ -75,10 +85,13 @@ public:
 
 	/**
 	 * Devolve o valor de uma rotação em z.
-	 */
+ 	 */
 	float getZ(void);
 
 
+	/**
+	 * Devolve o valor do tempo total de uma rotação.
+	 */
 	float getTotalTime(void);
 
 
@@ -106,11 +119,14 @@ public:
 	void setZ(float);
 
 
+	/**
+	 * Altera o valor do tempo total de uma rotação.
+	 */
 	void setTotalTime(float);
 
 
 	/**
-	 * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em 
+	 * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em
 	 * OpenGL.
 	 */
 	void execute(void);

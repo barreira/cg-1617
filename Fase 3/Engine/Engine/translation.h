@@ -9,7 +9,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 12-04-2017
+ * @version 29-04-2017
  */
 
 
@@ -48,9 +48,11 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param x Valor de uma translação em x.
-	 * @param y Valor de uma translação em y.
-	 * @param z Valor de uma translação em z.
+	 * @param x				Valor de uma translação em x.
+	 * @param y				Valor de uma translação em y.
+	 * @param z				Valor de uma translação em z.
+	 * @param catmullPoints	Coordenadas dos pontos da curva Catmull-Rom.
+	 * @param totalTime		Tempo total de translação.
 	 */
 	Translation(float x, float y, float z,
 		        std::vector<Vertex> catmullPoints, float totalTime);
@@ -82,9 +84,15 @@ public:
 	float getZ(void);
 
 
+	/**
+	 * Devolve um vector com as coordenadas dos pontos da curva.
+	 */
 	std::vector<Vertex> getCatmullPoints(void);
 
 
+	/**
+	 * Devolve o tempo total de translação na curva.
+	 */
 	float getTotalTime(void);
 
 
@@ -106,9 +114,15 @@ public:
 	void setZ(float);
 
 
+	/**
+	 * Altera o vector com as coordenadas dos pontos da curva.
+	 */
 	void setCatmullPoints(std::vector<Vertex>);
 
 
+	/**
+	 * Altera o tempo total de translação.
+	 */
 	void setTotalTime(float);
 
 

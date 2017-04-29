@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 21-04-2017
+ * @version 29-04-2017
  */
 
 
@@ -32,6 +32,8 @@ class Translation::TranslationImpl {
 	/**
 	 * Devolve o intervalo de tempo decorrido deste a última medida de tempo
 	 * efetuada.
+	 *
+	 * @return Intervalo de tempo decorrido desde a última medida
 	 */
 	size_t getDeltaTime(void)
 	{
@@ -44,18 +46,27 @@ class Translation::TranslationImpl {
 	}
 
 
-	// given  global t, returns the point in the curve3
+	/**
+	 * Para um instante de tempo, devolve as coordenadas globais de um ponto
+	 * da curva Catmull-Rom.
+	 *
+	 * @param gt	Tempo global
+	 * @param pos	Vetor com as coordenadas a serem retornadas
+	 * @param deriv	Vetor da tangente às coordenadas calculadas
+	 */
 	void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv) 
 	{
 		size_t numPoints = catmullPoints.size();
-		int indexes[4]; // indices store the points
+		int indexes[4];
 
-		float t = gt * numPoints; // this is the real global t
-		int index = floor(t);  // which segment
+		float t = gt * numPoints;
+		int index = floor(t);
 		
-		float p[12];
+		// coordenadas que definem a curva Catmull-Rom
+		// para depois calcular o ponto intermédio
+		float p[12];	
 
-		t = t - index; // where within  the segment
+		t = t - index;
 
 		indexes[0] = (index + numPoints - 1) % numPoints;
 		indexes[1] = (indexes[0] + 1) % numPoints;
@@ -63,6 +74,8 @@ class Translation::TranslationImpl {
 		indexes[3] = (indexes[2] + 1) % numPoints;
 		 
 		for (size_t i = 0; i < 4; i++) {
+
+			// cálculo das coordanas da curva
 			p[i * 3] = catmullPoints.at(indexes[i]).getX();
 			p[i * 3 + 1] = catmullPoints.at(indexes[i]).getY();
 			p[i * 3 + 2] = catmullPoints.at(indexes[i]).getZ();
@@ -111,12 +124,14 @@ public:
 
 
 	/**
-	* Construtor por parâmetros.
-	*
-	* @param x Valor de uma translação em x.
-	* @param y Valor de uma translação em y.
-	* @param z Valor de uma translação em z.
-	*/
+	 * Construtor por parâmetros.
+	 *
+	 * @param x				Valor de uma translação em x.
+	 * @param y				Valor de uma translação em y.
+	 * @param z				Valor de uma translação em z.
+	 * @param catmullPoints	Coordenadas dos pontos da curva Catmull-Rom.
+	 * @param totalTime		Tempo total de translação.
+	 */
 	TranslationImpl(float x, float y, float z,
 		            std::vector<Vertex> catmullPoints, float totalTime)
 	{
@@ -162,12 +177,18 @@ public:
 	}
 
 
+	/**
+	 * Devolve um vector com as coordenadas dos pontos da curva.
+	 */
 	std::vector<Vertex> getCatmullPoints(void)
 	{
 		return catmullPoints;
 	}
 
 
+	/**
+	 * Devolve o tempo total de translação na curva.
+	 */
 	float getTotalTime(void)
 	{
 		return totalTime;
@@ -176,6 +197,8 @@ public:
 
 	/**
 	 * Altera o valor de uma translação em x.
+	 *
+	 * @param x	Novo valor de x.
 	 */
 	void setX(float x)
 	{
@@ -184,7 +207,9 @@ public:
 
 
 	/**
-	 * Altera o valor de uma translação em x.
+	 * Altera o valor de uma translação em y.
+	 *
+	 * @param y	Novo valor de y.
 	 */
 	void setY(float y)
 	{
@@ -193,7 +218,9 @@ public:
 
 
 	/**
-	 * Altera o valor de uma translação em x.
+	 * Altera o valor de uma translação em z.
+	 *
+	 * @param z	Novo valor de z.
 	 */
 	void setZ(float z)
 	{
@@ -201,6 +228,11 @@ public:
 	}
 
 
+	/**
+	 * Altera o vector com as coordenadas dos pontos da curva.
+	 *
+	 * @param catmullPoints	Novo vector com os pontos da curva.
+	 */
 	void setCatmullPoints(std::vector<Vertex> catmullPoints)
 	{
 		this->catmullPoints = catmullPoints;
@@ -209,6 +241,11 @@ public:
 	}
 
 
+	/**
+	 * Altera o tempo total de translação.
+	 *
+	 * @param totalTime	Novo tempo total de translação.
+	 */
 	void setTotalTime(float totalTime)
 	{
 		this->totalTime = totalTime;
@@ -217,28 +254,42 @@ public:
 	}
 
 
+	/**
+	 * Executa uma translação em x, y ou z em OpenGL.
+	 */
 	void execute(void)
 	{
 		float pos[3];
 		float deriv[3];
 		float z[3];
 
-		size_t deltaTime = getDeltaTime();
-		float auxTime = ((float)deltaTime) / 1000.0;
+		// tempo decorrido desde a última medição de tempo
+		size_t deltaTime = getDeltaTime();			
 
-		timeAcc += (auxTime / (float)totalTime);
+		// conversão de deltaTime em segundos
+		float auxTime = ((float)deltaTime) / 1000.0;	
 
-		if (timeAcc >= 1.0) {
+		// é somado ao acumulador de instantes de
+		// tempo uma fatia de tempo proporcional
+		// ao tempo total de translação
+		timeAcc += (auxTime / (float)totalTime);	
+
+		// Caso o acumulador seja superior a 1.0, já se passou o tempo
+		// total de translação, logo inicia-se de novo o acumulador para
+		// uma nova volta
+		if (timeAcc >= 1.0) {	
 			timeAcc = 0.0;
 		}
 
 		getGlobalCatmullRomPoint(timeAcc, pos, deriv);
 		glTranslatef(pos[0], pos[1], pos[2]);
 		
-		cross(deriv, up, z);
+		// z é o vetor perpendicular aos vetores deriv e up
+		cross(deriv, up, z);	
 		normalize(z);
 
-		cross(z, deriv, up);
+		// up é o vetor perpendicular aos vetores z e deriv
+		cross(z, deriv, up);	
 		normalize(up);
 
 		normalize(deriv);
@@ -290,9 +341,11 @@ Translation::Translation(float x, float y, float z)
  * Construtor por parâmetros. Inicializa o apontador para a implementação da
  * classe Translation através dos parâmetros recebidos.
  *
- * @param x Valor de uma translação em x.
- * @param y Valor de uma translação em y.
- * @param z Valor de uma translação em z.
+ * @param x					Valor de uma translação em x.
+ * @param y					Valor de uma translação em y.
+ * @param z					Valor de uma translação em z.
+ * @param catmullPoints		Coordenadas dos pontos da curva Catmull-Rom.
+ * @param totalTime			Tempo total de translação.
  */
 Translation::Translation(float x, float y, float z, 
 	                     std::vector<Vertex> catmullPoints, float totalTime)
@@ -343,12 +396,18 @@ float Translation::getZ(void)
 }
 
 
+/**
+ * Devolve um vector com as coordenadas dos pontos da curva.
+ */
 std::vector<Vertex> Translation::getCatmullPoints(void)
 {
 	return pimpl->getCatmullPoints();
 }
 
 
+/**
+ * Devolve o tempo total de translação na curva.
+ */
 float Translation::getTotalTime(void)
 {
 	return pimpl->getTotalTime();
@@ -382,12 +441,18 @@ void Translation::setZ(float z)
 }
 
 
+/**
+ * Altera o vector com as coordenadas dos pontos da curva.
+ */
 void Translation::setCatmullPoints(std::vector<Vertex> catmullPoints)
 {
 	pimpl->setCatmullPoints(catmullPoints);
 }
 
 
+/**
+ * Altera o tempo total de translação.
+ */
 void Translation::setTotalTime(float totalTime)
 {
 	pimpl->setTotalTime(totalTime);

@@ -107,13 +107,6 @@ void getBezierPoint(float u, float v,
 	float uVec[CC] = { u * u * u, u * u, u, 1 };
 	float vVec[CC] = { v * v * v, v * v, v, 1 };
 
-	size_t i = 0;
-	size_t j = 0;
-
-	//float pMatrixX[CC][CC];
-	//float pMatrixY[CC][CC];
-	//float pMatrixZ[CC][CC];
-
 	float mvVec[CC];
 	float px[CC];
 	float py[CC];
@@ -122,14 +115,6 @@ void getBezierPoint(float u, float v,
 	float mx[CC];
 	float my[CC];
 	float mz[CC];
-
-	/*for (; i < CC; i++) {
-		for (j = 0; j < CC; j++) {
-			pMatrixX[i][j] = controlPoints.at(pIndexes.at(start + i * CC + j)).getX();
-			pMatrixY[i][j] = controlPoints.at(pIndexes.at(start + i * CC + j)).getY();
-			pMatrixZ[i][j] = controlPoints.at(pIndexes.at(start + i * CC + j)).getZ();
-		}
-	}*/
 
 	multMatrixVector((float*)bezierMatrix, vVec, mvVec);
 	multMatrixVector((float*)pMatrixX, mvVec, px);

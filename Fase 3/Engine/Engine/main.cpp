@@ -30,7 +30,7 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE "demos/solarSystem.xml" 
+#define XML_FILE "demos/solarsystem.xml" 
 
 #define FRONT_AND_BACK 1  // Desenhar a parte da frente e de trás de
                           // uma primitiva
