@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 8-4-2017
+ * @version 30-4-2017
  */
 
 
@@ -26,6 +26,50 @@ class Box::BoxImpl {
 	float centerZ;  // Coordenada z do centro da caixa
 	int numDiv;     // Número de divisões da caixa
 	size_t index;   // Índice atual do conjunto de índices
+
+
+	/**
+	 * Gera os índices necessários das duas faces de um plano de uma box.
+	 *
+	 * @param indexes Vetor de índices.
+	 */
+	void generateIndexes(std::vector<size_t>& indexes)
+	{
+		int a = 0;
+		int b = 0;
+		size_t aux = index;
+
+		// Ponteiros do relógio
+		for (a = 0; a < numDiv; a++) {
+			for (b = 0; b < numDiv; b++) {
+				indexes.push_back(a * (numDiv + 1) + b + aux);
+				indexes.push_back((a + 1) * (numDiv + 1) + b + aux);
+				indexes.push_back(a * (numDiv + 1) + b + 1 + aux);
+
+				indexes.push_back((a + 1) * (numDiv + 1) + b + aux);
+				indexes.push_back((a + 1) * (numDiv + 1) + b + 1 + aux);
+				indexes.push_back(a * (numDiv + 1) + b + 1 + aux);
+			}
+		}
+
+		index += ((numDiv + 1) * (numDiv + 1));
+		aux = index;
+
+		// Contrário aos ponteiros do relógio
+		for (a = 0; a < numDiv; a++) {
+			for (b = 0; b < numDiv; b++) {
+				indexes.push_back(a * (numDiv + 1) + b + aux);
+				indexes.push_back(a * (numDiv + 1) + b + 1 + aux);
+				indexes.push_back((a + 1) * (numDiv + 1) + b + aux);
+
+				indexes.push_back((a + 1) * (numDiv + 1) + b + aux);
+				indexes.push_back(a * (numDiv + 1) + b + 1 + aux);
+				indexes.push_back((a + 1) * (numDiv + 1) + b + 1 + aux);
+			}
+		}
+
+		index += ((numDiv + 1) * (numDiv + 1));
+	}
 
 
 	/**
@@ -62,46 +106,28 @@ class Box::BoxImpl {
 
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (a = 0; a < numDiv; a++, i += divX) {
-			for (b = 0; b < numDiv; b++, j += divY) {
-
-				// Face da frente
-
-				// Vértices v1-v2-v3-v4
-				vertices.push_back(Vertex(i - centerX, j - centerY, z - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - centerZ));
-				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - centerZ));
-
-				indexes.push_back(index);
-				indexes.push_back(index + 1);
-				indexes.push_back(index + 2);
-				indexes.push_back(index);
-				indexes.push_back(index + 2);
-				indexes.push_back(index + 3);
-
-
-				// Face de trás
-
-				// Vértices v5-v6-v7-v8
-				vertices.push_back(Vertex(i - centerX, j - centerY, z - dimZ - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, j + divY - centerY, z - dimZ - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, j - centerY, z - dimZ - centerZ));
-				vertices.push_back(Vertex(i - centerX, j + divY - centerY, z - dimZ - centerZ));
-			
-
-				indexes.push_back(index + 4);
-				indexes.push_back(index + 5);
-				indexes.push_back(index + 6);
-				indexes.push_back(index + 4);
-				indexes.push_back(index + 7);
-				indexes.push_back(index + 5);
-
-				index += 8;
+		// Face da frente
+		for (a = 0; a <= numDiv; a++, i += divX) {
+			for (b = 0; b <= numDiv; b++, j += divY) {
+				vertices.push_back(Vertex(i, j, z));
 			}
 
 			j = y;
 		}
+
+		i = x;
+		j = y;
+
+		// Face de trás
+		for (a = 0; a <= numDiv; a++, i += divX) {
+			for (b = 0; b <= numDiv; b++, j += divY) {
+				vertices.push_back(Vertex(i, j, z - dimZ));
+			}
+
+			j = y;
+		}
+		
+		generateIndexes(indexes);
 	}
 
 
@@ -139,45 +165,28 @@ class Box::BoxImpl {
 
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (a = 0; a < numDiv; a++, i += divX) {
-			for (b = 0; b < numDiv; b++, j += divZ) {
-
-				// Face de cima
-
-				// Vértices v1-v2-v3-v4
-				vertices.push_back(Vertex(i - centerX, y - centerY, j - centerZ));
-				vertices.push_back(Vertex(i - centerX, y - centerY, j + divZ - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, y - centerY, j - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, y - centerY, j + divZ - centerZ));
-
-				indexes.push_back(index);
-				indexes.push_back(index + 1);
-				indexes.push_back(index + 2);
-				indexes.push_back(index + 2);
-				indexes.push_back(index + 1);
-				indexes.push_back(index + 3);
-
-
-				// Face de baixo
-
-				// Vértices v5-v6-v7-v8
-				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j - centerZ));
-				vertices.push_back(Vertex(i - centerX, y - centerY - dimY, j + divZ - centerZ));
-				vertices.push_back(Vertex(i + divX - centerX, y - centerY - dimY, j + divZ - centerZ));
-
-				indexes.push_back(index + 4);
-				indexes.push_back(index + 5);
-				indexes.push_back(index + 6);
-				indexes.push_back(index + 5);
-				indexes.push_back(index + 7);
-				indexes.push_back(index + 6);
-
-				index += 8;
+		// Face da frente
+		for (a = 0; a <= numDiv; a++, i += divX) {
+			for (b = 0; b <= numDiv; b++, j += divZ) {
+				vertices.push_back(Vertex(i, y - dimY, j));
 			}
 
 			j = z;
 		}
+
+		i = x;
+		j = z;
+
+		// Face de trás
+		for (a = 0; a <= numDiv; a++, i += divX) {
+			for (b = 0; b <= numDiv; b++, j += divZ) {
+				vertices.push_back(Vertex(i, y, j));
+			}
+
+			j = z;
+		}
+
+		generateIndexes(indexes);
 	}
 
 
@@ -215,45 +224,28 @@ class Box::BoxImpl {
 
 		// Para cada uma das duas faces, serão calculados 2 triângulos por divisão
 
-		for (a = 0; a < numDiv; a++, i += divY) {
-			for (b = 0; b < numDiv; b++, j += divZ) {
-
-				// Face da direita
-
-				// Vértices v1-v2-v3-v4
-				vertices.push_back(Vertex(x - centerX, i - centerY, j - centerZ));
-				vertices.push_back(Vertex(x - centerX, i + divY - centerY, j - centerZ));
-				vertices.push_back(Vertex(x - centerX, i + divY - centerY, j + divZ - centerZ));
-				vertices.push_back(Vertex(x - centerX, i - centerY, j + divZ - centerZ));
-
-				indexes.push_back(index);
-				indexes.push_back(index + 1);
-				indexes.push_back(index + 2);
-				indexes.push_back(index);
-				indexes.push_back(index + 2);
-				indexes.push_back(index + 3);
-
-
-				// Face da esquerda
-
-				// Vértices v5-v6-v7-v8
-				vertices.push_back(Vertex(x - centerX - dimX, i - centerY, j - centerZ));
-				vertices.push_back(Vertex(x - centerX - dimX, i + divY - centerY, j + divZ - centerZ));
-				vertices.push_back(Vertex(x - centerX - dimX, i + divY - centerY, j - centerZ));
-				vertices.push_back(Vertex(x - centerX - dimX, i - centerY, j + divZ - centerZ));
-
-				indexes.push_back(index + 4);
-				indexes.push_back(index + 5);
-				indexes.push_back(index + 6);
-				indexes.push_back(index + 4);
-				indexes.push_back(index + 7);
-				indexes.push_back(index + 5);
-
-				index += 8;
+		// Face da frente
+		for (a = 0; a <= numDiv; a++, i += divY) {
+			for (b = 0; b <= numDiv; b++, j += divZ) {
+				vertices.push_back(Vertex(x, i, j));
 			}
 
 			j = z;
 		}
+
+		i = y;
+		j = z;
+
+		// Face de trás
+		for (a = 0; a <= numDiv; a++, i += divY) {
+			for (b = 0; b <= numDiv; b++, j += divZ) {
+				vertices.push_back(Vertex(x - dimX, i, j));
+			}
+
+			j = z;
+		}
+
+		generateIndexes(indexes);
 	}
 
 
@@ -398,9 +390,9 @@ public:
 		             std::vector<size_t>& indexes)
 	{
 		// Gera os vértices das faces XY, XZ e YZ
-		generateFacesXY(0, 0, dimZ, vertices, indexes);
-		generateFacesXZ(0, dimY, 0, vertices, indexes);
-		generateFacesYZ(dimX, 0, 0, vertices, indexes);
+		generateFacesXY(-centerX, -centerY, dimZ - centerZ, vertices, indexes);
+		generateFacesXZ(-centerX, dimY - centerY, -centerZ, vertices, indexes);
+	    generateFacesYZ(dimX - centerX, -centerY, -centerZ, vertices, indexes);
 	}
 
 

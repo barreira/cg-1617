@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 8-4-2017
+ * @version 30-4-2017
  */
 
 
@@ -129,65 +129,39 @@ public:
 		float angleAlfa = 0;	// Ângulo atual no plano XZ
 		float angleBeta = 0;	// Ângulo atual no plano XY
 
-
-		// Pontos de referência para aplicar-se a regra da mão direita
-
-					
-		float xA, yA, zA;		//Ponto A - canto inferior esquerdo
-			
-		float xB, yB, zB;		//Ponto B - canto inferior direito
-			
-		float xC, yC, zC;		//Ponto C - canto superior direito
-				
-		float xD, yD, zD;		//Ponto D - canto superior esquerdo
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
 
 		size_t index = 0;       // Índice atual do conjunto de índices
 
+		for (size_t i = 0; i <= (size_t)stacks; i++) {
+			
+			//Cálculo do ângulo Beta
+			angleBeta = ((float) beta * i);			
+
+			for (size_t j = 0; j <= (size_t)slices; j++) {
+				
+				//Cálculo do ângulo Alfa
+				angleAlfa = ((float) alfa * j);
+
+				x = radius * sin(angleBeta) * cos(angleAlfa);
+				y = radius * cos(angleBeta);
+				z = radius * sin(angleBeta) * sin(angleAlfa);
+
+				vertices.push_back(Vertex(x, y, z));
+			}
+		}
+
 		for (size_t i = 0; i < (size_t)stacks; i++) {
-			angleBeta = ((float) beta * i);			//Cálculo do ângulo Beta
-
 			for (size_t j = 0; j < (size_t)slices; j++) {
-			
-				angleAlfa = ((float) alfa * j);		//Cálculo do ângulo Alfa
-			
-				//Ponto A - canto inferior esquerdo
-				xA = radius * sin(angleBeta) * cos(angleAlfa);
-				yA = radius * cos(angleBeta);
-				zA = radius * sin(angleBeta) * sin(angleAlfa);
+				indexes.push_back(i * (slices + 1) + j);
+				indexes.push_back(i * (slices + 1) + j + 1);
+				indexes.push_back((i + 1) * (slices + 1) + j + 1);
 
-
-				//Ponto B - canto inferior direito
-				xB = radius * sin(angleBeta) * cos(angleAlfa + alfa);
-				yB = radius * cos(angleBeta);
-				zB = radius * sin(angleBeta) * sin(angleAlfa + alfa);
-
-
-				//Ponto C - canto superior direito
-				xC = radius * sin(angleBeta + beta) * cos(angleAlfa + alfa);
-				yC = radius * cos(angleBeta + beta);
-				zC = radius * sin(angleBeta + beta) * sin(angleAlfa + alfa);
-
-
-				//Ponto D - canto superior esquerdo
-				xD = radius * sin(angleBeta + beta) * cos(angleAlfa);
-				yD = radius * cos(angleBeta + beta);
-				zD = radius * sin(angleBeta + beta) * sin(angleAlfa);
-
-
-				//Inserção dos pontos na estrutura com os resultados
-				vertices.push_back(Vertex(xA, yA, zA));
-				vertices.push_back(Vertex(xB, yB, zB));
-				vertices.push_back(Vertex(xC, yC, zC));
-				vertices.push_back(Vertex(xD, yD, zD));
-
-				indexes.push_back(index);
-				indexes.push_back(index + 1);
-				indexes.push_back(index + 2);
-				indexes.push_back(index);
-				indexes.push_back(index + 2);
-				indexes.push_back(index + 3);
-
-				index += 4;
+				indexes.push_back(i * (slices + 1) + j);
+				indexes.push_back((i + 1) * (slices + 1) + j + 1);
+				indexes.push_back((i + 1) * (slices + 1) + j);
 			}
 		}
 	}
