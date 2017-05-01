@@ -1,2 +1,10 @@
-﻿  main.cpp
-  Generator.vcxproj -> E:\Uminho\CG\Generator\Debug\Generator.exe
+﻿  vertex.cpp
+  sphere.cpp
+  primitive.cpp
+  plane.cpp
+  main.cpp
+  cubicCurves.cpp
+  cone.cpp
+  box.cpp
+  Generating Code...
+  Generator.vcxproj -> E:\Uminho\Git\cg-1617\Fase 3\Generator\Debug\Generator.exe
