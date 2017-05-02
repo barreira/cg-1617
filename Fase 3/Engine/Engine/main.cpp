@@ -45,7 +45,7 @@ float angleY = 0.0;  // Ângulo em relação ao eixo dos yy
 
 
 // Por defeito o modo de desenho é wired
-GLenum mode = GL_LINE;
+GLenum mode = GL_FILL;
 
 // Por defeito desenham-se ambos os lados de uma primitiva
 GLenum drawMode = FRONT_AND_BACK;
