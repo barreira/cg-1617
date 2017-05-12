@@ -1,5 +1,5 @@
 <scene> 
 	<models>
-		<model file="demos/boxdiv.3d"/>
+		<model file="demos/boxdiv.3d" texture="demos/sun.jpg"/>
 	</models>
 </scene>

@@ -1,5 +1,5 @@
 <scene> 
 	<models>
-		<model file="demos/cone.3d"/>
+		<model diffR=1 file="demos/cone.3d"/>
 	</models>
 </scene>

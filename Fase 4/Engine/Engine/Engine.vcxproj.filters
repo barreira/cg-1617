@@ -30,9 +30,6 @@
     <ClCompile Include="tinyxmlparser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="rotation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,7 +48,19 @@
     <ClCompile Include="cubicCurves.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="color.cpp">
+    <ClCompile Include="tripleFloat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="directionalLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,9 +69,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tinyxml.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rotation.h">
@@ -92,19 +98,19 @@
     <ClInclude Include="cubicCurves.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="color.h">
+    <ClInclude Include="tripleFloat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="diffuseColor.h">
+    <ClInclude Include="light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="specularColor.h">
+    <ClInclude Include="pointLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="emissiveColor.h">
+    <ClInclude Include="directionalLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ambientColor.h">
+    <ClInclude Include="spotLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

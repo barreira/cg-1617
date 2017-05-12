@@ -16,7 +16,7 @@
 #define primitive_h
 
 #include <vector>
-#include "vertex.h"
+#include "tripleFloat.h"
 
 class Primitive {
 	class PrimitiveImpl;
@@ -33,12 +33,14 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param vertices Conjunto de vértices de uma primitiva.
-	 * @param normals  Conjunto de normais de uma primitiva.
-	 * @param indexes  Conjunto de índices associados ao vetor de vértices.
+	 * @param vertices  Conjunto de vértices de uma primitiva.
+	 * @param normals   Conjunto de normais de uma primitiva.
+	 * @param texCoords Conjunto de coordenadas de uma textura. 
+	 * @param indexes   Conjunto de índices associados ao vetor de vértices.
 	 */
-	Primitive(std::vector<Vertex> vertices,
-		      std::vector<Vertex> normals,
+	Primitive(std::vector<TripleFloat> vertices,
+		      std::vector<TripleFloat> normals,
+		      std::vector<TripleFloat> texCoords,
 		      std::vector<size_t> indexes);
 
 
@@ -53,13 +55,19 @@ public:
 	/**
 	 * Devolve o conjunto de vértices que definem uma primitiva.
 	 */
-	std::vector<Vertex> getVertices(void);
+	std::vector<TripleFloat> getVertices(void);
 
 
 	/**
 	 * Devolve o conjunto de normais que definem uma primitiva.
 	 */
-	std::vector<Vertex> getNormals(void);
+	std::vector<TripleFloat> getNormals(void);
+
+
+	/**
+	 * Devolve o conjunto coordenadas de uma textura.
+	 */
+	std::vector<TripleFloat> getTexCoords(void);
 
 
 	/**
@@ -73,7 +81,7 @@ public:
 	 *
 	 * @param v Vértice a adicionar.
 	 */
-	void addVertex(Vertex v);
+	void addVertex(TripleFloat v);
 
 
 	/**
@@ -81,7 +89,16 @@ public:
 	 *
 	 * @param n Normal a adicionar.
 	 */
-	void addNormal(Vertex n);
+	void addNormal(TripleFloat n);
+
+
+	/**
+	 * Adiciona uma coordenada de uma textura ao conjunto de 
+	 * coordenadas.
+	 *
+	 * @param t Coordenada de uma textura a adicionar.
+	 */
+	void addTexCoord(TripleFloat t);
 
 
 	/**

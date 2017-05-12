@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 30-4-2017
+ * @version 12-05-2017
  */
 
 
@@ -15,12 +15,12 @@
 #include <cmath>
 
 
-const float pi = 3.1415926f;
+const float PI = 3.1415926f;
 
 
 class Sphere::SphereImpl {
 	float radius;	// Raio da esfera
-	float alfa;		// Ângulo em relação ao eixo Y no plano XZ em radianos
+	float alpha;    // Ângulo em relação ao eixo Y no plano XZ em radianos
 	float beta;		// Ângulo em relação ao eixo Z no plano XY em radianos
 	int slices;	    // Número de slices a utilizar
 	int stacks;	    // Número de stacks a utilizar
@@ -33,8 +33,8 @@ public:
 	 */
 	SphereImpl(void)
 	{
-		radius = 0;
-		alfa = beta = 0;
+		radius = 0.0f;
+		alpha = beta = 0.0f;
 		slices = stacks = 0;
 	}
 
@@ -52,8 +52,8 @@ public:
 		this->slices = slices;
 		this->stacks = stacks;
 	
-		alfa = (2 * pi) / ((float) slices);
-		beta = pi / ((float) stacks);
+		alpha = (2.0f * PI) / ((float) slices);
+		beta = PI / ((float) stacks);
 	}
 
 	
@@ -100,7 +100,7 @@ public:
 	{
 		this->stacks = stacks;
 
-		beta = pi / ((float)stacks);
+		beta = PI / ((float)stacks);
 	}
 
 
@@ -111,7 +111,7 @@ public:
 	{
 		this->slices = slices;
 
-		alfa = (2 * pi) / ((float)slices);
+		alpha = (2.0f * PI) / ((float)slices);
 	}
 
 
@@ -119,17 +119,19 @@ public:
 	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de 
 	 * todos os vértices que definem a esfera.
 	 *
-	 * @param vertices Conjunto de vértices.
-	 * @param nromals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas de uma textura.
+	 * @param indexes   Conjunto de índices.
 	 * @return O resultado é guardado em vertices e em indexes.
 	 */
-	void generateSphere(std::vector<Vertex>& vertices,
-		                std::vector<Vertex>& normals,
+	void generateSphere(std::vector<TripleFloat>& vertices,
+		                std::vector<TripleFloat>& normals,
+		                std::vector<TripleFloat>& texCoords,
 		                std::vector<size_t>& indexes)
 	{
-		float angleAlfa = 0;	// Ângulo atual no plano XZ
-		float angleBeta = 0;	// Ângulo atual no plano XY
+		float angleAlpha = 0.0f; // Ângulo atual no plano XZ
+		float angleBeta = 0.0f;	 // Ângulo atual no plano XY
 
 		float x = 0.0f;
 		float y = 0.0f;
@@ -148,20 +150,25 @@ public:
 
 			for (size_t j = 0; j <= (size_t)slices; j++) {
 				
-				//Cálculo do ângulo Alfa
-				angleAlfa = ((float) alfa * j);
+				//Cálculo do ângulo Alpha
+				angleAlpha = ((float) alpha * j);
 
-				x = radius * sin(angleBeta) * cos(angleAlfa);
+				x = radius * sin(angleBeta) * cos(angleAlpha);
 				y = radius * cos(angleBeta);
-				z = radius * sin(angleBeta) * sin(angleAlfa);
+				z = radius * sin(angleBeta) * sin(angleAlpha);
 
-				vertices.push_back(Vertex(x, y, z));
+				vertices.push_back(TripleFloat(x, y, z));
 
-				nx = sin(angleBeta) * cos(angleAlfa);
+				nx = sin(angleBeta) * cos(angleAlpha);
 				ny = cos(angleBeta);
-				nz = sin(angleBeta) * sin(angleAlfa);
+				nz = sin(angleBeta) * sin(angleAlpha);
 
-				normals.push_back(Vertex(nx, ny, nz));
+				normals.push_back(TripleFloat(nx, ny, nz));
+
+
+				texCoords.push_back(TripleFloat((slices - (float)j) / slices, 
+					                            (stacks - (float)i) / stacks, 
+					                            0.0f));
 			}
 		}
 
@@ -207,7 +214,7 @@ Sphere::Sphere(float radius, int slices, int stacks)
 
 	// O raio não pode conter um valor negativo
 
-	radius = (radius < 0) ? 0 : radius;
+	radius = (radius < 0.0f) ? 0.0f : radius;
 
 	pimpl = new SphereImpl(radius, slices, stacks);
 
@@ -259,7 +266,7 @@ int Sphere::getSlices(void)
  */
 void Sphere::setRadius(float radius)
 {
-	radius = (radius < 0) ? 0 : radius;
+	radius = (radius < 0.0f) ? 0.0f : radius;
 	pimpl->setRadius(radius);
 }
 
@@ -289,15 +296,17 @@ void Sphere::setSlices(int slices)
  */
 void Sphere::generateVertices(void)
 {
-	std::vector<Vertex> vertices;
-	std::vector<Vertex> normals;
+	std::vector<TripleFloat> vertices;
+	std::vector<TripleFloat> normals;
+	std::vector<TripleFloat> texCoords;
 	std::vector<size_t> indexes;
 
-	pimpl->generateSphere(vertices, normals, indexes);
+	pimpl->generateSphere(vertices, normals, texCoords, indexes);
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));
 		addNormal(normals.at(i));
+		addTexCoord(texCoords.at(i));
 	}
 
 	for (size_t i = 0; i < indexes.size(); i++) {

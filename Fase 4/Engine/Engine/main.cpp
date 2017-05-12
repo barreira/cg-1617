@@ -7,12 +7,13 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017 
+ * @version 12-05-2017 
  */
 
 
-#include <stdlib.h>
+#include <cstdlib>
 
+#include <IL/il.h>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -20,7 +21,6 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #endif
-
 
 #include <iostream>
 #include <fstream>
@@ -30,7 +30,11 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE "demos/solarsystem.xml" 
+#define XML_FILE   "demos/cone.xml" 
+
+// Background por defeito
+#define BACKGROUND "demos/univ.jpg"
+
 
 #define FRONT_AND_BACK 1  // Desenhar a parte da frente e de trás de
                           // uma primitiva
@@ -38,45 +42,47 @@
 const float PI = 3.14159265358979323846f;  // Valor da constante pi
 
 
-float xPos = 0.0;    // Posição x
-float zPos = 0.0;    // Posição z
-float angleX = 0.0;  // Ângulo em relação ao eixo dos xx
-float angleY = 0.0;  // Ângulo em relação ao eixo dos yy
+float xPos = 0.0f;    // Posição x
+float zPos = 0.0f;    // Posição z
+float angleX = 0.0f;  // Ângulo em relação ao eixo dos xx
+float angleY = 0.0f;  // Ângulo em relação ao eixo dos yy
 
 
 // Por defeito o modo de desenho é wired
 GLenum mode = GL_FILL;
 
 // Por defeito desenham-se ambos os lados de uma primitiva
-GLenum drawMode = FRONT_AND_BACK;
+GLenum drawMode = GL_BACK;
 
 
-float lx = 0.0;                  // Posição para onde se está a olhar no eixo dos
-                                 // xx
-float px = 0.0;                  // Posição da câmara no eixo dos xx
+float lx = 0.0f;               // Posição para onde se está a olhar no eixo dos
+                               // xx
+float px = 0.0f;               // Posição da câmara no eixo dos xx
 
-float ly = 0.0;                  // Posição para onde se está a olhar no eixo dos
-                                 // yy
-float py = 0.0;                  // Posição da câmara no eixo dos yy
+float ly = 0.0f;               // Posição para onde se está a olhar no eixo dos
+                               // yy
+float py = 0.0f;               // Posição da câmara no eixo dos yy
 
-float lz = -1.0;                 // Posição para onde se está a olhar no eixo dos
-                                 // zz
-float pz = 15.0;                 // Posição da câmara no eixo dos zz
+float lz = -1.0f;              // Posição para onde se está a olhar no eixo dos
+                               // zz
+float pz = 15.0f;              // Posição da câmara no eixo dos zz
 
-float cameraAngleX = 0.0;        // Ângulo da câmara no eixo dos xx
-float deltaAngleX = 0.0;         // Ângulo para cálculos auxilares
-int xOrigin = -1;                // Posição x do rato
+float cameraAngleX = 0.0f;     // Ângulo da câmara no eixo dos xx
+float deltaAngleX = 0.0f;      // Ângulo para cálculos auxilares
+int xOrigin = -1;              // Posição x do rato
 
-float cameraAngleY = 0.0;        // Ângulo da câmara no eixo dos yy
-float deltaAngleY = 0.0;         // Ângulo para cálculos auxiliares
-int yOrigin = -1;                // Posição y do rato
+float cameraAngleY = 0.0f;     // Ângulo da câmara no eixo dos yy
+float deltaAngleY = 0.0f;      // Ângulo para cálculos auxiliares
+int yOrigin = -1;              // Posição y do rato
 
-const float vCameraX = 0.003;    // Velocidade de rotação da câmara em X
-const float vCameraY = 0.5;      // Velocidade de rotação da câmara em Y
+const float vCameraX = 0.003f; // Velocidade de rotação da câmara em X
+const float vCameraY = 0.5f;   // Velocidade de rotação da câmara em Y
 
 
 std::vector<GLOperation*> glOperations;  // Vetor de operações em OpenGL
 
+GLuint texID;
+std::string background;
 
 /**
  * Função responsável pela representação de uma cena em OpenGL. Percorre
@@ -119,12 +125,61 @@ void changeSize(int w, int h)
 }
 
 
+void drawBackground(void)
+{
+	float w = 0.0f;
+	float h = 0.0f;
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	w = (float)glutGet(GLUT_WINDOW_WIDTH);
+	h = (float)glutGet(GLUT_WINDOW_HEIGHT);
+
+	gluOrtho2D(0.0, (GLdouble)w, (GLdouble)h, 0.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glBegin(GL_QUADS);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(0.0f, h, 0.0f);
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(w, h, 0.0f);
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(w, 0.0f, 0.0f);
+
+	glEnd();
+
+	glPopMatrix(); 
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix(); 
+	glMatrixMode(GL_MODELVIEW);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+}
+
+
 void renderScene(void)
 {
-	float pos[4] = { 0.0, 0.0, 5.0, 0.0 };
-	GLfloat diff[4] = { 1, 1, 1, 1.0 };
-
-	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set the camera
@@ -133,12 +188,14 @@ void renderScene(void)
 		      px + lx, py + ly, pz + lz,
 		      0.0f, 1.0f, 0.0f);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
+	drawBackground();
 
-	glTranslatef(xPos, 0, zPos);
-	glRotatef(angleY, 0, 1, 0);
-	glRotatef(angleX, 1, 0, 0);
+	glPushMatrix();
+
+	glTranslatef(xPos, 0.0f, zPos);
+	glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+	glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+
 
 	if (drawMode != FRONT_AND_BACK) {
 		glEnable(GL_CULL_FACE);
@@ -153,6 +210,8 @@ void renderScene(void)
 	// Representa a cena correspondente a um conjunto de operações em OpenGL
 	drawScene();
 
+	glPopMatrix();
+
 	glutSwapBuffers();
 }
 
@@ -165,22 +224,22 @@ void keyboardEvent(unsigned char key, int x, int y)
 	if (key == 'w') {
 
 		// Afasta um modelo
-		zPos -= 0.3;
+		zPos -= 0.3f;
 	}
 	else if (key == 's') {
 
 		// Aproxima um modelo
-		zPos += 0.3;
+		zPos += 0.3f;
 	}
 	else if (key == 'a') {
 
 		// Move um modelo para a direita
-		xPos -= 0.3;
+		xPos -= 0.3f;
 	}
 	else if (key == 'd') {
 
 		// Move um modelo para a esquerda
-		xPos += 0.3;
+		xPos += 0.3f;
 	}
 }
 
@@ -194,25 +253,25 @@ void rotateEvent(int key, int x, int y)
 
 		// Roda o modelo em torno do eixo dos yy no sentido dos 
 		// ponteiros do relógio
-		angleY -= 3.0;
+		angleY -= 3.0f;
 	}
 	else if (key == GLUT_KEY_RIGHT) {
 		
 		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
 		// ponteiros do relógio
-		angleY += 3.0;
+		angleY += 3.0f;
 	}
 	else if (key == GLUT_KEY_UP) {
 
 		// Roda o modelo em torno do eixo dos yy no sentido dos 
 		// ponteiros do relógio
-		angleX -= 3.0;
+		angleX -= 3.0f;
 	}
 	else if (key == GLUT_KEY_DOWN) {
 
 		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
 		// ponteiros do relógio
-		angleX += 3.0;
+		angleX += 3.0f;
 	}
 }
 
@@ -270,14 +329,14 @@ void mouseMove(int x, int y)
 		deltaAngleY = (y - yOrigin) * vCameraY;
 
 		// Limita-se o ângulo da câmara em Y entre -90 e 90 graus
-		if (cameraAngleY + deltaAngleY >= 90.0) {
-			ly = tan(89.0 * PI / 180.0);
+		if (cameraAngleY + deltaAngleY >= 90.0f) {
+			ly = tan(89.0f * PI / 180.0f);
 		}
-		else if (cameraAngleY + deltaAngleY <= -90.0) {
-			ly = tan(-89.0 * PI / 180.0);
+		else if (cameraAngleY + deltaAngleY <= -90.0f) {
+			ly = tan(-89.0f * PI / 180.0f);
 		}
 		else {
-			ly = tan((cameraAngleY + deltaAngleY) * PI / 180.0);
+			ly = tan((cameraAngleY + deltaAngleY) * PI / 180.0f);
 		}
 	}
 }
@@ -310,6 +369,42 @@ void mouseButton(int button, int state, int x, int y)
 }
 
 
+void loadBackground(void)
+{
+	unsigned int t = 0;
+	unsigned int tw = 0;
+	unsigned int th = 0;
+	unsigned char *texData;
+
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+	ilGenImages(1, &t);
+	ilBindImage(t);
+	ilLoadImage((ILstring)background.c_str());
+
+	tw = ilGetInteger(IL_IMAGE_WIDTH);
+	th = ilGetInteger(IL_IMAGE_HEIGHT);
+
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	texData = ilGetData();
+
+	glGenTextures(1, &texID);
+
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 /**
  * Função que inicializa todos os componentes da glut
  */
@@ -326,7 +421,6 @@ void initGlut(int argc, char **argv)
 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
-
 
 	// Registos de funções
 	glutIdleFunc(renderScene);
@@ -354,13 +448,18 @@ void initGlut(int argc, char **argv)
 	glewInit();
 #endif
 
+	ilInit();
+
 	//  OpenGL settings
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_SMOOTH);
+	glEnable(GL_RESCALE_NORMAL);
+	
+	loadBackground();
 
 	// enter GLUT's main cycle
 	glutMainLoop();
@@ -387,6 +486,17 @@ int main(int argc, char **argv)
 	else {
 		// Caso contrário carrega-se o ficheiro por defeito.
 		parser = new XMLParser(XML_FILE);
+	}
+
+	// Se possuir mais que dois argumentos então o terceiro argumento
+	// corresponde à textura do background
+	if (argc > 2) {
+		background = argv[2];
+	}
+	else {
+
+		// Caso contrário é carregada a textura por defeito
+		background = BACKGROUND;
 	}
 
 	glOperations = parser->getGLOperations();

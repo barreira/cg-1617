@@ -8,7 +8,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017
+ * @version 06-05-2017
  */
 
 
@@ -27,10 +27,9 @@
 #include "scale.h"
 #include "translation.h"
 #include "trianglesDrawing.h"
-#include "diffuseColor.h"
-#include "specularColor.h"
-#include "emissiveColor.h"
-#include "ambientColor.h"
+#include "pointLight.h"
+#include "directionalLight.h"
+#include "spotLight.h"
 
 
 /* Definição de constantes e atributos que caracterizam operações em OpenGL */
@@ -42,18 +41,20 @@
 #define MODEL  "model"
 #define FILE   "file"
 
-#define DIFFR  "diffr"
-#define DIFFG  "diffg"
-#define DIFFB  "diffb"
-#define SPECR  "specr"
-#define SPECG  "specg"
-#define SPECB  "specb"
-#define EMISR  "emisr"
-#define EMISG  "emisg"
-#define EMISB  "emisb"
-#define AMBTR  "ambtr"   
-#define AMBTG  "ambtg"   
-#define AMBTB  "ambtb"   
+#define DIFFR     "diffr"
+#define DIFFG     "diffg"
+#define DIFFB     "diffb"
+#define SPECR     "specr"
+#define SPECG     "specg"
+#define SPECB     "specb"
+#define EMISR     "emisr"
+#define EMISG     "emisg"
+#define EMISB     "emisb"
+#define AMBTR     "ambtr"   
+#define AMBTG     "ambtg"   
+#define AMBTB     "ambtb"   
+#define SHININESS "shininess"
+#define TEXTURE   "texture"
 
 #define RAND   "rand"
 #define XZMINR "xzminr"
@@ -77,6 +78,25 @@
 #define Y         "y"
 #define Z         "z"
 #define TIME      "time"
+
+
+/* Tags relativas a luzes */
+#define LIGHTS      "lights"
+#define LIGHT       "light"
+#define POSX        "posx"
+#define POSY        "posy"
+#define POSZ        "posz"
+#define TYPE        "type"
+#define DIRECTIONAL "directional"
+#define SPOT        "spot"
+#define CUTOFF      "cutoff"
+#define EXPONENT    "exponent"
+#define SPOTDIRX    "spotdirx"
+#define SPOTDIRY    "spotdiry"
+#define SPOTDIRZ    "spotdirz"
+#define CONSTANT    "constant"
+#define LINEAR      "linear"
+#define QUADRATIC   "quadratic"
 
 
 const float PI = 3.14159265358979323846f;  // Valor da constante pi
@@ -105,6 +125,9 @@ class XMLParser::XMLParserImpl {
 	std::stack<bool> modelsInContainer;     // Stack para guardar a informação
 	                                        // acerca de um container possuir
 	                                        // ou não uma tag models
+	std::stack<bool> lightsInContainer;     // Stack para guardar a informação
+											// acerca de um container possuir
+											// ou não uma tag lights
 
 	std::vector<GLOperation*> glOperations;   // Vetor de operações em OpenGL
 	std::string errorString;                  // Representação textual de
@@ -117,6 +140,9 @@ class XMLParser::XMLParserImpl {
 
 	// Map que associa o nome de um ficheiro a um conjunto de normais
 	std::map<std::string, std::vector<GLfloat>> mapFileNormals;
+
+	// Map que associa o nome de um ficheiro a um conjunto de normais
+	std::map<std::string, std::vector<GLfloat>> mapFileTexCoords;
 
 	// Map que associa o nome de um ficheiro a um conjunto de índices
 	std::map<std::string, std::vector<size_t>> mapFileIndexes;
@@ -132,12 +158,6 @@ class XMLParser::XMLParserImpl {
 		}
 
 		glOperations.clear();
-	}
-
-
-	bool isColorChosen(bool a, bool b, bool c)
-	{
-		return (a == true || b == true || c == true);
 	}
 
 
@@ -158,6 +178,23 @@ class XMLParser::XMLParserImpl {
 
 
 	/**
+	 * Converte uma string para um valor real.
+	 *
+	 * @param str String a ser convertida.
+	 * @return Devolve o valor real da string recebida.
+	 */
+	float readFloat(std::string str)
+	{
+		float ret = 0.0f;
+		std::stringstream ss(str);
+
+		ss >> ret;
+
+		return ret;
+	}
+
+
+	/**
 	 * Inicializa as stacks de um container. Sempre que se inicia o parsing
 	 * de um container todas as stacks recebem o valor falso.
 	 */
@@ -168,6 +205,7 @@ class XMLParser::XMLParserImpl {
 		scalesInContainer.push(false);
 		translatesInContainer.push(false);
 		modelsInContainer.push(false);
+		lightsInContainer.push(false);
 	}
 
 
@@ -203,15 +241,15 @@ class XMLParser::XMLParserImpl {
 		float xzArea = xzMaxR - xzMinR;
 		float yArea = yMaxR - yMinR;
 
-		float xzAngle = getRandom() * 360.0;
+		float xzAngle = getRandom() * 360.0f;
 		float xzR = (getRandom() * xzArea) + xzMinR;
 
-		float yAngle = getRandom() * 360.0 - 180.0;
+		float yAngle = getRandom() * 360.0f - 180.0f;
 		float yR = (getRandom() * yArea) + yMinR;
 
-		x = xzR * sin(xzAngle * PI / 180.0);
-		y = yR * cos(yAngle * PI / 180.0);
-		z = xzR * cos(xzAngle * PI / 180.0);
+		x = xzR * sin(xzAngle * PI / 180.0f);
+		y = yR * cos(yAngle * PI / 180.0f);
+		z = xzR * cos(xzAngle * PI / 180.0f);
 
 		glOperations.push_back(new Translation(x, y, z));
 	}
@@ -270,6 +308,7 @@ class XMLParser::XMLParserImpl {
 		scalesInContainer.pop();
 		translatesInContainer.pop();
 		modelsInContainer.pop();
+		lightsInContainer.pop();
 	}
 
 
@@ -277,15 +316,17 @@ class XMLParser::XMLParserImpl {
 	 * Abre o ficheiro que contém um conjunto de vértices e nomrais de uma 
 	 * primitiva. Este ficheiro é aberto apenas uma vez.
 	 *
-	 * @param fileName Nome do ficheiro.
-	 * @param vertices Conjunto de vértices de uma primitiva.
-	 * @param normals  Conjunto de normais de uma primitiva.
-	 * @param indexes  Conjunto de índices associados ao vetor de vértices.
+	 * @param fileName  Nome do ficheiro.
+	 * @param vertices  Conjunto de vértices de uma primitiva.
+	 * @param normals   Conjunto de normais de uma primitiva.
+	 * @param texCoords Conjunto de coordenadas de uma textura.
+	 * @param indexes   Conjunto de índices associados ao vetor de vértices.
 	 * @return O resultado é devolvido em vertices e em indexes.
 	 */
 	void readModel(const char* file, 
 		           std::vector<GLfloat>& vertices,
 	               std::vector<GLfloat>& normals,
+		           std::vector<GLfloat>& texCoords,
 		           std::vector<size_t>& indexes)
 	{
 		std::fstream fp;       // Estrutura para abertura de um ficheiro em
@@ -295,13 +336,14 @@ class XMLParser::XMLParserImpl {
 		std::stringstream ss;  // String auxiliar para converter texto em 
 		                       // valores numéricos
 
-		float x = 0.0;  // Coordenada x de um vértice
-		float y = 0.0;  // Coordenada y de um vértice
-		float z = 0.0;  // Coordenada z de um vértice
+		float x = 0.0f;  // Coordenada x de um vértice
+		float y = 0.0f;  // Coordenada y de um vértice
+		float z = 0.0f;  // Coordenada z de um vértice
 
 		size_t index = 0;
 
 		bool normalsMode = false;
+		bool texMode = false;
 		bool indexesMode = false;
 
 		// Extrai dos mapas, os vértices, normais e os índices associados
@@ -309,6 +351,7 @@ class XMLParser::XMLParserImpl {
 		try {
 			vertices = mapFileVertices.at(file);
 			normals = mapFileNormals.at(file);
+			texCoords = mapFileTexCoords.at(file);
 			indexes = mapFileIndexes.at(file);
 		}
 		catch (std::out_of_range) {
@@ -331,8 +374,11 @@ class XMLParser::XMLParserImpl {
 						
 						// Já leu todas as normais, então procede-se à leitura 
 						// de índices
-						if (normalsMode == true) {
+						if (texMode == true) {
 							indexesMode = true;
+						}
+						else if (normalsMode == true) {
+							texMode = true;
 						}
 						else {
 							normalsMode = true;
@@ -346,6 +392,12 @@ class XMLParser::XMLParserImpl {
 
 						indexes.push_back(index);
 					}
+					else if (texMode == true) {
+						ss >> x >> y;
+
+						texCoords.push_back(x);
+						texCoords.push_back(y);
+					}
 					else if (normalsMode == true) {
 
 						// Converte uma linha para as normais x, y e z
@@ -355,6 +407,12 @@ class XMLParser::XMLParserImpl {
 						normals.push_back(x); 
 						normals.push_back(y); 
 						normals.push_back(z);
+					}
+					else if (texMode == true) {
+						ss >> x >> y;
+
+						texCoords.push_back(x);
+						texCoords.push_back(y);
 					}
 					else {
 
@@ -381,6 +439,9 @@ class XMLParser::XMLParserImpl {
 				mapFileNormals.insert(std::pair < std::string,
 					                  std::vector < GLfloat >> (file, normals));
 
+				mapFileTexCoords.insert(std::pair < std::string,
+					                  std::vector < GLfloat >> (file, texCoords));
+
 				mapFileIndexes.insert(std::pair < std::string,
 					                  std::vector < size_t >> (file, indexes));
 			}
@@ -406,19 +467,18 @@ class XMLParser::XMLParserImpl {
 	{
 		std::vector<GLfloat> vertices;  // Vetor de vértices de um modelo
 		std::vector<GLfloat> normals;   // Vetor de normais de um modelo
+		std::vector<GLfloat> texCoords; // Vetor de coordenadas de uma textura
 		std::vector<size_t> indexes;    // Conjunto de índices associados ao
 		                                // vetor de vértices
 		size_t numFiles = 0;            // Número de ficheiros associados à tag
 		                                // model
 
-		float red = 0.0f;          // Valor da cor em vermelho 
-		float green = 0.0f;         // Valor da cor em verde 
-		float blue = 0.0f;         // Valor da cor em azul 
-		bool isDiffuse = false;
-		bool isSpecular = false;
-		bool isEmissive = false;
-		bool isAmbient = false;
-		Color* color;
+		TripleFloat diff(0.8f, 0.8f, 0.8f);  // Cor difusa
+		TripleFloat emis(0.0f, 0.0f, 0.0f);  // Cor emissiva
+		TripleFloat spec(0.0f, 0.0f, 0.0f);  // Cor especular
+		TripleFloat ambt(0.2f, 0.2f, 0.2f);  // Cor ambiente
+
+		float shininess = 0.0f;   // Brilho do material
 
 		size_t rand = 0;          // Quantidade de modelos a serem gerados 
 		                          // em posições aleatórias
@@ -427,14 +487,16 @@ class XMLParser::XMLParserImpl {
 		                          // aleatórias
 		bool existsYMax = false;  // Determina se foi fornecida a área máxima
 		                          // para a geração da coordenada y aleatória
-		float xzMinR = 0.0f;      // Área mínima para a geração das coodenadas
+		float xzMinR = 0.0f;      // Área mínima para a geração das coordenadas
 		                          // aleatórias x e z
-		float xzMaxR = 0.0f;      // Área máxima para a geração das coodenadas
+		float xzMaxR = 0.0f;      // Área máxima para a geração das coordenadas
 		                          // aleatórias x e z
-		float yMinR = 0.0f;       // Área mínima para a geração da coodenada
+		float yMinR = 0.0f;       // Área mínima para a geração da coordenada
 		                          // aleatória y
-		float yMaxR = 0.0f;       // Área máxima para a geração da coodenada
+		float yMaxR = 0.0f;       // Área máxima para a geração da coordenada
 		                          // aleatória y
+
+		std::string texture = "";
 
 		numModels++;
 
@@ -450,113 +512,73 @@ class XMLParser::XMLParserImpl {
 					invalidDoc = true;
 				}
 				else {
-					readModel(a->Value(), vertices, normals, indexes);
+					readModel(a->Value(), vertices, normals, texCoords, indexes);
 					numFiles++;
 				}
 			}
-			else if (attName.compare(DIFFR) == 0 && isColorChosen(isSpecular, isEmissive, isAmbient) == false) {
-				isDiffuse = true;
-				std::stringstream ss(a->Value());
-				ss >> red;
+			else if (attName.compare(DIFFR) == 0) {
+				diff.setF1(readFloat(a->Value()));
 			}
-			else if (attName.compare(DIFFG) == 0 && isColorChosen(isSpecular, isEmissive, isAmbient) == false) {
-				isDiffuse = true;
-				std::stringstream ss(a->Value());
-				ss >> green;
+			else if (attName.compare(DIFFG) == 0) {
+				diff.setF2(readFloat(a->Value()));
 			}
-			else if (attName.compare(DIFFB) == 0 && isColorChosen(isSpecular, isEmissive, isAmbient) == false) {
-				isDiffuse = true;
-				std::stringstream ss(a->Value());
-				ss >> blue;
+			else if (attName.compare(DIFFB) == 0) {
+				diff.setF3(readFloat(a->Value()));
 			}
-			else if (attName.compare(SPECR) == 0 && isColorChosen(isDiffuse, isEmissive, isAmbient) == false) {
-				isSpecular = true;
-				std::stringstream ss(a->Value());
-				ss >> red;
+			else if (attName.compare(SPECR) == 0) {
+				spec.setF1(readFloat(a->Value()));
 			}
-			else if (attName.compare(SPECG) == 0 && isColorChosen(isDiffuse, isEmissive, isAmbient) == false) {
-				isSpecular = true;
-				std::stringstream ss(a->Value());
-				ss >> green;
+			else if (attName.compare(SPECG) == 0) {
+				spec.setF2(readFloat(a->Value()));
 			}
-			else if (attName.compare(SPECB) == 0 && isColorChosen(isDiffuse, isEmissive, isAmbient) == false) {
-				isSpecular = true;
-				std::stringstream ss(a->Value());
-				ss >> blue;
+			else if (attName.compare(SPECB) == 0) {
+				spec.setF3(readFloat(a->Value()));
 			}
-			else if (attName.compare(EMISR) == 0 && isColorChosen(isDiffuse, isSpecular, isAmbient) == false) {
-				isEmissive = true;
-				std::stringstream ss(a->Value());
-				ss >> red;
+			else if (attName.compare(EMISR) == 0) {
+				emis.setF1(readFloat(a->Value()));
 			}
-			else if (attName.compare(EMISG) == 0 && isColorChosen(isDiffuse, isSpecular, isAmbient) == false) {
-				isEmissive = true;
-				std::stringstream ss(a->Value());
-				ss >> green;
+			else if (attName.compare(EMISG) == 0) {
+				emis.setF2(readFloat(a->Value()));
 			}
-			else if (attName.compare(EMISB) == 0 && isColorChosen(isDiffuse, isSpecular, isAmbient) == false) {
-				isEmissive = true;
-				std::stringstream ss(a->Value());
-				ss >> blue;
+			else if (attName.compare(EMISB) == 0) {
+				emis.setF3(readFloat(a->Value()));
 			}
-			else if (attName.compare(AMBTR) == 0 && isColorChosen(isDiffuse, isSpecular, isEmissive) == false) {
-				isAmbient = true;
-				std::stringstream ss(a->Value());
-				ss >> red;
+			else if (attName.compare(AMBTR) == 0) {
+				ambt.setF1(readFloat(a->Value()));
 			}
-			else if (attName.compare(AMBTG) == 0 && isColorChosen(isDiffuse, isSpecular, isEmissive) == false) {
-				isAmbient = true;
-				std::stringstream ss(a->Value());
-				ss >> green;
+			else if (attName.compare(AMBTG) == 0) {
+				ambt.setF2(readFloat(a->Value()));
 			}
-			else if (attName.compare(AMBTB) == 0 && isColorChosen(isDiffuse, isSpecular, isEmissive) == false) {
-				isAmbient = true;
-				std::stringstream ss(a->Value());
-				ss >> blue;
+			else if (attName.compare(AMBTB) == 0) {
+				ambt.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(SHININESS) == 0) {
+				shininess = readFloat(a->Value());
 			}
 			else if(attName.compare(RAND) == 0) {
-				std::stringstream ss(a->Value());
-				ss >> rand;
+				rand = (size_t)readFloat(a->Value());
 			}
 			else if (attName.compare(XZMINR) == 0) {
-				std::stringstream ss(a->Value());
-				ss >> xzMinR;
+				xzMinR = readFloat(a->Value());
 			}
 			else if (attName.compare(XZMAXR) == 0) {
-				std::stringstream ss(a->Value());
-				ss >> xzMaxR;
+				xzMaxR = readFloat(a->Value());
 				existsXZMax = true;
 			}
 			else if (attName.compare(YMINR) == 0) {
-				std::stringstream ss(a->Value());
-				ss >> yMinR;
+				yMinR = readFloat(a->Value());
 				existsYMax = true;
 			}
 			else if (attName.compare(YMAXR) == 0) {
-				std::stringstream ss(a->Value());
-				ss >> yMaxR;
+				yMaxR = readFloat(a->Value());
+			}
+			else if (attName.compare(TEXTURE) == 0) {
+				texture = a->Value();
 			}
 			else {
 				errorString.append("Error: Invalid model attribute!\n");
 				invalidDoc = true;
 			}
-		}
-
-		// A cor de um modelo é difusa e branca por defeito
-		if (isDiffuse == true) {
-			color = new DiffuseColor(red, green, blue);
-		}
-		else if (isSpecular == true) {
-			color = new SpecularColor(red, green, blue);
-		}
-		else if (isEmissive == true) {
-			color = new EmissiveColor(red, green, blue);
-		}
-		else if (isAmbient == true) {
-			color = new AmbientColor(red, green, blue);
-		}
-		else {
-			color = new DiffuseColor(1.0f, 1.0f, 1.0f);
 		}
 
 		if (rand > 0 && invalidDoc == false) {
@@ -569,8 +591,14 @@ class XMLParser::XMLParserImpl {
 					
 					glOperations.push_back(new TrianglesDrawing(vertices, 
 						                                        normals,
+						                                        texCoords,
 						                                        indexes,
-						                                        color));
+						                                        diff,
+						                                        spec,
+						                                        emis,
+						                                        ambt,
+						                                        shininess,
+						                                        texture));
 					
 					glOperations.push_back(new PopMatrix());
 				}
@@ -579,8 +607,14 @@ class XMLParser::XMLParserImpl {
 		else {
 			glOperations.push_back(new TrianglesDrawing(vertices, 
 				                                        normals, 
+				                                        texCoords,
 				                                        indexes,
-				                                        color));
+				                                        diff,
+				                                        spec,
+				                                        emis,
+				                                        ambt,
+				                                        shininess,
+				                                        texture));
 		}
 	}
 
@@ -606,6 +640,175 @@ class XMLParser::XMLParserImpl {
 				// Uma tag models apenas pode ter a si associada filhos do tipo
 				// model
 				errorString.append("Error: Invalid models tag!\n");
+				invalidDoc = true;
+			}
+		}
+	}
+
+
+	/**
+	* Efetua o parsing de uma luz.
+	*
+	* @param light Tag light.
+	*/
+	void parseLight(TiXmlElement* light)
+	{
+		TripleFloat pos(0.0f, 0.0f, 1.0f);      // Posição da luz
+		TripleFloat diff(1.0f, 1.0f, 1.0f);     // Cor difusa da luz
+		TripleFloat spec(1.0f, 1.0f, 1.0f);     // Cor especular da luz
+		TripleFloat ambt(0.0f, 0.0f, 0.0f);     // Cor ambiente da luz
+		TripleFloat spotDir(0.0f, 0.0f, -1.0f); // Direção da spot light
+
+		float constant = 1.0f;
+		float linear = 0.0f;
+		float quadratic = 0.0f;
+
+		float cutoff = 180.0f;
+		float exponent = 0.0f;
+
+		bool isPoint = false;
+		bool isDirectional = false;
+		bool isSpot = false;
+
+		size_t numTypes = 0;
+
+		for (TiXmlAttribute* a = light->FirstAttribute();
+		     a != NULL && invalidDoc == false; a = a->Next()) {
+
+			std::string attName(toLower(a->Name()));
+
+			if (attName.compare(POSX) == 0) {
+				pos.setF1(readFloat(a->Value()));
+			}
+			else if (attName.compare(POSY) == 0) {
+				pos.setF2(readFloat(a->Value()));
+			}
+			else if (attName.compare(POSZ) == 0) {
+				pos.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(DIFFR) == 0) {
+				diff.setF1(readFloat(a->Value()));
+			}
+			else if (attName.compare(DIFFG) == 0) {
+				diff.setF2(readFloat(a->Value()));
+			}
+			else if (attName.compare(DIFFB) == 0) {
+				diff.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPECR) == 0) {
+				spec.setF1(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPECG) == 0) {
+				spec.setF2(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPECB) == 0) {
+				spec.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(AMBTR) == 0) {
+				ambt.setF1(readFloat(a->Value()));
+			}
+			else if (attName.compare(AMBTG) == 0) {
+				ambt.setF2(readFloat(a->Value()));
+			}
+			else if (attName.compare(AMBTB) == 0) {
+				ambt.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPOTDIRX) == 0) {
+				spotDir.setF1(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPOTDIRY) == 0) {
+				spotDir.setF2(readFloat(a->Value()));
+			}
+			else if (attName.compare(SPOTDIRZ) == 0) {
+				spotDir.setF3(readFloat(a->Value()));
+			}
+			else if (attName.compare(CUTOFF) == 0) {
+				cutoff = readFloat(a->Value());
+			}
+			else if (attName.compare(EXPONENT) == 0) {
+				exponent = readFloat(a->Value());
+			}
+			else if (attName.compare(CONSTANT) == 0) {
+				constant = readFloat(a->Value());
+			}
+			else if (attName.compare(LINEAR) == 0) {
+				linear = readFloat(a->Value());
+			}
+			else if (attName.compare(QUADRATIC) == 0) {
+				quadratic = readFloat(a->Value());
+			}
+			else if (attName.compare(TYPE) == 0) { 
+				std::string value(toLower(a->Value()));
+
+				if (value.compare(POINT) == 0) {
+					isPoint = true;
+					numTypes++;
+				}
+				else if (value.compare(DIRECTIONAL) == 0) {
+					isDirectional = true;
+					numTypes++;
+				}
+				else if (value.compare(SPOT) == 0) {
+					isSpot = true;
+					numTypes++;
+				}
+				else {
+					invalidDoc = true;
+					errorString.append("Error: Invalid light type!\n");
+				}
+			}
+			else {
+				errorString.append("Error: Invalid light attribute!\n");
+				invalidDoc = true;
+			}
+		}
+
+		if (numTypes > 1) {
+			invalidDoc = true;
+			errorString.append("Error: Multiple light types!\n");
+		}
+
+		if (isPoint == true) {
+			glOperations.push_back(new PointLight(pos, diff, spec, ambt,
+				                                  constant, linear, quadratic));
+		}
+		else if (isDirectional == true) {
+			glOperations.push_back(new DirectionalLight(pos, diff, spec, ambt,
+				                                        constant, linear, quadratic));
+		}
+		else if (isSpot == true) {
+			glOperations.push_back(new SpotLight(pos, diff, spec, ambt,
+				                                 constant, linear, quadratic,
+				                                 spotDir, cutoff, exponent));
+		}
+		else {
+			invalidDoc = true;
+			errorString.append("Error: Unspecified light type!\n");
+		}
+	}
+
+
+	/**
+	 * Efetua o parsing dos atributos associados à tag lights.
+	 *
+	 * @param lights Tag lights.
+	 */
+	void parseLights(TiXmlElement* lights)
+	{
+		for (TiXmlElement* light = lights->FirstChildElement();
+		     light != NULL && invalidDoc == false;
+			light = light->NextSiblingElement()) {
+
+			std::string lightName(toLower(light->Value()));
+
+			if (lightName.compare(LIGHT) == 0) {
+				parseLight(light);
+			}
+			else {
+
+				// Uma tag models apenas pode ter a si associada filhos do tipo
+				// model
+				errorString.append("Error: Invalid lights tag!\n");
 				invalidDoc = true;
 			}
 		}
@@ -641,11 +844,11 @@ class XMLParser::XMLParserImpl {
 	}
 
 
-	Vertex parsePoint(TiXmlElement* point)
+	TripleFloat parsePoint(TiXmlElement* point)
 	{
-		float x = 0.0;
-		float y = 0.0;
-		float z = 0.0;
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
 
 		std::string pointName = toLower(point->Value());
 
@@ -678,7 +881,7 @@ class XMLParser::XMLParserImpl {
 			invalidDoc = true;
 		}
 
-		return Vertex(x, y, z);
+		return TripleFloat(x, y, z);
 	}
 
 
@@ -693,7 +896,7 @@ class XMLParser::XMLParserImpl {
 		float y = 0.0;
 		float z = 0.0;
 		float time = 0.0;
-		std::vector<Vertex> catmullPoints;
+		std::vector<TripleFloat> catmullPoints;
 
 		for (TiXmlAttribute* a = translate->FirstAttribute(); 
 		     a != NULL && invalidDoc == false; a = a->Next()) {
@@ -911,6 +1114,26 @@ class XMLParser::XMLParserImpl {
 				scalesInContainer.push(true);
 
 				parseScale(tag);
+			}
+		}
+		else if (tagName.compare(LIGHTS) == 0) {
+			if (somethingInContainer.top() == false) {
+				somethingInContainer.pop();
+				somethingInContainer.push(true);
+			}
+
+			// Se o número de lights tags for igual ou superior a 1 então o
+			// parsing termina
+			if (lightsInContainer.top() == true) {
+				errorString.append("Error: Duplicated lights tag in group!\n");
+				invalidDoc = true;
+			}
+			else {
+
+				// O container passa a possuir uma lights tag
+				lightsInContainer.pop();
+				lightsInContainer.push(true);
+				parseLights(tag);
 			}
 		}
 

@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017
+ * @version 12-05-2017
  */
 
 
@@ -15,9 +15,10 @@
 
 
 class Primitive::PrimitiveImpl {
-	std::vector<Vertex> vertices;  // Conjunto de vértices de uma primitiva
-	std::vector<Vertex> normals;   // Conjunto de normais de uma primitiva
-	std::vector<size_t> indexes;   // Conjunto de índices do vetor de vértices
+	std::vector<TripleFloat> vertices;  // Conjunto de vértices de uma primitiva
+	std::vector<TripleFloat> normals;   // Conjunto de normais de uma primitiva
+	std::vector<TripleFloat> texCoords; // Conjunto de coordenadas de uma textura
+	std::vector<size_t> indexes;        // Conjunto de índices do vetor de vértices
 
 public:
 
@@ -30,16 +31,19 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param vertices Conjunto de vértices de uma primitiva.
-	 * @param normals  Conjunto de normais de uma primitiva.
-	 * @param indexes  Conjunto de índices associados ao vetor de vértices.
+	 * @param vertices  Conjunto de vértices de uma primitiva.
+	 * @param normals   Conjunto de normais de uma primitiva.
+	 * @param texCoords Conjunto de coordenadas de uma textura.
+	 * @param indexes   Conjunto de índices associados ao vetor de vértices.
 	 */
-	PrimitiveImpl(std::vector<Vertex> vertices, 
-		          std::vector<Vertex> normals,
+	PrimitiveImpl(std::vector<TripleFloat> vertices, 
+		          std::vector<TripleFloat> normals,
+		          std::vector<TripleFloat> texCoords,
 		          std::vector<size_t> indexes)
 	{
 		this->vertices = vertices;
 		this->normals = normals;
+		this->texCoords = texCoords;
 		this->indexes = indexes;
 	}
 
@@ -47,7 +51,7 @@ public:
 	/**
 	 * Devolve o conjunto de vértices que definem uma primitiva.
 	 */
-	std::vector<Vertex> getVertices(void)
+	std::vector<TripleFloat> getVertices(void)
 	{
 		return vertices;
 	}
@@ -56,9 +60,18 @@ public:
 	/**
 	 * Devolve o conjunto de normais de uma primitiva.
 	 */
-	std::vector<Vertex> getNormals(void)
+	std::vector<TripleFloat> getNormals(void)
 	{
 		return normals;
+	}
+
+
+	/**
+	 * Devolve o conjunto coordenadas de uma textura.
+	 */
+	std::vector<TripleFloat> getTexCoords(void)
+	{
+		return texCoords;
 	}
 
 
@@ -76,7 +89,7 @@ public:
 	 *
 	 * @param v Vértice a adicionar.
 	 */
-	void addVertex(Vertex v)
+	void addVertex(TripleFloat v)
 	{
 		vertices.push_back(v);
 	}
@@ -87,9 +100,21 @@ public:
 	 *
 	 * @param n Normal a adicionar.
 	 */
-	void addNormal(Vertex n)
+	void addNormal(TripleFloat n)
 	{
 		normals.push_back(n);
+	}
+
+
+	/**
+	 * Adiciona uma coordenada de uma textura ao conjunto de
+	 * coordenadas.
+	 *
+	 * @param t Coordenada de uma textura a adicionar.
+	 */
+	void addTexCoord(TripleFloat t)
+	{
+		texCoords.push_back(t);
 	}
 
 
@@ -125,13 +150,15 @@ Primitive::Primitive(void)
  *
  * @param vertices Conjunto de vértices de uma primitiva.
  * @param normals  Conjunto de normais de uma primitiva.
+ * @param texCoords Conjunto de coordenadas de uma textura.
  * @param indexes  Conjunto de índices associados ao vetor de vértices.
  */
-Primitive::Primitive(std::vector<Vertex> vertices, 
-	                 std::vector<Vertex> normals,
+Primitive::Primitive(std::vector<TripleFloat> vertices, 
+	                 std::vector<TripleFloat> normals,
+	                 std::vector<TripleFloat> texCoords,
 	                 std::vector<size_t> indexes)
 {
-	pimpl = new PrimitiveImpl(vertices, normals, indexes);
+	pimpl = new PrimitiveImpl(vertices, normals, texCoords, indexes);
 }
 
 
@@ -144,6 +171,7 @@ Primitive::Primitive(const Primitive& p)
 {
 	pimpl = new PrimitiveImpl(p.pimpl->getVertices(), 
 		                      p.pimpl->getNormals(),
+		                      p.pimpl->getTexCoords(),
 		                      p.pimpl->getIndexes());
 }
 
@@ -151,7 +179,7 @@ Primitive::Primitive(const Primitive& p)
 /**
  * Devolve o conjunto de vértices que definem uma primitiva.
  */
-std::vector<Vertex> Primitive::getVertices(void)
+std::vector<TripleFloat> Primitive::getVertices(void)
 {
 	return pimpl->getVertices();
 }
@@ -160,9 +188,18 @@ std::vector<Vertex> Primitive::getVertices(void)
 /**
  * Devolve o conjunto de normais que definem uma primitiva.
  */
-std::vector<Vertex> Primitive::getNormals(void)
+std::vector<TripleFloat> Primitive::getNormals(void)
 {
 	return pimpl->getNormals();
+}
+
+
+/**
+ * Devolve o conjunto coordenadas de uma textura.
+ */
+std::vector<TripleFloat> Primitive::getTexCoords(void)
+{
+	return pimpl->getTexCoords();
 }
 
 
@@ -180,7 +217,7 @@ std::vector<size_t> Primitive::getIndexes(void)
  *
  * @param v Vértice a adicionar.
  */
-void Primitive::addVertex(Vertex v)
+void Primitive::addVertex(TripleFloat v)
 {
 	pimpl->addVertex(v);
 }
@@ -191,9 +228,21 @@ void Primitive::addVertex(Vertex v)
  *
  * @param n Normal a adicionar.
  */
-void Primitive::addNormal(Vertex n)
+void Primitive::addNormal(TripleFloat n)
 {
 	pimpl->addNormal(n);
+}
+
+
+/**
+ * Adiciona uma coordenada de uma textura ao conjunto de
+ * coordenadas.
+ *
+ * @param t Coordenada de uma textura a adicionar.
+ */
+void Primitive::addTexCoord(TripleFloat t)
+{
+	pimpl->addTexCoord(t);
 }
 
 

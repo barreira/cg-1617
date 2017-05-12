@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 02-05-2017
+ * @version 12-05-2017
  */
 
 
@@ -88,17 +88,18 @@ class Box::BoxImpl {
 	 * |       |
 	 * v1------v2
 	 *
-	 * @param x        Coordenada x do vértice inicial (v1).
-	 * @param y        Coordenada y do vértice inicial (v1).
-	 * @param z        Coordenada z do vértice inicial (v1).
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param x         Coordenada x do vértice inicial (v1).
+	 * @param y         Coordenada y do vértice inicial (v1).
+	 * @param z         Coordenada z do vértice inicial (v1).
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
 	void generateFacesXY(float x, float y, float z,
-		                 std::vector<Vertex>& vertices,
-	                     std::vector<Vertex>& normals,
+		                 std::vector<TripleFloat>& vertices,
+	                     std::vector<TripleFloat>& normals,
+		                 std::vector<TripleFloat>& texCoords,
 		                 std::vector<size_t>& indexes)
 	{
 		int a = 0;
@@ -111,8 +112,9 @@ class Box::BoxImpl {
 		// Face da frente
 		for (a = 0; a <= numDiv; a++, i += divX) {
 			for (b = 0; b <= numDiv; b++, j += divY) {
-				vertices.push_back(Vertex(i, j, z));
-				normals.push_back(Vertex(0.0f, 0.0f, 1.0f));
+				vertices.push_back(TripleFloat(i, j, z));
+				normals.push_back(TripleFloat(0.0f, 0.0f, 1.0f));
+				texCoords.push_back(TripleFloat((float)a / numDiv, (float)b / numDiv, 0.0f));
 			}
 
 			j = y;
@@ -124,8 +126,9 @@ class Box::BoxImpl {
 		// Face de trás
 		for (a = 0; a <= numDiv; a++, i += divX) {
 			for (b = 0; b <= numDiv; b++, j += divY) {
-				vertices.push_back(Vertex(i, j, z - dimZ));
-				normals.push_back(Vertex(0.0f, 0.0f, -1.0f));
+				vertices.push_back(TripleFloat(i, j, z - dimZ));
+				normals.push_back(TripleFloat(0.0f, 0.0f, -1.0f));
+				texCoords.push_back(TripleFloat((float)a / numDiv, (float)b / numDiv, 0.0f));
 			}
 
 			j = y;
@@ -151,17 +154,18 @@ class Box::BoxImpl {
 	 *  /       /
 	 * v7------v8
 	 *
-	 * @param x        Coordenada x do vértice inicial (v1).
-	 * @param y        Coordenada y do vértice inicial (v1).
-	 * @param z        Coordenada z do vértice inicial (v1).
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param x         Coordenada x do vértice inicial (v1).
+	 * @param y         Coordenada y do vértice inicial (v1).
+	 * @param z         Coordenada z do vértice inicial (v1).
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
 	void generateFacesXZ(float x, float y, float z,
-		                 std::vector<Vertex>& vertices,
-		                 std::vector<Vertex>& normals,
+		                 std::vector<TripleFloat>& vertices,
+		                 std::vector<TripleFloat>& normals,
+		                 std::vector<TripleFloat>& texCoords,
 		                 std::vector<size_t>& indexes)
 	{
 		int a = 0;
@@ -175,8 +179,9 @@ class Box::BoxImpl {
 		// Face de baixo
 		for (a = 0; a <= numDiv; a++, i += divX) {
 			for (b = 0; b <= numDiv; b++, j += divZ) {
-				vertices.push_back(Vertex(i, y - dimY, j));
-				normals.push_back(Vertex(0.0f, -1.0f, 0.0f));
+				vertices.push_back(TripleFloat(i, y - dimY, j));
+				normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
+				texCoords.push_back(TripleFloat((float)b / numDiv, (float)a / numDiv, 0.0f));
 			}
 
 			j = z;
@@ -188,8 +193,9 @@ class Box::BoxImpl {
 		// Face de cima
 		for (a = 0; a <= numDiv; a++, i += divX) {
 			for (b = 0; b <= numDiv; b++, j += divZ) {
-				vertices.push_back(Vertex(i, y, j));
-				normals.push_back(Vertex(0.0f, 1.0f, 0.0f));
+				vertices.push_back(TripleFloat(i, y, j));
+				normals.push_back(TripleFloat(0.0f, 1.0f, 0.0f));
+				texCoords.push_back(TripleFloat((float)b / numDiv, (float)a / numDiv, 0.0f));
 			}
 
 			j = z;
@@ -215,17 +221,18 @@ class Box::BoxImpl {
 	 * |/      |/
 	 * v8      v4
 	 *
-	 * @param x        Coordenada x do vértice inicial (v1).
-	 * @param y        Coordenada y do vértice inicial (v1).
-	 * @param z        Coordenada z do vértice inicial (v1).
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param x         Coordenada x do vértice inicial (v1).
+	 * @param y         Coordenada y do vértice inicial (v1).
+	 * @param z         Coordenada z do vértice inicial (v1).
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
 	void generateFacesYZ(float x, float y, float z,
-		                 std::vector<Vertex>& vertices,
-		                 std::vector<Vertex>& normals,
+		                 std::vector<TripleFloat>& vertices,
+		                 std::vector<TripleFloat>& normals,
+		                 std::vector<TripleFloat>& texCoords,
 		                 std::vector<size_t>& indexes)
 	{
 		int a = 0;
@@ -239,8 +246,9 @@ class Box::BoxImpl {
 		// Face da direita
 		for (a = 0; a <= numDiv; a++, i += divY) {
 			for (b = 0; b <= numDiv; b++, j += divZ) {
-				vertices.push_back(Vertex(x, i, j));
-				normals.push_back(Vertex(1.0f, 0.0f, 0.0f));
+				vertices.push_back(TripleFloat(x, i, j));
+				normals.push_back(TripleFloat(1.0f, 0.0f, 0.0f));
+				texCoords.push_back(TripleFloat((float)b / numDiv, (float)a / numDiv, 0.0f));
 			}
 
 			j = z;
@@ -252,8 +260,9 @@ class Box::BoxImpl {
 		// Face de trás
 		for (a = 0; a <= numDiv; a++, i += divY) {
 			for (b = 0; b <= numDiv; b++, j += divZ) {
-				vertices.push_back(Vertex(x - dimX, i, j));
-				normals.push_back(Vertex(-1.0f, 0.0f, 0.0f));
+				vertices.push_back(TripleFloat(x - dimX, i, j));
+				normals.push_back(TripleFloat(-1.0f, 0.0f, 0.0f));
+				texCoords.push_back(TripleFloat((float)b / numDiv, (float)a / numDiv, 0.0f));
 			}
 
 			j = z;
@@ -270,8 +279,8 @@ public:
 	 */
 	BoxImpl(void)
 	{
-		dimX = dimY = dimZ = divX = divY = divZ = 0;
-		centerX = centerY = centerZ = 0;
+		dimX = dimY = dimZ = divX = divY = divZ = 0.0f;
+		centerX = centerY = centerZ = 0.0f;
 		numDiv = 0;
 		index = 0;
 	}
@@ -298,9 +307,9 @@ public:
 		divZ = dimZ / ((float) numDiv);
 
 		// Coordenadas x, y e z do centro da caixa
-		centerX = dimX / 2;
-		centerY = dimY / 2;
-		centerZ = dimZ / 2;
+		centerX = dimX / 2.0f;
+		centerY = dimY / 2.0f;
+		centerZ = dimZ / 2.0f;
 
 		index = 0;
 	}
@@ -348,7 +357,7 @@ public:
 	void setDimX(float dimX)
 	{
 		divX = dimX / ((float)numDiv);
-		centerX = dimX / 2;
+		centerX = dimX / 2.0f;
 		this->dimX = dimX;
 	}
 
@@ -359,7 +368,7 @@ public:
 	void setDimY(float dimY)
 	{
 		divY = dimY / ((float)numDiv);
-		centerY = dimY / 2;
+		centerY = dimY / 2.0f;
 		this->dimY = dimY;
 	}
 
@@ -370,7 +379,7 @@ public:
 	void setDimZ(float dimZ)
 	{
 		divZ = dimZ / ((float)numDiv);
-		centerZ = dimZ / 2;
+		centerZ = dimZ / 2.0f;
 		this->dimZ = dimZ;
 	}
 
@@ -384,9 +393,9 @@ public:
 		divY = dimY / ((float)numDiv);
 		divZ = dimZ / ((float)numDiv);
 
-		centerX = dimX / 2;
-		centerY = dimY / 2;
-		centerZ = dimZ / 2;
+		centerX = dimX / 2.0f;
+		centerY = dimY / 2.0f;
+		centerZ = dimZ / 2.0f;
 
 		this->numDiv = numDiv;
 	}
@@ -396,19 +405,19 @@ public:
 	 * Gera o conjunto de vértices de uma box, bem como o conjunto de índices
 	 * associado a este vetor.
 	 *
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
-	void generateBox(std::vector<Vertex>& vertices,
-		             std::vector<Vertex>& normals,
+	void generateBox(std::vector<TripleFloat>& vertices,
+		             std::vector<TripleFloat>& normals,
+		             std::vector<TripleFloat>& texCoords,
 		             std::vector<size_t>& indexes)
 	{
-		// Gera os vértices das faces XY, XZ e YZ
-		generateFacesXY(-centerX, -centerY, dimZ - centerZ, vertices, normals, indexes);
-		generateFacesXZ(-centerX, dimY - centerY, -centerZ, vertices, normals, indexes);
-	    generateFacesYZ(dimX - centerX, -centerY, -centerZ, vertices, normals, indexes);
+		generateFacesXY(-centerX, -centerY, dimZ - centerZ, vertices, normals, texCoords, indexes);
+		generateFacesXZ(-centerX, dimY - centerY, -centerZ, vertices, normals, texCoords, indexes);
+	    generateFacesYZ(dimX - centerX, -centerY, -centerZ, vertices, normals, texCoords, indexes);
 	}
 
 
@@ -422,7 +431,8 @@ public:
 /**
  * Construtor por defeito.
  */
-Box::Box(void) {
+Box::Box(void) 
+{
 	pimpl = new BoxImpl();
 } 
 
@@ -441,9 +451,9 @@ Box::Box(float dimX, float dimY, float dimZ, int numDiv)
 	numDiv = (numDiv < 1) ?	1 : numDiv;
 
 	// Não faz sentido uma dimensão ter um valor negativo
-	dimX = (dimX < 0) ? 0 : dimX;
-	dimY = (dimY < 0) ? 0 : dimY;
-	dimZ = (dimZ < 0) ? 0 : dimZ;
+	dimX = (dimX < 0.0f) ? 0.0f: dimX;
+	dimY = (dimY < 0.0f) ? 0.0f : dimY;
+	dimZ = (dimZ < 0.0f) ? 0.0f : dimZ;
 
 	pimpl = new BoxImpl(dimX, dimY, dimZ, numDiv);
 
@@ -504,7 +514,7 @@ int Box::getNumDiv(void)
  */
 void Box::setDimX(float dimX)
 {
-	dimX = (dimX < 0) ? 0 : dimX;
+	dimX = (dimX < 0.0f) ? 0.0f : dimX;
 	pimpl->setDimX(dimX);
 }
 
@@ -514,7 +524,7 @@ void Box::setDimX(float dimX)
  */
 void Box::setDimY(float dimY)
 {
-	dimY = (dimY < 0) ? 0 : dimY;
+	dimY = (dimY < 0.0f) ? 0.0f : dimY;
 	pimpl->setDimY(dimY);
 }
 
@@ -524,7 +534,7 @@ void Box::setDimY(float dimY)
  */
 void Box::setDimZ(float dimZ)
 {
-	dimZ = (dimZ < 0) ? 0 : dimZ;
+	dimZ = (dimZ < 0.0f) ? 0.0f : dimZ;
 	pimpl->setDimZ(dimZ);
 }
 
@@ -544,15 +554,17 @@ void Box::setNumDiv(int numDiv)
  */
 void Box::generateVertices(void)
 {
-	std::vector<Vertex> vertices;
-	std::vector<Vertex> normals;
+	std::vector<TripleFloat> vertices;
+	std::vector<TripleFloat> normals;
+	std::vector<TripleFloat> texCoords;
 	std::vector<size_t> indexes;
 
-	pimpl->generateBox(vertices, normals, indexes);
+	pimpl->generateBox(vertices, normals, texCoords, indexes);
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));
 		addNormal(normals.at(i));
+		addTexCoord(texCoords.at(i));
 	}
 
 	for (size_t i = 0; i < indexes.size(); i++) {

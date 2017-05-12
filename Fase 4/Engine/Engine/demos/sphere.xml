@@ -1,5 +1,5 @@
 <scene> 
 	<models>
-		<model file="demos/sphere.3d" /> 
+		<model file="demos/sphere.3d"  texture="demos/earth.jpg"/> 
 	</models>
 </scene>

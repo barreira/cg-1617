@@ -9,7 +9,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 29-04-2017
+ * @version 06-05-2017
  */
 
 
@@ -19,7 +19,7 @@
 
 #include <vector>
 #include "glOperation.h"
-#include "vertex.h"
+#include "tripleFloat.h"
 
 
 class Translation : public GLOperation {
@@ -55,7 +55,7 @@ public:
 	 * @param totalTime		Tempo total de translação.
 	 */
 	Translation(float x, float y, float z,
-		        std::vector<Vertex> catmullPoints, float totalTime);
+		        std::vector<TripleFloat> catmullPoints, float totalTime);
 
 
 	/**
@@ -87,7 +87,7 @@ public:
 	/**
 	 * Devolve um vector com as coordenadas dos pontos da curva.
 	 */
-	std::vector<Vertex> getCatmullPoints(void);
+	std::vector<TripleFloat> getCatmullPoints(void);
 
 
 	/**
@@ -117,7 +117,7 @@ public:
 	/**
 	 * Altera o vector com as coordenadas dos pontos da curva.
 	 */
-	void setCatmullPoints(std::vector<Vertex>);
+	void setCatmullPoints(std::vector<TripleFloat>);
 
 
 	/**

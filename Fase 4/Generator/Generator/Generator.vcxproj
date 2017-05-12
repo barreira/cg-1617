@@ -153,7 +153,7 @@
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="primitive.cpp" />
     <ClCompile Include="sphere.cpp" />
-    <ClCompile Include="vertex.cpp" />
+    <ClCompile Include="tripleFloat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="box.h" />
@@ -162,7 +162,7 @@
     <ClInclude Include="plane.h" />
     <ClInclude Include="primitive.h" />
     <ClInclude Include="sphere.h" />
-    <ClInclude Include="vertex.h" />
+    <ClInclude Include="tripleFloat.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

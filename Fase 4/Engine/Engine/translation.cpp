@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 29-04-2017
+ * @version 06-05-2017
  */
 
 
@@ -17,16 +17,16 @@
 
 
 class Translation::TranslationImpl {
-	float x;                            // Valor de uma translação em x
-	float y;                            // Valor de uma translação em y
-	float z;                            // Valor de uma translação em z
-	std::vector<Vertex> catmullPoints;  // Lista de pontos para uma curva do
-	                                    // tipo Catmull-Rom
-	size_t elapsedTime;                 // Tempo decorrido desde o ínicio da
-	                                    // contagem de tempo
-	float totalTime;                    // Tempo total da animação
-	float timeAcc;                      // Tempo decorrido da animação
-	float up[3];                        // Normal de um modelo
+	float x;                                 // Valor de uma translação em x
+	float y;                                 // Valor de uma translação em y
+	float z;                                 // Valor de uma translação em z
+	std::vector<TripleFloat> catmullPoints;  // Lista de pontos para uma curva 
+	                                         // do tipo Catmull-Rom
+	size_t elapsedTime;                      // Tempo decorrido desde o ínicio 
+	                                         // da contagem de tempo
+	float totalTime;                         // Tempo total da animação
+	float timeAcc;                           // Tempo decorrido da animação
+	float up[3];                             // Normal de um modelo
 
 
 	/**
@@ -56,7 +56,7 @@ class Translation::TranslationImpl {
 	 */
 	void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv) 
 	{
-		size_t numPoints = catmullPoints.size();
+		int numPoints = (int)catmullPoints.size();
 		int indexes[4];
 
 		float t = gt * numPoints;
@@ -76,9 +76,9 @@ class Translation::TranslationImpl {
 		for (size_t i = 0; i < 4; i++) {
 
 			// cálculo das coordanas da curva
-			p[i * 3] = catmullPoints.at(indexes[i]).getX();
-			p[i * 3 + 1] = catmullPoints.at(indexes[i]).getY();
-			p[i * 3 + 2] = catmullPoints.at(indexes[i]).getZ();
+			p[i * 3] = catmullPoints.at(indexes[i]).getF1();
+			p[i * 3 + 1] = catmullPoints.at(indexes[i]).getF2();
+			p[i * 3 + 2] = catmullPoints.at(indexes[i]).getF3();
 		}
 
 		getCatmullRomPoint(t, p, p + 3, p + 6, p + 9, pos, deriv);
@@ -92,12 +92,12 @@ public:
 	 */
 	TranslationImpl(void)
 	{
-		x = y = z = 0.0;
-		totalTime = timeAcc = 0.0;
+		x = y = z = 0.0f;
+		totalTime = timeAcc = 0.0f;
 		elapsedTime = 0;
-		up[0] = 0.0;
-		up[1] = 1.0;
-		up[2] = 0.0;
+		up[0] = 0.0f;
+		up[1] = 1.0f;
+		up[2] = 0.0f;
 	}
 
 
@@ -114,12 +114,12 @@ public:
 		this->y = y;
 		this->z = z;
 
-		totalTime = timeAcc = 0.0;
+		totalTime = timeAcc = 0.0f;
 		elapsedTime = 0;
 
-		up[0] = 0.0;
-		up[1] = 1.0;
-		up[2] = 0.0;
+		up[0] = 0.0f;
+		up[1] = 1.0f;
+		up[2] = 0.0f;
 	}
 
 
@@ -133,7 +133,7 @@ public:
 	 * @param totalTime		Tempo total de translação.
 	 */
 	TranslationImpl(float x, float y, float z,
-		            std::vector<Vertex> catmullPoints, float totalTime)
+		            std::vector<TripleFloat> catmullPoints, float totalTime)
 	{
 		this->x = x;
 		this->y = y;
@@ -142,11 +142,11 @@ public:
 		this->totalTime = totalTime;
 
 		elapsedTime = 0;
-		timeAcc = 0.0;
+		timeAcc = 0.0f;
 
-		up[0] = 0.0;
-		up[1] = 1.0;
-		up[2] = 0.0;
+		up[0] = 0.0f;
+		up[1] = 1.0f;
+		up[2] = 0.0f;
 	}
 
 
@@ -180,7 +180,7 @@ public:
 	/**
 	 * Devolve um vector com as coordenadas dos pontos da curva.
 	 */
-	std::vector<Vertex> getCatmullPoints(void)
+	std::vector<TripleFloat> getCatmullPoints(void)
 	{
 		return catmullPoints;
 	}
@@ -233,10 +233,10 @@ public:
 	 *
 	 * @param catmullPoints	Novo vector com os pontos da curva.
 	 */
-	void setCatmullPoints(std::vector<Vertex> catmullPoints)
+	void setCatmullPoints(std::vector<TripleFloat> catmullPoints)
 	{
 		this->catmullPoints = catmullPoints;
-		timeAcc = 0.0;
+		timeAcc = 0.0f;
 		elapsedTime = 0;
 	}
 
@@ -249,7 +249,7 @@ public:
 	void setTotalTime(float totalTime)
 	{
 		this->totalTime = totalTime;
-		timeAcc = 0.0;
+		timeAcc = 0.0f;
 		elapsedTime = 0;
 	}
 
@@ -267,7 +267,7 @@ public:
 		size_t deltaTime = getDeltaTime();			
 
 		// conversão de deltaTime em segundos
-		float auxTime = ((float)deltaTime) / 1000.0;	
+		float auxTime = ((float)deltaTime) / 1000.0f;	
 
 		// é somado ao acumulador de instantes de
 		// tempo uma fatia de tempo proporcional
@@ -277,8 +277,8 @@ public:
 		// Caso o acumulador seja superior a 1.0, já se passou o tempo
 		// total de translação, logo inicia-se de novo o acumulador para
 		// uma nova volta
-		if (timeAcc >= 1.0) {	
-			timeAcc = 0.0;
+		if (timeAcc >= 1.0f) {	
+			timeAcc = 0.0f;
 		}
 
 		getGlobalCatmullRomPoint(timeAcc, pos, deriv);
@@ -298,7 +298,7 @@ public:
 			{ deriv[0], up[0], z[0], pos[0] },
 			{ deriv[1], up[1], z[1], pos[1] },
 			{ deriv[2], up[2], z[2], pos[2] },
-			{ 0.0, 0.0, 0.0, 1.0 }
+			{ 0.0f, 0.0f, 0.0f, 1.0f }
 		};
 
 		buildRotMatrix(deriv, up, z, (float*)m);
@@ -348,7 +348,8 @@ Translation::Translation(float x, float y, float z)
  * @param totalTime			Tempo total de translação.
  */
 Translation::Translation(float x, float y, float z, 
-	                     std::vector<Vertex> catmullPoints, float totalTime)
+	                     std::vector<TripleFloat> catmullPoints, 
+	                     float totalTime)
 {
 	pimpl = new TranslationImpl(x, y, z, catmullPoints, totalTime);
 }
@@ -399,7 +400,7 @@ float Translation::getZ(void)
 /**
  * Devolve um vector com as coordenadas dos pontos da curva.
  */
-std::vector<Vertex> Translation::getCatmullPoints(void)
+std::vector<TripleFloat> Translation::getCatmullPoints(void)
 {
 	return pimpl->getCatmullPoints();
 }
@@ -444,7 +445,7 @@ void Translation::setZ(float z)
 /**
  * Altera o vector com as coordenadas dos pontos da curva.
  */
-void Translation::setCatmullPoints(std::vector<Vertex> catmullPoints)
+void Translation::setCatmullPoints(std::vector<TripleFloat> catmullPoints)
 {
 	pimpl->setCatmullPoints(catmullPoints);
 }

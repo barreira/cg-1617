@@ -28,7 +28,7 @@ public:
 	 */
 	ScaleImpl(void)
 	{
-		x = y = z = 0.0;
+		x = y = z = 0.0f;
 	}
 
 

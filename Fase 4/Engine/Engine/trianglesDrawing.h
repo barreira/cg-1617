@@ -11,7 +11,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017
+ * @version 06-05-2017
  */
 
 
@@ -21,8 +21,7 @@
 
 #include <vector>
 #include "glOperation.h"
-#include "vertex.h"
-#include "color.h"
+#include "tripleFloat.h"
 
 
 class TrianglesDrawing : public GLOperation {
@@ -42,15 +41,27 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param vertices Conjunto de vértices a desenhar.
-	 * @param normals  Conjunto de normais de uma primitiva.
-	 * @param indexes  Conjunto de índices.
-	 * @param color    Cor da primitiva
+	 * @param vertices   Conjunto de vértices a desenhar.
+	 * @param normals    Conjunto de vértices a desenhar.
+	 * @param texCoords  Conjunto de coordenadas de uma textura.
+	 * @param indexes    Conjunto de índices associados ao vetor de vértices.
+	 * @param diff       Cor difusa.
+	 * @param spec       Cor especular.
+	 * @param emis       Cor emissiva.
+	 * @param ambt       Cor ambiente.
+	 * @param shininess  Brilho do modelo.
+	 * @param textura    Textura de um modelo.
 	 */
-	TrianglesDrawing(std::vector<GLfloat> vertices, 
+	TrianglesDrawing(std::vector<GLfloat> vertices,
 		             std::vector<GLfloat> normals,
+		             std::vector<GLfloat> texCoords,
 		             std::vector<size_t> indexes,
-		             Color* color);
+		             TripleFloat diff,
+		             TripleFloat spec,
+		             TripleFloat emis,
+		             TripleFloat ambt,
+		             float shininess = 0.0f,
+		             std::string texture = "");
 
 
 	/**
@@ -74,15 +85,51 @@ public:
 
 
 	/**
+	 * Devolve o conjunto de coordenadas de uma textura.
+	 */
+	std::vector<GLfloat> getTexCoords(void);
+
+
+	/**
 	 * Devolve o conjunto de índices associados ao vetor de vértices.
 	 */
 	std::vector<size_t> getIndexes(void);
 
 	
 	/**
-	 * Devolve a cor do modelo.
+	 * Devolve a cor difusa do modelo.
 	 */
-	Color* getColor(void);
+	TripleFloat getDiff(void);
+
+
+	/**
+	 * Devolve a cor especular do modelo.
+	 */
+	TripleFloat getSpec(void);
+
+
+	/**
+	 * Devolve a cor emissiva do modelo.
+	 */
+	TripleFloat getEmis(void);
+
+
+	/**
+	 * Devolve a cor ambiente do modelo.
+	 */
+	TripleFloat getAmbt(void);
+
+
+	/**
+	 * Devolve o valor do brilho do modelo.
+	 */
+	float TrianglesDrawing::getShininess(void);
+
+
+	/**
+	 * Devolve o nome da textura.
+	 */
+	std::string getTexture(void);
 
 
 	/**
@@ -98,15 +145,51 @@ public:
 
 
 	/**
+	 * Altera o conjunto de coordenadas de uma textura.
+	 */
+	void setTexCoords(std::vector<GLfloat>);
+
+
+	/**
 	 * Altera o conjunto de índices associados ao vetor de vértices.
 	 */
 	void setIndexes(std::vector<size_t>);
 
 
 	/**
-	 * Altera a cor do modelo.
+	 * Altera a cor difusa do modelo.
 	 */
-	void setColor(Color*);
+	void setDiff(TripleFloat);
+
+
+	/**
+	 * Altera a cor especular do modelo.
+	 */
+	void setSpec(TripleFloat);
+
+
+	/**
+	 * Altera a cor emissiva do modelo.
+	 */
+	void setEmis(TripleFloat);
+
+
+	/**
+	 * Altera a cor ambiente do modelo.
+	 */
+	void setAmbt(TripleFloat);
+
+
+	/**
+	 * Altera o valor do brilho do modelo.
+	 */
+	void TrianglesDrawing::setShininess(float);
+
+
+	/**
+	 * Altera o nome da textura.
+	 */
+	void setTexture(std::string texture);
 
 
 	/**

@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017
+ * @version 12-05-2017
  */
 
 
@@ -25,7 +25,7 @@ public:
 	 */
 	PlaneImpl(void)
 	{
-		dimX = dimZ = 0;
+		dimX = dimZ = 0.0f;
 	}
 
 
@@ -102,8 +102,8 @@ Plane::Plane(void)
  */
 Plane::Plane(float dimX, float dimZ)
 {
-	dimX = (dimX < 0) ? 0 : dimX;
-	dimZ = (dimZ < 0) ? 0 : dimZ;
+	dimX = (dimX < 0.0f) ? 0.0f : dimX;
+	dimZ = (dimZ < 0.0f) ? 0.0f : dimZ;
 
 	pimpl = new PlaneImpl(dimX, dimZ);
 
@@ -145,7 +145,7 @@ float Plane::getDimZ(void)
  */
 void Plane::setDimX(float dimX)
 {
-	dimX = (dimX < 0) ? 0 : dimX;
+	dimX = (dimX < 0.0f) ? 0.0f : dimX;
 	pimpl->setDimX(dimX);
 }
 
@@ -155,7 +155,7 @@ void Plane::setDimX(float dimX)
  */
 void Plane::setDimZ(float dimZ)
 {
-	dimZ = (dimZ < 0) ? 0 : dimZ;
+	dimZ = (dimZ < 0.0f) ? 0.0f : dimZ;
 	pimpl->setDimZ(dimZ);
 }
 
@@ -172,24 +172,46 @@ void Plane::setDimZ(float dimZ)
 void Plane::generateVertices(void)
 {
 	// Centrar o plano na origem
-	float x = pimpl->getDimX() / 2; 
-	float z = pimpl->getDimZ() / 2;
+	float x = pimpl->getDimX() / 2.0f; 
+	float z = pimpl->getDimZ() / 2.0f;
 
 
 	// Um plano apenas contém 2 triângulos
 
 	// Vértices v1-v2-v3-v4
-	addVertex(Vertex(x, 0.0f, -z));
-	addVertex(Vertex(-x, 0.0f, -z));
-	addVertex(Vertex(-x, 0.0f, z));
-	addVertex(Vertex(x, 0.0f, z));
+	addVertex(TripleFloat(x, 0.0f, -z));
+	addVertex(TripleFloat(-x, 0.0f, -z));
+	addVertex(TripleFloat(-x, 0.0f, z));
+	addVertex(TripleFloat(x, 0.0f, z));
+
+	addVertex(TripleFloat(x, 0.0f, -z));
+	addVertex(TripleFloat(-x, 0.0f, -z));
+	addVertex(TripleFloat(-x, 0.0f, z));
+	addVertex(TripleFloat(x, 0.0f, z));
 
 	// Como é um plano XZ entao as normais dos seus vértices são sempre as 
 	// mesmas
-	addNormal(Vertex(0.0f, 1.0f, 0.0f));
-	addNormal(Vertex(0.0f, 1.0f, 0.0f));
-	addNormal(Vertex(0.0f, 1.0f, 0.0f));
-	addNormal(Vertex(0.0f, 1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, 1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, 1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, 1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, 1.0f, 0.0f));
+
+	addNormal(TripleFloat(0.0f, -1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, -1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, -1.0f, 0.0f));
+	addNormal(TripleFloat(0.0f, -1.0f, 0.0f));
+
+
+	addTexCoord(TripleFloat(1.0f, 1.0f, 0.0f));
+	addTexCoord(TripleFloat(0.0f, 1.0f, 0.0f));
+	addTexCoord(TripleFloat(0.0f, 0.0f, 0.0f));
+	addTexCoord(TripleFloat(1.0f, 0.0f, 0.0f));
+
+	addTexCoord(TripleFloat(1.0f, 1.0f, 0.0f));
+	addTexCoord(TripleFloat(0.0f, 1.0f, 0.0f));
+	addTexCoord(TripleFloat(0.0f, 0.0f, 0.0f));
+	addTexCoord(TripleFloat(1.0f, 0.0f, 0.0f));
+
 
 	addIndex(0);
 	addIndex(1);
@@ -198,6 +220,14 @@ void Plane::generateVertices(void)
 	addIndex(0);
 	addIndex(2);
 	addIndex(3);
+
+	addIndex(4);
+	addIndex(6);
+	addIndex(5);
+
+	addIndex(4);
+	addIndex(7);
+	addIndex(6);
 }
 
 

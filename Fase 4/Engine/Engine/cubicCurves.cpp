@@ -9,7 +9,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 26-04-2017
+ * @version 12-05-2017
  */
 
 
@@ -162,7 +162,8 @@ void getCatmullRomPoint(float t,
  * Calcula um ponto de uma curva de Bezier. Os cálculos são efetuados através
  * de três matrizes 4x4 (uma para cada coordenada x, y e z dos dezasseis
  * pontos necessários para o cálculo de uma superfície cúbica de Bezier), bem
- * como o valor da tesselagem em u e em v.
+ * como o valor da tesselagem em u e em v. São também calculdas as derivadas
+ * em u e em v.
  *
  * @param u         Valor da tesselagem vertical.
  * @param v         Valor da tesselagem horizontal.
@@ -171,14 +172,19 @@ void getCatmullRomPoint(float t,
  * @param pMatrizZ  Matriz com as coordendas z de dezasseis pontos.
  * @param pos       Posição (x, y e z) pertencente a uma curva de Bezier a ser
  *                  calculada.
+ * @param derivU    Derivada em u.
+ * @param derivV    Derivada em v.
  */
-void getBezierPoint(float u, float v, 
+void getBezierPoint(float u, float v,
 	                float** pMatrixX, float** pMatrixY, float** pMatrixZ,
-	                float* pos)
+	                float* pos, float* derivU, float* derivV)
 {
 
 	float uVec[CC] = { u * u * u, u * u, u, 1 };
 	float vVec[CC] = { v * v * v, v * v, v, 1 };
+
+	float uDer[CC] = { 3 * (u * u), 2 * u, 1, 0 };
+	float vDer[CC] = { 3 * (v * v), 2 * v, 1, 0 };
 
 	float mvVec[CC];
 	float px[CC];
@@ -189,21 +195,56 @@ void getBezierPoint(float u, float v,
 	float my[CC];
 	float mz[CC];
 
-	// Calcula M (transposta) * V
 	multMatrixVector((float*)bezierMatrix, vVec, mvVec);
-
-	// Calcula P * resultado anterior
 	multMatrixVector((float*)pMatrixX, mvVec, px);
 	multMatrixVector((float*)pMatrixY, mvVec, py);
 	multMatrixVector((float*)pMatrixZ, mvVec, pz);
 
-	// Calcula M * resultado anterior
 	multMatrixVector((float*)bezierMatrix, px, mx);
 	multMatrixVector((float*)bezierMatrix, py, my);
 	multMatrixVector((float*)bezierMatrix, pz, mz);
 
-	// Calcula U * resultado anterior
+
 	pos[0] = (uVec[0] * mx[0]) + (uVec[1] * mx[1]) + (uVec[2] * mx[2]) + (uVec[3] * mx[3]);
 	pos[1] = (uVec[0] * my[0]) + (uVec[1] * my[1]) + (uVec[2] * my[2]) + (uVec[3] * my[3]);
 	pos[2] = (uVec[0] * mz[0]) + (uVec[1] * mz[1]) + (uVec[2] * mz[2]) + (uVec[3] * mz[3]);
+
+
+	// Calcular derivada em u
+
+	vVec[0] = 3 * (v * v); vVec[1] = 2 * v; vVec[2] = 1; vVec[3] = 0;
+
+	multMatrixVector((float*)bezierMatrix, vVec, mvVec);
+	multMatrixVector((float*)pMatrixX, mvVec, px);
+	multMatrixVector((float*)pMatrixY, mvVec, py);
+	multMatrixVector((float*)pMatrixZ, mvVec, pz);
+
+	multMatrixVector((float*)bezierMatrix, px, mx);
+	multMatrixVector((float*)bezierMatrix, py, my);
+	multMatrixVector((float*)bezierMatrix, pz, mz);
+
+
+	derivU[0] = (uVec[0] * mx[0]) + (uVec[1] * mx[1]) + (uVec[2] * mx[2]) + (uVec[3] * mx[3]);
+	derivU[1] = (uVec[0] * my[0]) + (uVec[1] * my[1]) + (uVec[2] * my[2]) + (uVec[3] * my[3]);
+	derivU[2] = (uVec[0] * mz[0]) + (uVec[1] * mz[1]) + (uVec[2] * mz[2]) + (uVec[3] * mz[3]);
+
+
+	// Calcular derivada em v
+
+	uVec[0] = 3 * (u * u); uVec[1] = 2 * u; uVec[2] = 1; uVec[3] = 0;
+	vVec[0] = v * v * v; vVec[1] = v * v; vVec[2] = v; vVec[3] = 1;
+
+	multMatrixVector((float*)bezierMatrix, vVec, mvVec);
+	multMatrixVector((float*)pMatrixX, mvVec, px);
+	multMatrixVector((float*)pMatrixY, mvVec, py);
+	multMatrixVector((float*)pMatrixZ, mvVec, pz);
+
+	multMatrixVector((float*)bezierMatrix, px, mx);
+	multMatrixVector((float*)bezierMatrix, py, my);
+	multMatrixVector((float*)bezierMatrix, pz, mz);
+
+
+	derivV[0] = (uVec[0] * mx[0]) + (uVec[1] * mx[1]) + (uVec[2] * mx[2]) + (uVec[3] * mx[3]);
+	derivV[1] = (uVec[0] * my[0]) + (uVec[1] * my[1]) + (uVec[2] * my[2]) + (uVec[3] * my[3]);
+	derivV[2] = (uVec[0] * mz[0]) + (uVec[1] * mz[1]) + (uVec[2] * mz[2]) + (uVec[3] * mz[3]);
 }

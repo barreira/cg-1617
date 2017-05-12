@@ -55,8 +55,8 @@ public:
 	 */
 	RotationImpl(void)
 	{
-		angle = x = y = z = 0.0;
-		totalTime = timeAcc = 0.0;
+		angle = x = y = z = 0.0f;
+		totalTime = timeAcc = 0.0f;
 		elapsedTime = 0;
 	}
 
@@ -76,7 +76,7 @@ public:
 		this->y = y;
 		this->z = z;
 		totalTime = elapsedTime = 0;
-		timeAcc = 0;
+		timeAcc = 0.0f;
 	}
 
 
@@ -97,7 +97,7 @@ public:
 		this->y = y;
 		this->z = z;
 
-		timeAcc = 0.0;
+		timeAcc = 0.0f;
 		elapsedTime = 0;
 	}
 
@@ -161,7 +161,7 @@ public:
 	void setTotalTime(float totalTime)
 	{
 		this->totalTime = totalTime;
-		timeAcc = 0.0;
+		timeAcc = 0.0f;
 		elapsedTime = 0;
 	}
 
@@ -203,7 +203,7 @@ public:
 		size_t deltaTime = getDeltaTime();
 
 		// É dividido por 1000 de forma a termos o tempo em segundos
-		float auxTime = ((float)deltaTime) / 1000.0;
+		float auxTime = ((float)deltaTime) / 1000.0f;
 
 		// Soma-se o tempo parcial da rotação ao tempo acumulado
 		timeAcc += auxTime;
@@ -217,7 +217,7 @@ public:
 		// É efetuada uma rotação em openGL correspondente cujo ângulo
 		// corresponde à divisão do acumulado pelo tempo total. A rotação
 		// é efetuada em torno dos eixos definidos anteriormente.
-		glRotatef(timeAcc * 360.0 / ((float)totalTime), x, y, z);
+		glRotatef(timeAcc * 360.0f / ((float)totalTime), x, y, z);
 	}
 
 

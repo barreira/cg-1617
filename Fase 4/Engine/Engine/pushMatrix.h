@@ -33,6 +33,14 @@ public:
 	 */
 	void execute(void)
 	{
+		glEnable(GL_LIGHT0);
+		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT2);
+		glEnable(GL_LIGHT3);
+		glEnable(GL_LIGHT4);
+		glEnable(GL_LIGHT5);
+		glEnable(GL_LIGHT6);
+		glEnable(GL_LIGHT7);
 		glPushMatrix();
 	}
 

@@ -16,6 +16,10 @@
 #define glOperation_h
 
 
+#include <cstdlib>
+
+#include <IL/il.h>
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else

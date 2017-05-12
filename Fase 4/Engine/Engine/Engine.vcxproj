@@ -152,37 +152,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="color.cpp" />
     <ClCompile Include="cubicCurves.cpp" />
+    <ClCompile Include="directionalLight.cpp" />
+    <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pointLight.cpp" />
     <ClCompile Include="rotation.cpp" />
     <ClCompile Include="scale.cpp" />
+    <ClCompile Include="spotLight.cpp" />
     <ClCompile Include="tinystr.cpp" />
     <ClCompile Include="tinyxml.cpp" />
     <ClCompile Include="tinyxmlerror.cpp" />
     <ClCompile Include="tinyxmlparser.cpp" />
     <ClCompile Include="translation.cpp" />
     <ClCompile Include="trianglesDrawing.cpp" />
-    <ClCompile Include="vertex.cpp" />
+    <ClCompile Include="tripleFloat.cpp" />
     <ClCompile Include="xmlParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ambientColor.h" />
-    <ClInclude Include="color.h" />
     <ClInclude Include="cubicCurves.h" />
-    <ClInclude Include="diffuseColor.h" />
-    <ClInclude Include="emissiveColor.h" />
+    <ClInclude Include="directionalLight.h" />
     <ClInclude Include="glOperation.h" />
+    <ClInclude Include="light.h" />
+    <ClInclude Include="pointLight.h" />
     <ClInclude Include="popMatrix.h" />
     <ClInclude Include="pushMatrix.h" />
     <ClInclude Include="rotation.h" />
     <ClInclude Include="scale.h" />
-    <ClInclude Include="specularColor.h" />
+    <ClInclude Include="spotLight.h" />
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />
     <ClInclude Include="translation.h" />
     <ClInclude Include="trianglesDrawing.h" />
-    <ClInclude Include="vertex.h" />
+    <ClInclude Include="tripleFloat.h" />
     <ClInclude Include="xmlParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

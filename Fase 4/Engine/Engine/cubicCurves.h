@@ -9,7 +9,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  * 
- * @version 26-04-2017
+ * @version 12-05-2017
  */
 
 
@@ -81,21 +81,24 @@ void getCatmullRomPoint(float t, float* p0, float* p1, float* p2, float* p3,
 
 /**
  * Calcula um ponto de uma curva de Bezier. Os cálculos são efetuados através
- * de três matrizes 4x4 (uma para cada coordenada x, y e z dos dezasseis 
+ * de três matrizes 4x4 (uma para cada coordenada x, y e z dos dezasseis
  * pontos necessários para o cálculo de uma superfície cúbica de Bezier), bem
- * como o valor da tesselagem em u e em v.
+ * como o valor da tesselagem em u e em v. São também calculdas as derivadas
+ * em u e em v.
  *
  * @param u         Valor da tesselagem vertical.
  * @param v         Valor da tesselagem horizontal.
  * @param pMatrizX  Matriz com as coordendas x de dezasseis pontos.
  * @param pMatrizY  Matriz com as coordendas y de dezasseis pontos.
- * @param pMatrizZ  Matriz com as coordendas z de dezasseis pontos.
+ * @param pMatrizZ  Matriz com as coordendas z de dezasseis pontos. 
  * @param pos       Posição (x, y e z) pertencente a uma curva de Bezier a ser
  *                  calculada.
+ * @param derivU    Derivada em u.
+ * @param derivV    Derivada em v.
  */
 void getBezierPoint(float u, float v,
 	                float** pMatrixX, float** pMatrixY, float** pMatrixZ,
-	                float* pos);
+	                float* pos, float* derivU, float* derivV);
 
 
 #endif

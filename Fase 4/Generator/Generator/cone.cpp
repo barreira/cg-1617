@@ -7,7 +7,7 @@
  * @author João Barreira  - A73831
  * @author Rafael Braga   - A61799
  *
- * @version 02-05-2017
+ * @version 12-05-2017
  */
 
 
@@ -15,13 +15,13 @@
 #include <cmath>
 
 
-const float pi = 3.1415926f;
+const float PI = 3.1415926f;
 
 
 class Cone::ConeImpl {
 	float radius;		// raio da base
 	float height;		// altura do cone
-	float alfa;		    // ângulo ao centro em radianos
+	float alpha;		    // ângulo ao centro em radianos
 	float stackHeight;	// altura de uma stack
 	int slices;		    // número de slices
 	int stacks;		    // número de stacks
@@ -32,13 +32,14 @@ class Cone::ConeImpl {
 	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de
 	 * todos os pontos que pertencem à base do cone.
 	 *
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
-	void generateBase(std::vector<Vertex>& vertices,
-		              std::vector<Vertex>& normals,
+	void generateBase(std::vector<TripleFloat>& vertices,
+		              std::vector<TripleFloat>& normals,
+		              std::vector<TripleFloat>& texCoords,
 		              std::vector<size_t>& indexes)
 	{
 		float angle = 0.0f;	// Ângulo ao centro
@@ -54,15 +55,18 @@ class Cone::ConeImpl {
 		size_t i = 0;
 
 		// Definição do centro da base
-		vertices.push_back(Vertex(0.0f, y, 0.0f));
-		normals.push_back(Vertex(0.0f, -1.0f, 0.0f));
+		vertices.push_back(TripleFloat(0.0f, y, 0.0f));
+		normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
+		texCoords.push_back(TripleFloat(0.0f, 1.0f, 0.0f));
 
-		for (i = 0; i <= (size_t)slices; i++, angle += alfa) {
+		for (i = 0; i <= (size_t)slices; i++, angle += alpha) {
 			x = radius * sin(angle);
 			z = radius * cos(angle);
 
-			vertices.push_back(Vertex(x, y, z));
-			normals.push_back(Vertex(0.0f, -1.0f, 0.0f));
+			vertices.push_back(TripleFloat(x, y, z));
+			normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
+
+			texCoords.push_back(TripleFloat((float)i / slices, 0.0f, 0.0f));
 		}
 
 		for (i = 0; i < (size_t)slices; i++) {
@@ -80,13 +84,14 @@ class Cone::ConeImpl {
 	 * Calcula, a partir dos dados recebidos no construtor, as coordenadas de
 	 * todos os pontos que pertencem à superfície lateral do cone.
 	 *
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais.
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais.
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
-	void generateSides(std::vector<Vertex>& vertices,
-		               std::vector<Vertex>& normals,
+	void generateSides(std::vector<TripleFloat>& vertices,
+		               std::vector<TripleFloat>& normals,
+		               std::vector<TripleFloat>& texCoords,
 		               std::vector<size_t>& indexes)
 	{
 		float angle = 0.0f;		// Ângulo ao centro
@@ -96,7 +101,7 @@ class Cone::ConeImpl {
 		float z = 0.0f;
 
 		float nx = 0.0f;
-		float ny = 0.0f;
+		float ny = cos(atan(height / radius));
 		float nz = 0.0f;
 
 		// Para cada stack, calcula-se o raio do seu círculo
@@ -106,19 +111,21 @@ class Cone::ConeImpl {
 			// Percorrem-se as slices e calculam-se as coordenadas
 			// dos pontos de referência para a stack e slice atuais
 			for (size_t j = 0; j <= (size_t)slices; j++) {
-				angle = alfa * (float)j;
+				angle = alpha * (float)j;
 
 				x = r * sin(angle);
 				y = height - (i * stackHeight) - (height / 4.0f);
 				z = r * cos(angle);
 
-				vertices.push_back(Vertex(x, y, z));
+				vertices.push_back(TripleFloat(x, y, z));
 
 				nx = sin(angle);
-				ny = height - (i * stackHeight) - (height / 4.0f);
 				nz = cos(angle);
 
-				normals.push_back(Vertex(nx, 0.0f, nz));
+				texCoords.push_back(TripleFloat((slices - (float)j) / slices,
+					                            (stacks - (float)i) / stacks, 0.0f));
+
+				normals.push_back(TripleFloat(nx, ny, nz));
 			}
 		}
 
@@ -143,7 +150,7 @@ public:
 	 */
 	ConeImpl(void)
 	{
-		radius = height = stackHeight = alfa = 0;
+		radius = height = stackHeight = alpha = 0.0f;
 		slices = stacks = 0;
 		index = 0;
 	}
@@ -165,7 +172,7 @@ public:
 		this->stacks = stacks;
 		
 		// Cálculo do ângulo ao centro
-		alfa = (2 * pi) / ((float) slices);		  
+		alpha = (2.0f * PI) / ((float) slices);		  
 		
 		// Cálculo da altura de uma stack
 		stackHeight = height / ((float) stacks);  
@@ -195,9 +202,9 @@ public:
 	/**
 	 * Devolve o ângulo ao centro.
 	 */
-	float getAlfa(void)
+	float getAlpha(void)
 	{
-		return alfa;
+		return alpha;
 	}
 
 
@@ -264,7 +271,7 @@ public:
 	{
 		this->slices = slices;
 
-		alfa = (2 * pi) / ((float)slices);		  
+		alpha = (2.0f * PI) / ((float)slices);		  
 	}
 
 
@@ -272,18 +279,19 @@ public:
 	 * Gera o conjunto de vértices de um cone, bem como o conjunto de índices
 	 * associado a este vetor.
 	 *
-	 * @param vertices Conjunto de vértices.
-	 * @param normals  Conjunto de normais
-	 * @param indexes  Conjunto de índices.
-	 * @return O resultado é guardado em vertices e em indexes.
+	 * @param vertices  Conjunto de vértices.
+	 * @param normals   Conjunto de normais
+	 * @param texCoords Conjunto de coordenadas para uma textura.
+	 * @param indexes   Conjunto de índices.
 	 */
-	void generateCone(std::vector<Vertex>& vertices,
-		              std::vector<Vertex>& normals,
+	void generateCone(std::vector<TripleFloat>& vertices,
+		              std::vector<TripleFloat>& normals,
+		              std::vector<TripleFloat>& texCoords,
 		              std::vector<size_t>& indexes)
 	{
 		// Gera os vértices da base e dos lados do cone
-		generateBase(vertices, normals, indexes);
-		generateSides(vertices, normals, indexes);
+		generateBase(vertices, normals, texCoords, indexes);
+		generateSides(vertices, normals, texCoords, indexes);
 	}
 
 
@@ -314,8 +322,8 @@ Cone::Cone(void)
 Cone::Cone(float radius, float height, int slices, int stacks)
 {
 	// O valor do raio e da altura têm que ser positivos
-	radius = (radius < 0) ? 0 : radius;
-	height = (height < 0) ? 0 : height;
+	radius = (radius < 0.0f) ? 0.0f : radius;
+	height = (height < 0.0f) ? 0.0f : height;
 
 	// Por defeito, o número de slices e de stacks é sempre maior ou igual a 1
 	slices = (slices < 1) ? 1 : slices;	
@@ -380,7 +388,7 @@ int Cone::getSlices(void)
  */
 void Cone::setRadius(float radius)
 {
-	radius = (radius < 0) ? 0 : radius;
+	radius = (radius < 0.0f) ? 0.0f : radius;
 	pimpl->setRadius(radius);
 }
 
@@ -390,7 +398,7 @@ void Cone::setRadius(float radius)
  */
 void Cone::setHeight(float height)
 {
-	height = (height < 0) ? 0 : height;
+	height = (height < 0.0f) ? 0.0f : height;
 	pimpl->setHeight(height);
 }
 
@@ -420,15 +428,17 @@ void Cone::setSlices(int slices)
  */
 void Cone::generateVertices(void)
 {
-	std::vector<Vertex> vertices;
-	std::vector<Vertex> normals;
+	std::vector<TripleFloat> vertices;
+	std::vector<TripleFloat> normals;
+	std::vector<TripleFloat> texCoords;
 	std::vector<size_t> indexes;
 
-	pimpl->generateCone(vertices, normals, indexes);
+	pimpl->generateCone(vertices, normals, texCoords,indexes);
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		addVertex(vertices.at(i));
 		addNormal(normals.at(i));
+		addTexCoord(texCoords.at(i));
 	}
 
 	for (size_t i = 0; i < indexes.size(); i++) {

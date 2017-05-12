@@ -7,7 +7,7 @@
 * @author João Barreira  - A73831
 * @author Rafael Braga   - A61799
 *
-* @version 29-4-2017
+* @version 12-05-2017
 */
 
 
@@ -56,15 +56,19 @@
 #define SPHERE_CEILS 2
 
 
-// O menor número de parâmetros recebidos possível é 5
+// O menor número de parâmetros recebidos para a construção de uma 
+// primitiva é 5
 // <nome do programa (Generator)> <nome da primitiva> e os argumentos do plano
 #define MIN_PARAMS 5
 
 
-std::vector<Vertex> vertices;  // Conjunto de vértices de uma primitiva
-std::vector<Vertex> normals;   // Conjunto de normais de uma primitiva
-std::vector<size_t> indexes;   // Conjunto de índices dos vértices de uma 
-							   // primitiva
+std::vector<TripleFloat> vertices;   // Conjunto de vértices de uma primitiva
+std::vector<TripleFloat> normals;    // Conjunto de normais de uma primitiva
+std::vector<TripleFloat> texCoords;  // Conjunto de coordenadas de uma textura
+std::vector<size_t> indexes;         // Conjunto de índices dos vértices de uma 
+							         // primitiva
+
+
 std::string fileName;          // Nome do ficheiro que irá conter os vértices
 							   // de uma primitiva
 std::vector<float> arguments;  // Conjunto de argumentos numéricos de uma
@@ -102,7 +106,7 @@ bool generateArgs(std::vector<std::string> params, const size_t numParams,
 		for (size_t i = 0; i < params.size() - 1 && ret; i++) {
 			std::stringstream ss(params.at(i));
 
-			float flt = 0;
+			float flt = 0.0f;
 
 			// Se não se conseguir converter um valor o ciclo termina
 			if (!(ss >> flt)) {
@@ -130,11 +134,11 @@ bool generateArgs(std::vector<std::string> params, const size_t numParams,
 
 
 /**
- * Cria uma instância da classe Box bem como os seus vértices.
+ * Cria uma instância da classe Box.
  *
  * @params Parâmetros de uma box.
  * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso
- *         contrário. Os vértices são guardados em vertices.
+ *         contrário. 
  */
 bool generateBox(std::vector<std::string> params)
 {
@@ -153,11 +157,12 @@ bool generateBox(std::vector<std::string> params)
 			}
 			else {
 				p = new Box(arguments.at(0), arguments.at(1), arguments.at(2),
-					(int)arguments.at(3));
+					        (int)arguments.at(3));
 			}
 
 			vertices = p->getVertices();
 			normals = p->getNormals();
+			texCoords = p->getTexCoords();
 			indexes = p->getIndexes();
 		}
 	}
@@ -167,11 +172,11 @@ bool generateBox(std::vector<std::string> params)
 
 
 /**
- * Cria uma instância da classe Cone bem como os seus vértices.
+ * Cria uma instância da classe Cone.
  *
  * @params Parâmetros de um cone.
  * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso
- *         contrário. Os vértices são guardados em vertices.
+ *         contrário. 
  */
 bool generateCone(std::vector<std::string> params)
 {
@@ -179,10 +184,11 @@ bool generateCone(std::vector<std::string> params)
 
 	if (ret) {
 		p = new Cone(arguments.at(0), arguments.at(1),
-			(int)arguments.at(2), (int)arguments.at(3));
+			         (int)arguments.at(2), (int)arguments.at(3));
 
 		vertices = p->getVertices();
 		normals = p->getNormals();
+		texCoords = p->getTexCoords();
 		indexes = p->getIndexes();
 	}
 
@@ -191,11 +197,11 @@ bool generateCone(std::vector<std::string> params)
 
 
 /**
- * Cria uma instância da classe Plane bem como os seus vértices.
+ * Cria uma instância da classe Plane.
  *
  * @params Parâmetros de um plane.
  * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso
- *         contrário. Os vértices são guardados em vertices.
+ *         contrário. 
  */
 bool generatePlane(std::vector<std::string> params)
 {
@@ -206,6 +212,7 @@ bool generatePlane(std::vector<std::string> params)
 
 		vertices = p->getVertices();
 		normals = p->getNormals();
+		texCoords = p->getTexCoords();
 		indexes = p->getIndexes();
 	}
 
@@ -214,11 +221,11 @@ bool generatePlane(std::vector<std::string> params)
 
 
 /**
- * Cria uma instância da classe Sphere bem como os seus vértices.
+ * Cria uma instância da classe Sphere.
  *
  * @params Parâmetros de uma sphere.
  * @return Falso caso os parâmetros sejam inválidos ou verdadeiro caso
- *         contrário. Os vértices são guardados em vertices.
+ *         contrário. 
  */
 bool generateSphere(std::vector<std::string> params)
 {
@@ -226,10 +233,11 @@ bool generateSphere(std::vector<std::string> params)
 
 	if (ret) {
 		p = new Sphere(arguments.at(0),
-			(int)arguments.at(1), (int)arguments.at(2));
+			           (int)arguments.at(1), (int)arguments.at(2));
 
 		vertices = p->getVertices();
 		normals = p->getNormals();
+		texCoords = p->getTexCoords();
 		indexes = p->getIndexes();
 	}
 
@@ -240,7 +248,7 @@ bool generateSphere(std::vector<std::string> params)
 /**
  * Verifica o tipo de primitiva a ser gerada.
  * Caso o tipo de primitiva seja válido então é feita a validade dos seus
- * parâmetros e respetiva geração dos seus vértices.
+ * parâmetros e sua respetiva geração.
  *
  * @params primitive Tipo de primitiva.
  * @params Parâmetros de uma primitiva.
@@ -276,29 +284,28 @@ bool generatePrimitive(std::string primitive, std::vector<std::string> params)
  * @param pIndexes  Vetor de índices
  * @param t         Tesselagem
  */
-void generateBezierPatches(std::vector<Vertex> pVertices,
-	std::vector<size_t> pIndexes,
-	size_t t)
+void generateBezierPatches(std::vector<TripleFloat> pVertices,
+	                       std::vector<size_t> pIndexes,
+	                       size_t t)
 {
 	size_t i = 0;
 	size_t j = 0;
 	size_t w = 0;
 	size_t z = 0;
-	size_t start = 0;
-	size_t index = 0;
-	size_t patch = 0;
+	size_t start = 0;     // Identifica o início de um patch
+	size_t patch = 0;     // Identifica o patch
 
-	float u = 0.0f;
-	float v = 0.0f;
+	float u = 0.0f;       // Tesselagem em u
+	float v = 0.0f;       // Tesselagem em v
 
-	float pos[3];
-	float derivU[3];
-	float derivV[3];
-	float pMatrixX[4][4];
-	float pMatrixY[4][4];
-	float pMatrixZ[4][4];
+	float pos[3];         // Ponto resultante do cálculo
+	float derivU[3];      // Derivada em u
+	float derivV[3];      // Derivada em v
+	float pMatrixX[4][4]; // Coordenadas x dos 16 pontos de controlo
+	float pMatrixY[4][4]; // Coordenadas y dos 16 pontos de controlo
+	float pMatrixZ[4][4]; // Coordenadas z dos 16 pontos de controlo
 
-	float normal[3];
+	float normal[3];      // Normal de um ponto de Bezier Patches
 
 	for (start = 0; start < pIndexes.size(); start += 16) {
 		for (i = 0; i <= t; i++) {
@@ -309,15 +316,15 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 
 				for (w = 0; w < 4; w++) {
 					for (z = 0; z < 4; z++) {
-						pMatrixX[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getX();
-						pMatrixY[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getY();
-						pMatrixZ[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getZ();
+						pMatrixX[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getF1();
+						pMatrixY[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getF2();
+						pMatrixZ[w][z] = pVertices.at(pIndexes.at(start + w * 4 + z)).getF3();
 					}
 				}
 				
 				getBezierPoint(u, v, (float**)pMatrixX, (float**)pMatrixY, (float**)pMatrixZ, pos, derivU, derivV);
 
-				vertices.push_back(Vertex(pos[0], pos[1], pos[2]));
+				vertices.push_back(TripleFloat(pos[0], pos[1], pos[2]));
 
 				normalize(derivU);
 				normalize(derivV);
@@ -325,7 +332,8 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 				cross(derivU, derivV, normal);
 				normalize(normal);
 
-				normals.push_back(Vertex(normal[0], normal[1], normal[2]));
+				normals.push_back(TripleFloat(normal[0], normal[1], normal[2]));
+				texCoords.push_back(TripleFloat(1.0f - v, 1.0f - u, 0.0f));
 			}
 		}
 	}
@@ -336,12 +344,12 @@ void generateBezierPatches(std::vector<Vertex> pVertices,
 		for (i = 0; i < t; i++) {
 			for (j = 0; j < t; j++) {
 				indexes.push_back(patch + ((t + 1) * i) + j);
-				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
 				indexes.push_back(patch + ((t + 1) * i) + j + 1);
+				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
 
 				indexes.push_back(patch + ((t + 1) * i) + j);
-				indexes.push_back(patch + (t + 1) * (i + 1) + j);
 				indexes.push_back(patch + (t + 1) * (i + 1) + j + 1);
+				indexes.push_back(patch + (t + 1) * (i + 1) + j);
 			}
 		}
 	}
@@ -377,7 +385,7 @@ bool readBezierPatches(char* fileName, size_t t)
 
 	bool firstLine = true;
 
-	std::vector<Vertex> auxVertices;
+	std::vector<TripleFloat> auxVertices;
 	std::vector<size_t> auxIndexes;
 
 	fp.open(fileName);
@@ -424,7 +432,7 @@ bool readBezierPatches(char* fileName, size_t t)
 
 					// Adicionam-se as coordenadas ao vetor de vértices
 					if (++coordIndex == 3) {
-						auxVertices.push_back(Vertex(coord[0], coord[1], coord[2]));
+						auxVertices.push_back(TripleFloat(coord[0], coord[1], coord[2]));
 						coordIndex = 0;
 					}
 				}
@@ -506,6 +514,13 @@ int main(int argc, char** argv)
 
 		for (i = 0; i < normals.size(); i++) {
 			file << normals.at(i).toString() << std::endl;
+		}
+
+		file << std::endl;
+
+		for (i = 0; i < texCoords.size(); i++) {
+			file << texCoords.at(i).getF1() << " ";
+			file << texCoords.at(i).getF2() << std::endl;
 		}
 
 		file << std::endl;
