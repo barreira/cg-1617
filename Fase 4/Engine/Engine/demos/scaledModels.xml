@@ -1,10 +1,11 @@
 <scene>
+	<translate z=15/>
 	<group>
 		<translate x=3/>
 		<scale x=1 y=2 Z=2/>
 		<models>
 			<model FILE="demos/sphere.3d" diffr=1/>
-			<model file="demos/ring.3d"/>
+			<model file="ring.3d"/>
 		</models>
 	</group>
 	<group>

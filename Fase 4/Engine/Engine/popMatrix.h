@@ -47,6 +47,16 @@ public:
 
 
 	/**
+	 * Executa uma operação de popMatrix em OpenGL.
+	 */
+	void execute(FrustumCulling* f)
+	{
+		execute();
+		f->popCoords();
+	}
+
+
+	/**
 	 * Destrutor (por defeito em c++).
 	 */
 	~PopMatrix(void) = default;

@@ -1,4 +1,5 @@
 <scene>
+	<translate z=15/>
 	<lights>
 		<light type="POINT" diffB=0.5 diffG=0.5 diffR=0.5/>
 	</lights>
@@ -52,7 +53,7 @@
 	<group>
 		<rotate axisY=1 time=10/>
 		<models>
-			<model file="demos/asteroid.3d" diffR=0.2 diffG=0.1 diffB=0 rand=1000 xzMinR=20 xzMaxR=22 yMaxR=1/>
+			<model file="demos/asteroid.3d" diffR=0.2 diffG=0.1 diffB=0 rand=700 xzMinR=20 xzMaxR=22 yMaxR=1/>
 		</models>
 	</group>
 	<group>
@@ -64,13 +65,12 @@
 	</group>
 	<group>
 		<rotate axisY=1 time=147.5/>
-		<translate z=-33/>
-		<scale x=0.8 y=0.8 z=0.8/>
+		<translate z=-35/>
+		<scale x=1 y=1 z=1/>
 		<group>
-			<scale x=0.4 y=0.4 z=0.4/>
 			<models>
-				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=500 xzMaxR=8.125 xzMinR=7.25/>
-				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=500 xzMaxR=9  xzMinR=8.5/>
+				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=300 xzMaxR=3.125 xzMinR=2.25/>
+				<model file="demos/asteroid.3d" diffR=0.878 diffG=0.878 diffB=0.878 rand=300 xzMaxR=4  xzMinR=3.5/>
 			</models>
 		</group>
 		<group>
@@ -81,7 +81,7 @@
 	</group>
 	<group>
 		<rotate axisY=1 time=420/>
-		<translate z=-38/>
+		<translate z=-40/>
 		<scale x=0.6 y=0.6 z=0.6/>
 		<models>
 			<model file="demos/sphere.3d" diffG=1 diffB=1 diffR=0/>
@@ -89,7 +89,7 @@
 	</group>
 	<group>
 		<rotate axisY=1 time=825/>
-		<translate z=-43/>
+		<translate z=-45/>
 		<scale x=0.6 y=0.6 z=0.6/>
 		<models>
 			<model file="demos/sphere.3d" diffG=0.2 diffB=0.4 diffr=0 shininess=128 specr=0 specb=0 specg=0/>
@@ -97,7 +97,7 @@
 	</group>
 	<group>
 		<rotate axisY=1 time=1000/>
-		<translate z=-48/>
+		<translate z=-50/>
 		<scale x=0.05 y=0.05 z=0.05/>
 		<models>
 			<model file="demos/sphere.3d" diffR=0.25 diffG=0.25 diffB=0.25/>

@@ -209,6 +209,15 @@ void Scale::execute(void)
 
 
 /**
+ * Efetua uma escala em x, y ou z em OpenGL.
+ */
+void Scale::execute(FrustumCulling* f)
+{
+	execute();
+}
+
+
+/**
  * Destrutor da classe Scale. Liberta a memória ocupada pelo apontador para a 
  * implementação da classe Scale.
  */

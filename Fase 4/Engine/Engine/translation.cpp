@@ -264,6 +264,58 @@ public:
 		float z[3];
 
 		// tempo decorrido desde a última medição de tempo
+		size_t deltaTime = getDeltaTime();
+
+		// conversão de deltaTime em segundos
+		float auxTime = ((float)deltaTime) / 1000.0f;
+
+		// é somado ao acumulador de instantes de
+		// tempo uma fatia de tempo proporcional
+		// ao tempo total de translação
+		timeAcc += (auxTime / (float)totalTime);
+
+		// Caso o acumulador seja superior a 1.0, já se passou o tempo
+		// total de translação, logo inicia-se de novo o acumulador para
+		// uma nova volta
+		if (timeAcc >= 1.0f) {
+			timeAcc = 0.0f;
+		}
+
+		getGlobalCatmullRomPoint(timeAcc, pos, deriv);
+		glTranslatef(pos[0], pos[1], pos[2]);
+
+		// z é o vetor perpendicular aos vetores deriv e up
+		cross(deriv, up, z);
+		normalize(z);
+
+		// up é o vetor perpendicular aos vetores z e deriv
+		cross(z, deriv, up);
+		normalize(up);
+
+		normalize(deriv);
+
+		float m[4][4] = {
+			{ deriv[0], up[0], z[0], pos[0] },
+			{ deriv[1], up[1], z[1], pos[1] },
+			{ deriv[2], up[2], z[2], pos[2] },
+			{ 0.0f, 0.0f, 0.0f, 1.0f }
+		};
+
+		buildRotMatrix(deriv, up, z, (float*)m);
+		glMultMatrixf((float*)m);
+	}
+
+
+	/**
+	 * Executa uma translação em x, y ou z em OpenGL.
+	 */
+	void execute(FrustumCulling* f)
+	{
+		float pos[3];
+		float deriv[3];
+		float z[3];
+
+		// tempo decorrido desde a última medição de tempo
 		size_t deltaTime = getDeltaTime();			
 
 		// conversão de deltaTime em segundos
@@ -284,6 +336,8 @@ public:
 		getGlobalCatmullRomPoint(timeAcc, pos, deriv);
 		glTranslatef(pos[0], pos[1], pos[2]);
 		
+		f->translateCoords(pos[0], pos[1], pos[2]);
+
 		// z é o vetor perpendicular aos vetores deriv e up
 		cross(deriv, up, z);	
 		normalize(z);
@@ -470,6 +524,21 @@ void Translation::execute(void)
 	}
 	else {
 		pimpl->execute();
+	}
+}
+
+
+/**
+ * Executa uma translação em x, y ou z em OpenGL.
+ */
+void Translation::execute(FrustumCulling* f)
+{
+	if (pimpl->getCatmullPoints().size() < 4) {
+		glTranslatef(pimpl->getX(), pimpl->getY(), pimpl->getZ());
+		f->translateCoords(pimpl->getX(), pimpl->getY(), pimpl->getZ());
+	}
+	else {
+		pimpl->execute(f);
 	}
 }
 

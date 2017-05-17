@@ -1,5 +1,6 @@
 <scene>
+	<translate z=15/>
 	<models>
-		<model file="demos/box.3d" texture = "demos/earth.jpg"/>
+		<model file="demos/box.3d"/>
 	</models>
 </scene>

@@ -27,6 +27,8 @@
 #include <GL/glut.h>
 #endif
 
+#include "frustumCulling.h"
+
 
 class GLOperation {
 
@@ -42,6 +44,12 @@ public:
 	 * Método abstrato de uma qualquer operação em OpenGL.
 	 */
 	virtual void execute(void) = 0;
+
+
+	/**
+	 * Método abstrato de uma qualquer operação em OpenGL.
+	 */
+	virtual void execute(FrustumCulling*) = 0;
 
 
 	/**

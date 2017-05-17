@@ -84,6 +84,15 @@ void DirectionalLight::execute(void)
 
 
 /**
+ * Apresenta uma luz direcional em OpenGL.
+ */
+void DirectionalLight::execute(FrustumCulling* f)
+{
+	execute();
+}
+
+
+/**
  * Destrutor da classe DirectionalLight.
  */
 DirectionalLight::~DirectionalLight(void) = default;

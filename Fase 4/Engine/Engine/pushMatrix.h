@@ -46,6 +46,16 @@ public:
 
 
 	/**
+	 * Executa uma operação de pushMatrix em OpenGL.
+	 */
+	void execute(FrustumCulling* f)
+	{
+		execute();
+		f->pushCoords();
+	}
+
+
+	/**
 	 * Destrutor (por defeito em c++).
 	 */
 	~PushMatrix(void) = default;

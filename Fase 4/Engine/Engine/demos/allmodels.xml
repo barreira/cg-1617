@@ -1,4 +1,5 @@
 <scene> 
+	<translate z=15/>
 	<models>
 		<model file="demos/sphere.3d" /> 
 		<model file="demos/plane.3d" /> 

@@ -129,6 +129,9 @@ class XMLParser::XMLParserImpl {
 											// acerca de um container possuir
 											// ou não uma tag lights
 
+	std::stack<TripleFloat> scales;         // Stack relativa aos valores
+	                                        // das escalas efetuadas
+
 	std::vector<GLOperation*> glOperations;   // Vetor de operações em OpenGL
 	std::string errorString;                  // Representação textual de
 	                                          // eventuais erros, ou warnings,
@@ -147,6 +150,9 @@ class XMLParser::XMLParserImpl {
 	// Map que associa o nome de um ficheiro a um conjunto de índices
 	std::map<std::string, std::vector<size_t>> mapFileIndexes;
 
+	// Map que associa o nome de um ficheiro a um conjunto das suas maiores
+	// posições em x, y e z
+	std::map<std::string, TripleFloat> mapFileSphere;
 
 	/**
 	 * Limpa o conteúdo do vetor de operações em OpenGL.
@@ -206,6 +212,15 @@ class XMLParser::XMLParserImpl {
 		translatesInContainer.push(false);
 		modelsInContainer.push(false);
 		lightsInContainer.push(false);
+
+		if (scales.empty() == true) {
+			scales.push(TripleFloat(1.0f, 1.0f, 1.0f));
+		}
+		else {
+			TripleFloat aux(scales.top());
+			
+			scales.push(aux);
+		}
 	}
 
 
@@ -309,6 +324,56 @@ class XMLParser::XMLParserImpl {
 		translatesInContainer.pop();
 		modelsInContainer.pop();
 		lightsInContainer.pop();
+		scales.pop();
+	}
+
+
+	/**
+	 * Devolve os valores das maiores posições em x, y e z relativamente à
+	 * origem.
+	 */
+	TripleFloat boundingSphere(std::vector<GLfloat> vertices)
+	{
+		float x = 0.0f;
+		float auxX = 0.0f;
+		float y = 0.0f;
+		float auxY = 0.0f;
+		float z = 0.0f;
+		float auxZ = 0.0f;
+		size_t i = 0;
+
+		for (; i < vertices.size(); i += 3) {
+			auxX = fabs(vertices.at(i));
+			auxY = fabs(vertices.at(i + 1));
+			auxZ = fabs(vertices.at(i + 2));
+
+			x = (auxX > x) ? auxX : x;
+			y = (auxY > y) ? auxY : y;
+			z = (auxZ > z) ? auxZ : z;
+		}
+
+		return TripleFloat(x, y, z);
+	}
+
+
+	/**
+	 * Devolve o valor da maior coordenada quando efetuada uma escala qualquer.
+	 */
+	float getMaxRadius(TripleFloat p)
+	{
+		float radius = 0.0f;
+
+		TripleFloat s(scales.top());
+
+		p.setF1(p.getF1() * s.getF1());
+		p.setF2(p.getF2() * s.getF2());
+		p.setF3(p.getF3() * s.getF3());
+
+		radius = (p.getF1() > radius) ? p.getF1() : radius;
+		radius = (p.getF2() > radius) ? p.getF2() : radius;
+		radius = (p.getF3() > radius) ? p.getF3() : radius;
+
+		return radius;
 	}
 
 
@@ -323,11 +388,12 @@ class XMLParser::XMLParserImpl {
 	 * @param indexes   Conjunto de índices associados ao vetor de vértices.
 	 * @return O resultado é devolvido em vertices e em indexes.
 	 */
-	void readModel(const char* file, 
+	bool readModel(const char* file, 
 		           std::vector<GLfloat>& vertices,
 	               std::vector<GLfloat>& normals,
 		           std::vector<GLfloat>& texCoords,
-		           std::vector<size_t>& indexes)
+		           std::vector<size_t>& indexes,
+		           float* radius)
 	{
 		std::fstream fp;       // Estrutura para abertura de um ficheiro em
 		                       // modo de leitura
@@ -345,6 +411,7 @@ class XMLParser::XMLParserImpl {
 		bool normalsMode = false;
 		bool texMode = false;
 		bool indexesMode = false;
+		bool ret = true;
 
 		// Extrai dos mapas, os vértices, normais e os índices associados
 		// à string file, caso estes existam
@@ -353,6 +420,7 @@ class XMLParser::XMLParserImpl {
 			normals = mapFileNormals.at(file);
 			texCoords = mapFileTexCoords.at(file);
 			indexes = mapFileIndexes.at(file);
+			*radius = getMaxRadius(mapFileSphere.at(file));
 		}
 		catch (std::out_of_range) {
 			// Caso os maps não possua esse ficheiro deve-se proceder à 
@@ -430,6 +498,9 @@ class XMLParser::XMLParserImpl {
 
 				std::string aux(file);   // String auxliar para a conversão
 
+				TripleFloat auxRadius = boundingSphere(vertices);
+				*radius = getMaxRadius(auxRadius);
+
 				// O ficheiro lido e conjunto de vértices e índices são 
 				// adicionados aos mapas. Assim, não será necessário 
 				// proceder-se à leitura deste ficheiro novamente
@@ -444,6 +515,8 @@ class XMLParser::XMLParserImpl {
 
 				mapFileIndexes.insert(std::pair < std::string,
 					                  std::vector < size_t >> (file, indexes));
+
+				mapFileSphere.insert(std::pair<std::string, TripleFloat>(file, auxRadius));
 			}
 			else {
 				errorString.append("Warning: Could not read file ");
@@ -453,8 +526,11 @@ class XMLParser::XMLParserImpl {
 				// Se não se conseguiu abrir bem o ficheiro então o modelo atual 
 				// conta como um modelo que não pode ser processado
 				failedModels++;
+				ret = false;
 			}
 		}
+
+		return ret;
 	}
 
 
@@ -472,6 +548,8 @@ class XMLParser::XMLParserImpl {
 		                                // vetor de vértices
 		size_t numFiles = 0;            // Número de ficheiros associados à tag
 		                                // model
+
+		float radius = 0.0f;
 
 		TripleFloat diff(0.8f, 0.8f, 0.8f);  // Cor difusa
 		TripleFloat emis(0.0f, 0.0f, 0.0f);  // Cor emissiva
@@ -497,6 +575,7 @@ class XMLParser::XMLParserImpl {
 		                          // aleatória y
 
 		std::string texture = "";
+		bool success = true;
 
 		numModels++;
 
@@ -512,8 +591,12 @@ class XMLParser::XMLParserImpl {
 					invalidDoc = true;
 				}
 				else {
-					readModel(a->Value(), vertices, normals, texCoords, indexes);
+					success = readModel(a->Value(), vertices, normals, texCoords, indexes, &radius);
 					numFiles++;
+
+					if (success == false) {
+						return;
+					}
 				}
 			}
 			else if (attName.compare(DIFFR) == 0) {
@@ -593,6 +676,7 @@ class XMLParser::XMLParserImpl {
 						                                        normals,
 						                                        texCoords,
 						                                        indexes,
+						                                        radius,
 						                                        diff,
 						                                        spec,
 						                                        emis,
@@ -609,6 +693,7 @@ class XMLParser::XMLParserImpl {
 				                                        normals, 
 				                                        texCoords,
 				                                        indexes,
+				                                        radius,
 				                                        diff,
 				                                        spec,
 				                                        emis,
@@ -999,9 +1084,9 @@ class XMLParser::XMLParserImpl {
 	 */
 	void parseScale(TiXmlElement* scale)
 	{
-		float x = 0.0;
-		float y = 0.0;
-		float z = 0.0;
+		float x = 1.0f;
+		float y = 1.0f;
+		float z = 1.0f;
 
 		for (TiXmlAttribute* a = scale->FirstAttribute(); 
 		     a != NULL && invalidDoc == false; a = a->Next()) {
@@ -1023,6 +1108,15 @@ class XMLParser::XMLParserImpl {
 				invalidDoc = true;
 			}
 		}
+
+		TripleFloat s(scales.top());
+
+		s.setF1(s.getF1() * x);
+		s.setF2(s.getF2() * y);
+		s.setF3(s.getF3() * z);
+
+		scales.pop();
+		scales.push(s);
 
 		glOperations.push_back(new Scale(x, y, z));
 	}

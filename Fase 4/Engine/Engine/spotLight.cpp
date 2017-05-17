@@ -266,6 +266,15 @@ void SpotLight::execute(void)
 
 
 /**
+ * Apresenta uma luz do tipo spot em OpenGL.
+ */
+void SpotLight::execute(FrustumCulling* f)
+{
+	execute();
+}
+
+
+/**
  * Destrutor da classe SpotLight.
  */
 SpotLight::~SpotLight(void)

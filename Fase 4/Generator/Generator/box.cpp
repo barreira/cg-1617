@@ -257,7 +257,7 @@ class Box::BoxImpl {
 		i = y;
 		j = z;
 
-		// Face de trás
+		// Face da esquerda
 		for (a = 0; a <= numDiv; a++, i += divY) {
 			for (b = 0; b <= numDiv; b++, j += divZ) {
 				vertices.push_back(TripleFloat(x - dimX, i, j));

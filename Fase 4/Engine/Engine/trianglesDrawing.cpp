@@ -22,6 +22,8 @@ class TrianglesDrawing::TrianglesDrawingImpl {
 
 	std::vector<size_t> indexes;    // Conjunto de índices associados ao vetor
 	                                // de vértices
+	float sphereRadius;             // Raio da esfera que cobre a primitiva
+
 	TripleFloat diff;               // Cor difusa
 	TripleFloat spec;               // Cor especular
 	TripleFloat emis;               // Cor emissiva
@@ -38,6 +40,9 @@ class TrianglesDrawing::TrianglesDrawingImpl {
 	unsigned int texID;             // ID de uma textura
 
 
+	/**
+	 * Carrega a textura da primitiva
+	 */
 	void loadTexture(void) 
 	{
 		unsigned int t = 0; 
@@ -102,7 +107,9 @@ class TrianglesDrawing::TrianglesDrawingImpl {
 		}
 	}
 
-
+	/**
+	 * Testa se uma cor tem outro valor que não uma cor preta (0, 0, 0).
+	 */
 	bool hasColor(TripleFloat color)
 	{
 		return (color.getF1() != 0.0f || color.getF2() != 0.0f || color.getF3() != 0.0f);
@@ -137,27 +144,30 @@ public:
 		texture = "";
 		isGenerated = false;
 		texID = 0;
+		sphereRadius = 0.0f;
 	}
 
 
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param vertices  Conjunto de vértices a desenhar.
-	 * @param normals   Conjunto de vértices a desenhar.
-	 * @param texCoords Conjunto de coordenadas de uma textura.
-	 * @param indexes   Conjunto de índices associados ao vetor de vértices.
-	 * @param diff      Cor difusa.
-	 * @param spec      Cor especular.
-	 * @param emis      Cor emissiva.
-	 * @param ambt      Cor ambiente.
-	 * @param shininess Brilho do material
-	 * @param textura    Textura de um modelo.
+	 * @param vertices     Conjunto de vértices a desenhar.
+	 * @param normals      Conjunto de vértices a desenhar.
+	 * @param texCoords    Conjunto de coordenadas de uma textura.
+	 * @param indexes      Conjunto de índices associados ao vetor de vértices.
+	 * @param sphereRadius Raio da esfera que cobre a primitiva.
+	 * @param diff         Cor difusa.
+	 * @param spec         Cor especular.
+	 * @param emis         Cor emissiva.
+	 * @param ambt         Cor ambiente.
+	 * @param shininess    Brilho do material
+	 * @param texture      Textura de um modelo.
 	 */
 	TrianglesDrawingImpl(std::vector<GLfloat> vertices, 
 		                 std::vector<GLfloat> normals,
 		                 std::vector<GLfloat> texCoords,
 		                 std::vector<size_t> indexes,
+		                 float sphereRadius,
 		                 TripleFloat diff,
 		                 TripleFloat spec,
 		                 TripleFloat emis,
@@ -192,6 +202,7 @@ public:
 		isGenerated = false;
 		
 		texID = 0;
+		this->sphereRadius = sphereRadius;
 	}
 
 
@@ -228,6 +239,15 @@ public:
 	std::vector<size_t> getIndexes(void)
 	{
 		return indexes;
+	}
+
+
+	/**
+	 * Devolve o valor do raio da esfera que cobre a primitiva.
+	 */
+	float getSphereRadius(void)
+	{
+		return sphereRadius;
 	}
 
 
@@ -388,10 +408,10 @@ public:
 	 */
 	void execute(void)
 	{
-		float d[4]; 
-		float s[4]; 
+		float d[4];
+		float s[4];
 		float e[4] = { emis.getF1(), emis.getF2(), emis.getF3(), 1.0f };
-		float a[4]; 
+		float a[4];
 
 		if (isGenerated == false) {
 			generate();
@@ -399,8 +419,8 @@ public:
 
 		// Não deixa que a tela fique em preto
 		if (hasColor(diff) == false) {
-			diff.setF1(1.0f); 
-			diff.setF2(1.0f); 
+			diff.setF1(1.0f);
+			diff.setF2(1.0f);
 			diff.setF3(1.0f);
 		}
 
@@ -411,7 +431,7 @@ public:
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, d);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, s);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, e);
-	    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, a);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, a);
 
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
@@ -434,6 +454,29 @@ public:
 		}
 
 		glDrawElements(GL_TRIANGLES, (GLsizei)indexes.size(), GL_UNSIGNED_INT, &indexes[0]);
+
+		if (texture.compare("") != 0) {
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
+
+
+	/**
+	 * Desenha uma primitiva em modo de VBOs com um conjunto de índices.
+	 */
+	void execute(FrustumCulling* f)
+	{
+		bool inFrustum = false;
+		TripleFloat coord(f->getCoords());
+
+	    inFrustum = f->sphereInFrustum(coord, sphereRadius);
+
+		/**
+		 * Só desenha a primitiva se estiver dentro do campo visível.
+		 */
+		if (inFrustum == true) {
+			execute();
+		}
 	}
 
 
@@ -457,21 +500,23 @@ TrianglesDrawing::TrianglesDrawing(void)
 /**
  * Construtor por parâmetros.
  *
- * @param vertices  Conjunto de vértices a desenhar.
- * @param normals   Conjunto de vértices a desenhar.
- * @param texCoords Conjunto de coordenadas de uma textura.
- * @param indexes   Conjunto de índices associados ao vetor de vértices. 
- * @param diff      Cor difusa.
- * @param spec      Cor especular.
- * @param emis      Cor emissiva.
- * @param ambt      Cor ambiente.
- * @param shininess Brilho do material.
- * @param textura    Textura de um modelo.
- */
+ * @param vertices     Conjunto de vértices a desenhar.
+ * @param normals      Conjunto de vértices a desenhar.
+ * @param texCoords    Conjunto de coordenadas de uma textura.
+ * @param indexes      Conjunto de índices associados ao vetor de vértices. 
+ * @param sphereRadius Raio da esfera que cobre a primitiva.
+ * @param diff         Cor difusa.
+ * @param spec         Cor especular.
+ * @param emis         Cor emissiva.
+ * @param ambt         Cor ambiente.
+ * @param shininess    Brilho do material.
+ * @param texture      Textura de um modelo.
+ */ 
 TrianglesDrawing::TrianglesDrawing(std::vector<GLfloat> vertices,
 	                               std::vector<GLfloat> normals,
 	                               std::vector<GLfloat> texCoords,
 	                               std::vector<size_t> indexes,
+	                               float sphereRadius,
 	                               TripleFloat diff,
 	                               TripleFloat spec,
 	                               TripleFloat emis,
@@ -479,7 +524,7 @@ TrianglesDrawing::TrianglesDrawing(std::vector<GLfloat> vertices,
 	                               float shininess,
 	                               std::string texture)
 {
-	pimpl = new TrianglesDrawingImpl(vertices, normals, texCoords, indexes,
+	pimpl = new TrianglesDrawingImpl(vertices, normals, texCoords, indexes, sphereRadius,
 		                             diff, spec, emis, ambt,
 		                             shininess, texture);
 }
@@ -497,6 +542,7 @@ TrianglesDrawing::TrianglesDrawing(const TrianglesDrawing& t)
 		                             t.pimpl->getNormals(),
 		                             t.pimpl->getTexCoords(),
 		                             t.pimpl->getIndexes(),
+		                             t.pimpl->getSphereRadius(),
 		                             t.pimpl->getDiff(),
 		                             t.pimpl->getSpec(),
 		                             t.pimpl->getEmis(),
@@ -692,6 +738,15 @@ void TrianglesDrawing::setTexture(std::string texture)
 void TrianglesDrawing::execute(void)
 {
 	pimpl->execute();
+}
+
+
+/**
+ * Desenha os vértices correspondentes a uma primitiva em OpenGL.
+ */
+void TrianglesDrawing::execute(FrustumCulling* f)
+{
+	pimpl->execute(f);
 }
 
 

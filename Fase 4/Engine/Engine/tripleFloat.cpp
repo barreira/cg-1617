@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include "tripleFloat.h"
 
 
@@ -214,6 +215,97 @@ void TripleFloat::setF3(float f3)
 std::string TripleFloat::toString(void)
 {
 	return pimpl->toString();
+}
+
+
+/**
+ * Multiplica as três componentes por um escalar.
+ */
+TripleFloat TripleFloat::multWithScalar(float scalar)
+{
+	float f1 = getF1() * scalar;
+	float f2 = getF2() * scalar;
+	float f3 = getF3() * scalar;
+
+	return TripleFloat(f1, f2, f3);
+}
+
+
+/**
+ * Afetua o produto componente a componente entre dois vetores.
+ */
+float TripleFloat::dotProd(const TripleFloat& t)
+{
+	return getF1() * t.pimpl->getF1() + getF2() * t.pimpl->getF2() + getF3() * t.pimpl->getF3();
+}
+
+
+/**
+ * Normaliza as coordenadas.
+ */
+void TripleFloat::normalize(void)
+{
+	float l = sqrt(getF1() * getF1() + getF2() * getF2() + getF3() * getF3());
+
+	if (l == 0.0f) {
+		l = 1.0f;
+	}
+
+	setF1(getF1() / l);
+	setF2(getF2() / l);
+	setF3(getF3() / l);
+}
+
+
+/**
+ * Operador de soma entre duas coordenadas.
+ */
+TripleFloat TripleFloat::operator+(const TripleFloat& t)
+{
+	float f1 = getF1() + t.pimpl->getF1();
+	float f2 = getF2() + t.pimpl->getF2();
+	float f3 = getF3() + t.pimpl->getF3();
+
+	return TripleFloat(f1, f2, f3);
+}
+
+
+/**
+ * Operador de subtração entre duas coordenadas.
+ */
+TripleFloat TripleFloat::operator-(const TripleFloat& t)
+{
+	float f1 = getF1() - t.pimpl->getF1();
+	float f2 = getF2() - t.pimpl->getF2();
+	float f3 = getF3() - t.pimpl->getF3();
+
+	return TripleFloat(f1, f2, f3);
+}
+
+
+/**
+ * Efetua um cross product entre dois vetores.
+ */
+TripleFloat TripleFloat::operator*(const TripleFloat& t)
+{
+	float f1 = getF2() * t.pimpl->getF3() - getF3() * t.pimpl->getF2();
+	float f2 = getF3() * t.pimpl->getF1() - getF1() * t.pimpl->getF3();
+	float f3 = getF1() * t.pimpl->getF2() - getF2() * t.pimpl->getF1();
+
+	return TripleFloat(f1, f2, f3);
+}
+
+
+/**
+ * Operador de atribuição de uma coordenada.
+ */
+TripleFloat& TripleFloat::operator=(const TripleFloat& t)
+{
+	setF1(t.pimpl->getF1());
+	setF2(t.pimpl->getF2());
+	setF3(t.pimpl->getF3());
+
+	return *this;
 }
 
 

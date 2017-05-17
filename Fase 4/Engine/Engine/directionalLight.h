@@ -60,6 +60,12 @@ public:
 
 
 	/**
+	 * Apresenta uma luz direcional em OpenGL.
+	 */
+	void execute(FrustumCulling*);
+
+
+	/**
 	 * Destrutor da classe DirectionalLight.
 	 */
 	~DirectionalLight(void);

@@ -27,10 +27,14 @@
 #include <string>
 #include <cmath>
 #include "xmlParser.h"
+#include "frustumCulling.h"
 
 
 // Ficheiro xml por defeito
-#define XML_FILE   "demos/cone.xml" 
+#define XML_FILE   "demos/teapot.xml" 
+
+// Ficheiro xml da camera por defeito
+#define CAMERA_ENTITY "demos/teapot.xml"
 
 // Background por defeito
 #define BACKGROUND "demos/univ.jpg"
@@ -48,13 +52,6 @@ float angleX = 0.0f;  // Ângulo em relação ao eixo dos xx
 float angleY = 0.0f;  // Ângulo em relação ao eixo dos yy
 
 
-// Por defeito o modo de desenho é wired
-GLenum mode = GL_FILL;
-
-// Por defeito desenham-se ambos os lados de uma primitiva
-GLenum drawMode = GL_BACK;
-
-
 float lx = 0.0f;               // Posição para onde se está a olhar no eixo dos
                                // xx
 float px = 0.0f;               // Posição da câmara no eixo dos xx
@@ -63,26 +60,42 @@ float ly = 0.0f;               // Posição para onde se está a olhar no eixo dos
                                // yy
 float py = 0.0f;               // Posição da câmara no eixo dos yy
 
-float lz = -1.0f;              // Posição para onde se está a olhar no eixo dos
+float lz = 1.0f;               // Posição para onde se está a olhar no eixo dos
                                // zz
-float pz = 15.0f;              // Posição da câmara no eixo dos zz
+float pz = 0.0f;               // Posição da câmara no eixo dos zz
 
-float cameraAngleX = 0.0f;     // Ângulo da câmara no eixo dos xx
 float deltaAngleX = 0.0f;      // Ângulo para cálculos auxilares
 int xOrigin = -1;              // Posição x do rato
 
-float cameraAngleY = 0.0f;     // Ângulo da câmara no eixo dos yy
 float deltaAngleY = 0.0f;      // Ângulo para cálculos auxiliares
 int yOrigin = -1;              // Posição y do rato
 
-const float vCameraX = 0.003f; // Velocidade de rotação da câmara em X
+const float vCameraX = 0.5f;   // Velocidade de rotação da câmara em X
 const float vCameraY = 0.5f;   // Velocidade de rotação da câmara em Y
 
+float camAngle = 0.0f;         // Ângulo da camera em x e em z
+float camAngleY = 0.0f;        // Ângulo da camera em y
 
 std::vector<GLOperation*> glOperations;  // Vetor de operações em OpenGL
+std::vector<GLOperation*> cameraEntity;  // Vetor de operações em OpenGl
+                                         // Respetivos à entidade da camera
 
-GLuint texID;
-std::string background;
+float entityZAngle = 0.0f;               // Ângulo da entidade da camera
+
+float epx = 0.0f;                        // Posição da entidade da camera no
+                                         // eixo dos xx
+float epz = 0.0f;                        // Posição da entidade da camera no
+                                         // eixo dos zz
+
+GLuint texID;                            // Textura do background
+std::string background;                  // Nome da textura do background
+
+FrustumCulling* fCulling = new FrustumCulling(); // Campo visível
+size_t elapsedTime = 0;                          // Tempo total decorrido
+size_t dTime = 0;                             
+bool estabilizing = false;                       // Informa se a camera já
+                                                 // estabilizou
+
 
 /**
  * Função responsável pela representação de uma cena em OpenGL. Percorre
@@ -92,7 +105,7 @@ std::string background;
 void drawScene(void)
 {	
 	for (size_t i = 0; i < glOperations.size(); i++) {
-		glOperations.at(i)->execute();
+		glOperations.at(i)->execute(fCulling);
 	}
 }
 
@@ -120,16 +133,23 @@ void changeSize(int w, int h)
 	// Set perspective
 	gluPerspective(45.0f, ratio, 1.0f, 1000.0f);
 
+	fCulling->setPerspective(45.0f, ratio, 1.0f, 1000.0f);
+
 	// return to the model view matrix mode
 	glMatrixMode(GL_MODELVIEW);
 }
 
 
+/**
+ * Desenha um background estático no fundo da janela.
+ */
 void drawBackground(void)
 {
-	float w = 0.0f;
-	float h = 0.0f;
+	float w = 0.0f;  // Largura da janela
+	float h = 0.0f;  // Altura da janela
 
+	// Pretende-se que o background não seja sujeito a transformações e que
+	// permaneça no fundo da janela
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 
@@ -137,6 +157,7 @@ void drawBackground(void)
 	glPushMatrix();
 	glLoadIdentity();
 
+	// Calculam-se a altura e a largura da janela
 	w = (float)glutGet(GLUT_WINDOW_WIDTH);
 	h = (float)glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -148,6 +169,8 @@ void drawBackground(void)
 
 	glBindTexture(GL_TEXTURE_2D, texID);
 
+	// Desenha-se um plano com as dimensões da janela e aplica-se a textura
+	// com o background
 	glBegin(GL_QUADS);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -166,6 +189,8 @@ void drawBackground(void)
 
 	glEnd();
 
+
+	// Retorna-se às configurações iniciais
 	glPopMatrix(); 
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix(); 
@@ -178,39 +203,157 @@ void drawBackground(void)
 }
 
 
+/**
+ * Estabiliza a camera.
+ */
+void estabilize(void)
+{
+	float dx = lx - px;
+	float dy = ly - py;
+	float dz = lz - pz;
+
+	float rx = -dz;
+	float rz = dx;
+
+	float k = vCameraX * 0.2;
+
+	if (epz < 0.0f) {
+		epz += 0.05f;
+
+		px = px + k * dx;
+		pz = pz + k * dz;
+
+		lx = lx + k * dx;
+		lz = lz + k * dz;
+
+		if (epz >= 0.0f) {
+			epz = 0.0f;
+			estabilizing = false;
+		}
+	}
+	else if (epz > 0.0f) {
+		epz -= 0.05f;
+
+		px = px - k * dx;
+		pz = pz - k * dz;
+
+		lx = lx - k * dx;
+		lz = lz - k * dz;
+
+		if (epz <= 0.0f) {
+			epz = 0.0f;
+			estabilizing = false;
+		}
+	}
+
+
+	if (epx > 0.0f) {
+		epx -= 0.05f;
+		entityZAngle += 2.25f;
+
+		px = px + k * rx;
+		pz = pz + k * rz;
+
+		lx = lx + k * rx;
+		lz = lz + k * rz;
+
+		if (epx <= 0.0f) {
+			epx = 0.0f;
+			entityZAngle = 0.0f;
+			estabilizing = false;
+		}
+	}
+	else if (epx < 0.0f) {
+		epx += 0.05f;
+		entityZAngle -= 2.25f;
+
+		px = px - k * rx;
+		pz = pz - k * rz;
+
+		lx = lx - k * rx;
+		lz = lz - k * rz;
+
+		if (epx >= 0.0f) {
+			epx = 0.0f;
+			entityZAngle = 0.0f;
+			estabilizing = false;
+		}
+	}
+}
+
+
+/**
+ * Devolve o tempo decorrido desde a última medição.
+ */
+size_t getDeltaTime(void)
+{
+	// É calculado o tempo total decorrido até ao ponto atual
+	size_t actualTime = glutGet(GLUT_ELAPSED_TIME);
+
+	// O tempo decorrido desde a última rotação corresponde
+	// à subtração do tempo atual pelo tempo total decorrido
+	size_t deltaTime = actualTime - elapsedTime;
+
+	// O tempo total decorrido passa a corresponder ao tempo
+	// total decorrido até ao ponto atual
+	elapsedTime = actualTime;
+
+	return deltaTime;
+}
+
+
+/**
+ * Desenha a cena.
+ */
 void renderScene(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	TripleFloat pos(px, py, pz);
+	TripleFloat look(lx, ly, lz);
+	TripleFloat up(0.0f, 1.0f, 0.0f);
+	size_t i = 0;
 
-	// set the camera
-	glLoadIdentity();
-	gluLookAt(px, py, pz,
-		      px + lx, py + ly, pz + lz,
-		      0.0f, 1.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawBackground();
 
+	// Efetua uma medição de tempo
+	dTime += getDeltaTime();
+
+	// Se a entidade da câmera não foi movida então estabiliza-se a camera
+	if (dTime > 300 && estabilizing == false) {
+		estabilizing = true;
+	}
+
+	if (estabilizing == true) {
+		estabilize();
+	}
+
+	// set the camera
+	glLoadIdentity();
+
 	glPushMatrix();
 
-	glTranslatef(xPos, 0.0f, zPos);
-	glRotatef(angleY, 0.0f, 1.0f, 0.0f);
-	glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+	// Desenha a entidade da camera
+	glTranslatef(epx, 0.0f, epz);
+	glRotatef(entityZAngle, 0.0f, 0.0f, 1.0f);
 
-
-	if (drawMode != FRONT_AND_BACK) {
-		glEnable(GL_CULL_FACE);
-		glCullFace(drawMode);
-	}
-	else {
-		glDisable(GL_CULL_FACE);
+	for (; i < cameraEntity.size(); i++) {
+		cameraEntity.at(i)->execute();
 	}
 
-	glPolygonMode(GL_FRONT_AND_BACK, mode);
+	glPopMatrix();
+
+	gluLookAt(px, py, pz, lx, ly, lz, 0.0f, 1.0f, 0.0f);
+
+	fCulling->setCam(pos, look, up);
+
+	glPushMatrix();
 
 	// Representa a cena correspondente a um conjunto de operações em OpenGL
 	drawScene();
 
 	glPopMatrix();
+
 
 	glutSwapBuffers();
 }
@@ -218,93 +361,118 @@ void renderScene(void)
 
 /**
  * Função que trata dos eventos do teclado, teclas 'w', 's', 'a' e 'd'.
+ * Move a identidade da camera (a partir de uma certa "força", a camera acompanha
+ * a identidade).
  */
 void keyboardEvent(unsigned char key, int x, int y)
 {
+	float dx = (lx - px);
+	float dy = (ly - py);
+	float dz = (lz - pz);
+
+	float k = vCameraX;
+
+	float rx = -dz;
+	float rz = dx;
+
 	if (key == 'w') {
+		if (epz > -1.0f) {
+			epz -= 0.1f;
+		}
+		else {
+			px = px + k * dx;
+			lx = lx + k * dx;
 
-		// Afasta um modelo
-		zPos -= 0.3f;
-	}
-	else if (key == 's') {
+			pz = pz + k * dz;
+			lz = lz + k * dz;
+		}
 
-		// Aproxima um modelo
-		zPos += 0.3f;
+		py = py + k * dy;
+		ly = ly + k * dy;
 	}
 	else if (key == 'a') {
+		if (epx > -1.0f) {
+			epx -= 0.1f;
+		}
+		else {
+			px = px - k * rx;
+			pz = pz - k * rz;
 
-		// Move um modelo para a direita
-		xPos -= 0.3f;
+			lx = lx - k * rx;
+			lz = lz - k * rz;
+		}
+
+		if (entityZAngle < 45.0f) {
+			entityZAngle += 4.5f;
+		}
+	}
+	else if (key == 's') {
+		if (epz < 1.0f) {
+			epz += 0.1f;
+		}
+		else {
+			px = px - k * dx;
+			lx = lx - k * dx;
+
+			pz = pz - k * dz;
+			lz = lz - k * dz;
+		}
+
+		py = py - k * dy;
+		ly = ly - k * dy;
 	}
 	else if (key == 'd') {
+		if (epx < 1.0f) {
+			epx += 0.1f;
+		}
+		else {
+			px = px + k * rx;
+			pz = pz + k * rz;
 
-		// Move um modelo para a esquerda
-		xPos += 0.3f;
+			lx = lx + k * rx;
+			lz = lz + k * rz;
+		}
+
+		if (entityZAngle > -45.0f) {
+			entityZAngle -= 4.5f;
+		}
 	}
+
+	getDeltaTime();
+	dTime = 0;
 }
 
 
 /**
  * Função que trata dos eventos respetivos às arrow keys.
+ * Roda a camera.
  */
 void rotateEvent(int key, int x, int y)
 {
 	if (key == GLUT_KEY_LEFT) {
-
-		// Roda o modelo em torno do eixo dos yy no sentido dos 
-		// ponteiros do relógio
-		angleY -= 3.0f;
+		camAngle += 5.0f;
 	}
 	else if (key == GLUT_KEY_RIGHT) {
-		
-		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
-		// ponteiros do relógio
-		angleY += 3.0f;
+		camAngle -= 5.0f;
 	}
 	else if (key == GLUT_KEY_UP) {
+		camAngleY -= 5.0f;
 
-		// Roda o modelo em torno do eixo dos yy no sentido dos 
-		// ponteiros do relógio
-		angleX -= 3.0f;
+		if (camAngleY < -90.0f) {
+			camAngleY = -90.0f;
+		}
 	}
 	else if (key == GLUT_KEY_DOWN) {
+		camAngleY += 5.0f;
 
-		// Roda o modelo em torno do eixo dos yy no sentido contrário ao dos 
-		// ponteiros do relógio
-		angleX += 3.0f;
+		if (camAngleY > 90.0f) {
+			camAngleY = 90.0f;
+		}
 	}
-}
 
-
-/**
- * Função que trata das opções selecionadas no menu.
- */
-void processMenuEvents(int option)
-{
-	if (option == GL_FILL) {
-
-		// Preenche a primitiva
-		mode = GL_FILL;
-	}
-	else if (option == GL_LINE) {
-
-		// Desenha a primitiva em modo wired
-		mode = GL_LINE;
-	}
-	else if (option == GL_POINT) {
-
-		// Desenha apenas os vértices da primitiva
-		mode = GL_POINT;
-	}
-	else if (option == GL_BACK) {
-		drawMode = GL_BACK;
-	}
-	else if (option == GL_FRONT) {
-		drawMode = GL_FRONT;
-	}
-	else if (option == FRONT_AND_BACK) {
-		drawMode = FRONT_AND_BACK;
-	}
+	lx = px + sin(camAngle * PI / 180.0f);
+	ly = py + sin(camAngleY * PI / 180.0f);
+	lz = pz + cos(camAngle * PI / 180.0f);
 }
 
 
@@ -321,22 +489,22 @@ void mouseMove(int x, int y)
 		deltaAngleX = (x - xOrigin) * vCameraX;
 
 		// Atualiza-se a direção da câmara
-		lx = sin(cameraAngleX + deltaAngleX);
-		lz = -cos(cameraAngleX + deltaAngleX);
+		lx = px + sin((camAngle + deltaAngleX) * PI / 180.0f);
+		lz = pz + cos((camAngle + deltaAngleX) * PI / 180.0f);
 	}
 
 	if (yOrigin >= 0) {
 		deltaAngleY = (y - yOrigin) * vCameraY;
 
 		// Limita-se o ângulo da câmara em Y entre -90 e 90 graus
-		if (cameraAngleY + deltaAngleY >= 90.0f) {
-			ly = tan(89.0f * PI / 180.0f);
+		if (camAngleY + deltaAngleY >= 90.0f) {
+			ly = py + sin(90.0f * PI / 180.0f);
 		}
-		else if (cameraAngleY + deltaAngleY <= -90.0f) {
-			ly = tan(-89.0f * PI / 180.0f);
+		else if (camAngleY + deltaAngleY <= -90.0f) {
+			ly = py + sin(-90.0f * PI / 180.0f);
 		}
 		else {
-			ly = tan((cameraAngleY + deltaAngleY) * PI / 180.0f);
+			ly = py + sin((camAngleY + deltaAngleY) * PI / 180.0f);
 		}
 	}
 }
@@ -354,10 +522,10 @@ void mouseButton(int button, int state, int x, int y)
 
 		// Depois de o botão ser libertado atualizam-se os ângulos da câmara
 		if (state == GLUT_UP) {
-			cameraAngleX += deltaAngleX;
+			camAngle += deltaAngleX;
 			xOrigin = -1;
 			
-			cameraAngleY += deltaAngleY;
+			camAngleY += deltaAngleY;
 
 			yOrigin = -1;
 		}
@@ -369,6 +537,9 @@ void mouseButton(int button, int state, int x, int y)
 }
 
 
+/**
+ * Carrega a textura do background.
+ */
 void loadBackground(void)
 {
 	unsigned int t = 0;
@@ -426,18 +597,7 @@ void initGlut(int argc, char **argv)
 	glutIdleFunc(renderScene);
 	glutKeyboardFunc(keyboardEvent);
 	glutSpecialFunc(rotateEvent);
-	menu = glutCreateMenu(processMenuEvents);
 
-	// Categorias do menu
-	glutAddMenuEntry("GL_FILL", GL_FILL);
-	glutAddMenuEntry("GL_LINE", GL_LINE);
-	glutAddMenuEntry("GL_POINT", GL_POINT);
-	glutAddMenuEntry("DRAW_FRONT", GL_BACK);
-	glutAddMenuEntry("DRAW_BACK", GL_FRONT);
-	glutAddMenuEntry("DRAW_FRONT_AND_BACK", FRONT_AND_BACK);
-
-	// O menu é acionado sempre que se pressiona o botão direito do rato
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	// Funções de tratamento dos eventos do rato
 	glutMouseFunc(mouseButton);
@@ -458,6 +618,8 @@ void initGlut(int argc, char **argv)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_SMOOTH);
 	glEnable(GL_RESCALE_NORMAL);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	
 	loadBackground();
 
@@ -475,6 +637,7 @@ void initGlut(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	XMLParser* parser;
+	XMLParser* cameraParser;
 
 	std::cout << "Processing models..." << std::endl;
 
@@ -488,9 +651,19 @@ int main(int argc, char **argv)
 		parser = new XMLParser(XML_FILE);
 	}
 
-	// Se possuir mais que dois argumentos então o terceiro argumento
-	// corresponde à textura do background
+	// Se possuir mais que dois argumentos então o segundo argumento
+	// corresponde à entidade da camera
+
 	if (argc > 2) {
+		cameraParser = new XMLParser(argv[2]);
+	}
+	else {
+		cameraParser = new XMLParser(CAMERA_ENTITY);
+	}
+
+	// Se possuir mais que três argumentos então o terceiro argumento
+	// corresponde à textura do background
+	if (argc > 3) {
 		background = argv[2];
 	}
 	else {
@@ -500,16 +673,20 @@ int main(int argc, char **argv)
 	}
 
 	glOperations = parser->getGLOperations();
+	cameraEntity = cameraParser->getGLOperations();
 
 	// Testa-se se o parsing foi efetuado com sucesso
 	if (glOperations.size() > 0) {
 
 		// Apenas se inicia a glut se todos os modelos foram processados com
 		// sucesso
-		if (parser->getFailedModels() < parser->getNumModels()) {
+		if (parser->getFailedModels() < parser->getNumModels() &&
+			cameraParser->getFailedModels() < cameraParser->getNumModels()) {
 			// Mostra no ecrã eventuais warnings que possam ter ocorrido
 			std::cout << parser->getErrorString();
-			
+			std::cout << cameraParser->getErrorString();
+
+			delete cameraParser;
 			delete parser;
 			initGlut(argc, argv);
 		}
@@ -519,9 +696,11 @@ int main(int argc, char **argv)
 	}
 	else {
 		std::cout << parser->getErrorString();
+		std::cout << cameraParser->getErrorString();
 	}
 
 	delete parser;
+	delete cameraParser;
 
 	std::cout << "Press any key to continue..." << std::endl;
 

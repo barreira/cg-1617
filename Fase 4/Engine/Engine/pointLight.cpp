@@ -83,6 +83,15 @@ void PointLight::execute(void)
 
 
 /**
+ * Apresenta uma luz do tipo point em OpenGL.
+ */
+void PointLight::execute(FrustumCulling* f)
+{
+	execute();
+}
+
+
+/**
  * Destrutor da classe PointLight.
  */
 PointLight::~PointLight(void) = default;

@@ -91,6 +91,48 @@ public:
 
 
 	/**
+	 * Multiplica as três componentes por um escalar.
+	 */
+	TripleFloat multWithScalar(float);
+
+
+	/**
+	 * Afetua o produto componente a componente entre dois vetores.
+	 */
+    float dotProd(const TripleFloat& t);
+
+
+	/**
+	 * Normaliza as coordenadas.
+	 */
+	void normalize(void);
+
+
+	/**
+	 * Operador de soma entre duas coordenadas.
+	 */
+	TripleFloat operator+(const TripleFloat& t);
+
+
+	/**
+	 * Operador de subtração entre duas coordenadas.
+	 */
+	TripleFloat operator-(const TripleFloat& t);
+
+
+	/**
+	 * Efetua um cross product entre dois vetores.
+	 */
+	TripleFloat operator*(const TripleFloat& t);
+
+
+	/**
+	 * Operador de atribuição de uma coordenada.
+	 */
+	TripleFloat& operator=(const TripleFloat& t);
+
+
+	/**
 	 * Destrutor da classe TripleFloat.
 	 */
 	~TripleFloat(void);

@@ -133,6 +133,12 @@ public:
 
 
 	/**
+	 * Executa uma translação em x, y ou z em OpenGL.
+	 */
+	void execute(FrustumCulling*);
+
+
+	/**
 	 * Destrutor da classe Translation.
 	 */
 	~Translation(void);

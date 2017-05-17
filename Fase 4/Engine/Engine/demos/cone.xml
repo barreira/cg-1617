@@ -1,5 +1,6 @@
 <scene> 
+	<translate z=15/>
 	<models>
-		<model diffR=1 file="demos/cone.3d"/>
+		<model file="demos/cone.3d"/>
 	</models>
 </scene>

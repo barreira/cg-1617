@@ -54,29 +54,30 @@ class Cone::ConeImpl {
 	
 		size_t i = 0;
 
-		// Definição do centro da base
-		vertices.push_back(TripleFloat(0.0f, y, 0.0f));
-		normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
-		texCoords.push_back(TripleFloat(0.0f, 1.0f, 0.0f));
-
 		for (i = 0; i <= (size_t)slices; i++, angle += alpha) {
 			x = radius * sin(angle);
 			z = radius * cos(angle);
 
+			vertices.push_back(TripleFloat(0.0f, y, 0.0f));
 			vertices.push_back(TripleFloat(x, y, z));
+
+			normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
 			normals.push_back(TripleFloat(0.0f, -1.0f, 0.0f));
 
+			texCoords.push_back(TripleFloat((float)i / slices, 1.0f, 0.0f));
 			texCoords.push_back(TripleFloat((float)i / slices, 0.0f, 0.0f));
 		}
 
-		for (i = 0; i < (size_t)slices; i++) {
-			indexes.push_back(0);
-			indexes.push_back(i + 2);
+		size_t aux = 0;
+
+		for (i = 0; i < (size_t)slices * 2; i += 2) {
+			indexes.push_back(i);
+			indexes.push_back(i + 3);
 			indexes.push_back(i + 1);
 		}
 
 		// Número total de vértices da base de um cone
-		index = (size_t)slices + 2;
+		index = ((size_t)slices + 1) * 2;
 	}
 
 

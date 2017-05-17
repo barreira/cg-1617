@@ -41,21 +41,23 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param vertices   Conjunto de vértices a desenhar.
-	 * @param normals    Conjunto de vértices a desenhar.
-	 * @param texCoords  Conjunto de coordenadas de uma textura.
-	 * @param indexes    Conjunto de índices associados ao vetor de vértices.
-	 * @param diff       Cor difusa.
-	 * @param spec       Cor especular.
-	 * @param emis       Cor emissiva.
-	 * @param ambt       Cor ambiente.
-	 * @param shininess  Brilho do modelo.
-	 * @param textura    Textura de um modelo.
+	 * @param vertices     Conjunto de vértices a desenhar.
+	 * @param normals      Conjunto de vértices a desenhar.
+	 * @param texCoords    Conjunto de coordenadas de uma textura.
+	 * @param indexes      Conjunto de índices associados ao vetor de vértices.
+	 * @param sphereRadius Raio da esfera que cobre a primitiva.
+	 * @param diff         Cor difusa.
+	 * @param spec         Cor especular.
+	 * @param emis         Cor emissiva.
+	 * @param ambt         Cor ambiente.
+	 * @param shininess    Brilho do modelo.
+	 * @param textura      Textura de um modelo.
 	 */
 	TrianglesDrawing(std::vector<GLfloat> vertices,
 		             std::vector<GLfloat> normals,
 		             std::vector<GLfloat> texCoords,
 		             std::vector<size_t> indexes,
+		             float sphereRadius,
 		             TripleFloat diff,
 		             TripleFloat spec,
 		             TripleFloat emis,
@@ -196,6 +198,12 @@ public:
 	 * Desenha um conjunto de vértices de uma primitiva em OpenGL.
 	 */
 	void execute(void);
+
+
+	/**
+	 * Desenha um conjunto de vértices de uma primitiva em OpenGL.
+	 */
+	void execute(FrustumCulling*);
 
 
 	/**

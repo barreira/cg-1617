@@ -37,17 +37,6 @@ public:
 	/**
 	 * Construtor por parâmetros.
 	 *
-	 * @param angle Ângulo de uma rotação.
-	 * @param x     Valor de uma rotação em x.
-	 * @param y     Valor de uma rotação em y.
-	 * @param z     Valor de uma rotação em z.
-	 */
-	Rotation(float angle, float X, float Y, float z);
-
-
-	/**
-	 * Construtor por parâmetros.
-	 *
 	 * @param angle     Ângulo de uma rotação.
 	 * @param totalTime Tempo total de uma rotação.
 	 * @param x         Valor de uma rotação em x.
@@ -130,6 +119,13 @@ public:
 	 * OpenGL.
 	 */
 	void execute(void);
+
+
+	/**
+	 * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em
+	 * OpenGL.
+	 */
+	void execute(FrustumCulling* f);
 
 
 	/**

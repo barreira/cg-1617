@@ -60,6 +60,12 @@ public:
 
 
 	/**
+	 * Apresenta uma luz do tipo point em OpenGL.
+	 */
+	void execute(FrustumCulling*);
+
+
+	/**
 	 * Destrutor da classe PointLight.
 	 */
 	~PointLight(void);

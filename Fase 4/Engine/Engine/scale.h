@@ -92,6 +92,12 @@ public:
 
 
 	/**
+	 * Efetua uma escala em x, y ou z em OpenGL.
+	 */
+	void execute(FrustumCulling*);
+
+
+	/**
 	 * Destrutor da classe Scale.
 	 */
 	~Scale(void);

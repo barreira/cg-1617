@@ -214,10 +214,23 @@ public:
 			timeAcc = 0.0;
 		}
 
+		float auxAngle = timeAcc * 360.0f / ((float)totalTime);
+
 		// É efetuada uma rotação em openGL correspondente cujo ângulo
 		// corresponde à divisão do acumulado pelo tempo total. A rotação
 		// é efetuada em torno dos eixos definidos anteriormente.
-		glRotatef(timeAcc * 360.0f / ((float)totalTime), x, y, z);
+		glRotatef(auxAngle, x, y, z);
+	}
+
+
+	/**
+	 * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em
+	 * OpenGL.
+	 */
+	void execute(FrustumCulling* f)
+	{
+		execute();
+		f->rotateCoords(x, y, z, timeAcc * 360.0f / ((float)totalTime));
 	}
 
 
@@ -371,6 +384,22 @@ void Rotation::execute(void)
 	}
 	else {
 		glRotatef(pimpl->getAngle(), pimpl->getX(), pimpl->getY(), pimpl->getZ());
+	}
+}
+
+
+/**
+ * Efetua uma rotação com um certo ângulo em torno dos eixos x, y ou z em
+ * OpenGL.
+ */
+void Rotation::execute(FrustumCulling* f)
+{
+	if (pimpl->getTotalTime() > 0) {
+		pimpl->execute(f);
+	}
+	else {
+		glRotatef(pimpl->getAngle(), pimpl->getX(), pimpl->getY(), pimpl->getZ());
+		f->rotateCoords(pimpl->getX(), pimpl->getY(), pimpl->getZ(), pimpl->getAngle());
 	}
 }
 

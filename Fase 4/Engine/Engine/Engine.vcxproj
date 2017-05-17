@@ -154,8 +154,10 @@
   <ItemGroup>
     <ClCompile Include="cubicCurves.cpp" />
     <ClCompile Include="directionalLight.cpp" />
+    <ClCompile Include="frustumCulling.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="plane.cpp" />
     <ClCompile Include="pointLight.cpp" />
     <ClCompile Include="rotation.cpp" />
     <ClCompile Include="scale.cpp" />
@@ -172,8 +174,10 @@
   <ItemGroup>
     <ClInclude Include="cubicCurves.h" />
     <ClInclude Include="directionalLight.h" />
+    <ClInclude Include="frustumCulling.h" />
     <ClInclude Include="glOperation.h" />
     <ClInclude Include="light.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="pointLight.h" />
     <ClInclude Include="popMatrix.h" />
     <ClInclude Include="pushMatrix.h" />

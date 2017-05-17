@@ -104,6 +104,12 @@ public:
 
 
 	/**
+	 * Apresenta uma luz do tipo spot em OpenGL.
+	 */
+	void execute(FrustumCulling*);
+
+
+	/**
 	 * Destrutor da classe SpotLight.
 	 */
 	~SpotLight(void);
