@@ -331,7 +331,7 @@ void renderScene(void)
 	dTime += getDeltaTime();
 
 	// Se a entidade da câmera não foi movida então estabiliza-se a camera
-	if (dTime > 300 && estabilizing == false) {
+	if (dTime > 100 && estabilizing == false) {
 		estabilizing = true;
 	}
 
