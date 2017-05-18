@@ -34,7 +34,7 @@
 #define XML_FILE   "demos/solar.xml" 
 
 // Ficheiro xml da camera por defeito
-#define CAMERA_ENTITY "demos/teapot.xml"
+#define CAMERA_ENTITY "demos/tiefighter.xml"
 
 // Background por defeito
 #define BACKGROUND "demos/univ.jpg"

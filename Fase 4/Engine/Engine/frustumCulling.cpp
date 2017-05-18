@@ -225,7 +225,8 @@ public:
 	/**
 	 * Testa se um ponto está dentro do campo visível.
 	 * Um ponto está dentro do campo visível se a sua distância a cada um dos
-	 * seis planos for maior ou igual a zero. Caso a distância seja negativa
+	 * seis p
+lanos for maior ou igual a zero. Caso a distância seja negativa
 	 * significa que o ponto se situa do lado contrário à normal de um plano, 
 	 * ou seja, fora do campo visível.
 	 *
