@@ -31,7 +31,7 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE   "demos/teapot.xml" 
+#define XML_FILE   "demos/solar.xml" 
 
 // Ficheiro xml da camera por defeito
 #define CAMERA_ENTITY "demos/teapot.xml"
@@ -96,6 +96,8 @@ size_t dTime = 0;
 bool estabilizing = false;                       // Informa se a camera já
                                                  // estabilizou
 
+int timebase = 0;
+int frame = 0;
 
 /**
  * Função responsável pela representação de uma cena em OpenGL. Percorre
@@ -226,6 +228,9 @@ void estabilize(void)
 		lx = lx + k * dx;
 		lz = lz + k * dz;
 
+		py = py + k * dy;
+		ly = ly + k * dy;
+
 		if (epz >= 0.0f) {
 			epz = 0.0f;
 			estabilizing = false;
@@ -239,6 +244,9 @@ void estabilize(void)
 
 		lx = lx - k * dx;
 		lz = lz - k * dz;
+
+		py = py - k * dy;
+		ly = ly - k * dy;
 
 		if (epz <= 0.0f) {
 			epz = 0.0f;
@@ -311,6 +319,9 @@ void renderScene(void)
 	TripleFloat look(lx, ly, lz);
 	TripleFloat up(0.0f, 1.0f, 0.0f);
 	size_t i = 0;
+	float fps = 0.0f;
+	int time = 0;
+	char s[64];
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -354,6 +365,17 @@ void renderScene(void)
 
 	glPopMatrix();
 
+
+	frame++;
+	time = glutGet(GLUT_ELAPSED_TIME);
+	
+	if (time - timebase > 1000) {
+		fps = frame*1000.0 / (time - timebase);
+		timebase = time;
+		frame = 0;
+		sprintf_s(s, "FPS: %f6.2", fps);
+		glutSetWindowTitle(s);
+	}
 
 	glutSwapBuffers();
 }
