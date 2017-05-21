@@ -31,7 +31,7 @@
 
 
 // Ficheiro xml por defeito
-#define XML_FILE   "demos/solar.xml" 
+#define XML_FILE   "demos/solarSystem.xml" 
 
 // Ficheiro xml da camera por defeito
 #define CAMERA_ENTITY "demos/tiefighter.xml"
@@ -206,6 +206,16 @@ void drawBackground(void)
 
 
 /**
+ * Atualiza uma posição dos vetores pos e look da câmara
+ */
+void updateCam(float* p, float* l, float k, float d)
+{
+	*p = *p + k * d;
+	*l = *l + k * d;
+}
+
+
+/**
  * Estabiliza a camera.
  */
 void estabilize(void)
@@ -222,14 +232,9 @@ void estabilize(void)
 	if (epz < 0.0f) {
 		epz += 0.05f;
 
-		px = px + k * dx;
-		pz = pz + k * dz;
-
-		lx = lx + k * dx;
-		lz = lz + k * dz;
-
-		py = py + k * dy;
-		ly = ly + k * dy;
+		updateCam(&px, &lx, k, dx);
+		updateCam(&py, &ly, k, dy);
+		updateCam(&pz, &lz, k, dz);
 
 		if (epz >= 0.0f) {
 			epz = 0.0f;
@@ -239,14 +244,9 @@ void estabilize(void)
 	else if (epz > 0.0f) {
 		epz -= 0.05f;
 
-		px = px - k * dx;
-		pz = pz - k * dz;
-
-		lx = lx - k * dx;
-		lz = lz - k * dz;
-
-		py = py - k * dy;
-		ly = ly - k * dy;
+		updateCam(&px, &lx, -k, dx);
+		updateCam(&py, &ly, -k, dy);
+		updateCam(&pz, &lz, -k, dz);
 
 		if (epz <= 0.0f) {
 			epz = 0.0f;
@@ -259,11 +259,8 @@ void estabilize(void)
 		epx -= 0.05f;
 		entityZAngle += 2.25f;
 
-		px = px + k * rx;
-		pz = pz + k * rz;
-
-		lx = lx + k * rx;
-		lz = lz + k * rz;
+		updateCam(&px, &lx, k, rx);
+		updateCam(&pz, &lz, k, rz);
 
 		if (epx <= 0.0f) {
 			epx = 0.0f;
@@ -275,11 +272,8 @@ void estabilize(void)
 		epx += 0.05f;
 		entityZAngle -= 2.25f;
 
-		px = px - k * rx;
-		pz = pz - k * rz;
-
-		lx = lx - k * rx;
-		lz = lz - k * rz;
+		updateCam(&px, &lx, -k, rx);
+		updateCam(&pz, &lz, -k, rz);
 
 		if (epx >= 0.0f) {
 			epx = 0.0f;
@@ -331,7 +325,7 @@ void renderScene(void)
 	dTime += getDeltaTime();
 
 	// Se a entidade da câmera não foi movida então estabiliza-se a camera
-	if (dTime > 100 && estabilizing == false) {
+	if (dTime > 300 && estabilizing == false) {
 		estabilizing = true;
 	}
 
@@ -397,62 +391,48 @@ void keyboardEvent(unsigned char key, int x, int y)
 	float rx = -dz;
 	float rz = dx;
 
-	if (key == 'w') {
+	if (key == 'w' || key == 'W') {
 		if (epz > -1.0f) {
 			epz -= 0.1f;
 		}
 		else {
-			px = px + k * dx;
-			lx = lx + k * dx;
-
-			pz = pz + k * dz;
-			lz = lz + k * dz;
+			updateCam(&px, &lx, k, dx);
+			updateCam(&pz, &lz, k, dz);
 		}
 
-		py = py + k * dy;
-		ly = ly + k * dy;
+		updateCam(&py, &ly, k, dy);
 	}
-	else if (key == 'a') {
+	else if (key == 'a' || key == 'A') {
 		if (epx > -1.0f) {
 			epx -= 0.1f;
 		}
 		else {
-			px = px - k * rx;
-			pz = pz - k * rz;
-
-			lx = lx - k * rx;
-			lz = lz - k * rz;
+			updateCam(&px, &lx, -k, rx);
+			updateCam(&pz, &lz, -k, rz);
 		}
 
 		if (entityZAngle < 45.0f) {
 			entityZAngle += 4.5f;
 		}
 	}
-	else if (key == 's') {
+	else if (key == 's' || key == 'S') {
 		if (epz < 1.0f) {
 			epz += 0.1f;
 		}
 		else {
-			px = px - k * dx;
-			lx = lx - k * dx;
-
-			pz = pz - k * dz;
-			lz = lz - k * dz;
+			updateCam(&px, &lx, -k, dx);
+			updateCam(&pz, &lz, -k, dz);
 		}
 
-		py = py - k * dy;
-		ly = ly - k * dy;
+		updateCam(&py, &ly, -k, dy);
 	}
-	else if (key == 'd') {
+	else if (key == 'd' || key == 'D') {
 		if (epx < 1.0f) {
 			epx += 0.1f;
 		}
 		else {
-			px = px + k * rx;
-			pz = pz + k * rz;
-
-			lx = lx + k * rx;
-			lz = lz + k * rz;
+			updateCam(&px, &lx, k, rx);
+			updateCam(&pz, &lz, k, rz);
 		}
 
 		if (entityZAngle > -45.0f) {

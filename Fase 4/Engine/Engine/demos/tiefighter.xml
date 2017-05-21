@@ -8,15 +8,31 @@
 		</models>
 	</group>
 	<group>
-		<translate x=3/>
+		<translate x=1/>
 		<models>
 			<model file="demos/wing.3d" texture="demos/wing.jpg" emisr=1 emisg=1 emisb=1/> 
 		</models>
 	</group>
 	<group>
-		<translate x=6.85/>
+		<translate x=8.7/>
 		<models>
 			<model file="demos/wing.3d" texture="demos/wing.jpg" emisr=1 emisg=1 emisb=1/> 
+		</models>
+	</group>
+	<group>
+		<translate x=-1/>
+		<rotate axisz=1 angle=90/>
+		<scale x=0.05 y=0.2 z=0.3/>
+		<models>
+			<model file="demos/cone.3d" texture="demos/cockpit.jpg" emisr=1 emisg=1 emisb=1/>
+		</models>
+	</group>
+	<group>
+		<translate x=0.8/>
+		<rotate axisz=1 angle=-90/>
+		<scale x=0.05 y=0.2 z=0.3/>
+		<models>
+			<model file="demos/cone.3d" texture="demos/cockpit.jpg" emisr=1 emisg=1 emisb=1/>
 		</models>
 	</group>
 </scene>
